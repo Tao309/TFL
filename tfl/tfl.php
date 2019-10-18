@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Class TFL
+ *
+ * @property \tfl\utils\DB db
+ */
 class TFL {
     /**
      * @var TFL
