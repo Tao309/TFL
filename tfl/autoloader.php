@@ -17,7 +17,19 @@ function autoload_register($className): void
     $names = explode("\\", $className);
     $names = array_map('strtolower', $names);
 
-    $file = zROOT . implode('/', $names) . '.php';
+    if (count($names) > 2) {
+        if ($names[0] == 'app' && $names[1] == 'models') {
+            if (count($names) > 3) {
+                $file = zROOT . implode('/', $names) . '.php';
+            } else {
+                $file = zROOT . implode('/', $names) . '/' . $names[2] . '.php';
+            }
+        }
+    }
+
+    if (!$file) {
+        $file = zROOT . implode('/', $names) . '.php';
+    }
 
     if (file_exists($file)) {
         require_once $file;
@@ -25,7 +37,19 @@ function autoload_register($className): void
 }
 
 
+set_exception_handler('exception_handler');
 
-// set_exception_handler
+function exception_handler(Throwable $e)
+{
+    echo $e->getMessage();
+
+    $trace = $e->getTrace();
+
+    echo '<pre>';
+    print_r($trace[0]);
+    echo '</pre>';
+}
+
+//TFLNotFoundModel
 
 // set_error_handler

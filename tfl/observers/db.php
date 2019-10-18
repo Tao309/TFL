@@ -1,6 +1,6 @@
 <?php
 
-namespace tfl\traits;
+namespace tfl\observers;
 
 trait DB
 {
@@ -34,9 +34,11 @@ trait DB
         'where',
     ];
 
-    public function select($input)
+    public function select($input = null)
     {
         $this->setInit();
+
+        $input = $input ?? '*';
 
         $this->_select = 'SELECT ' . $input;
 

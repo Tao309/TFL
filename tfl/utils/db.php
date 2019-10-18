@@ -7,7 +7,7 @@ namespace tfl\utils;
  * @property \PDO pdo
  */
 class DB {
-    use \tfl\traits\DB;
+    use \tfl\observers\DB;
 
     const TYPE_INSERT = 'insert';
     const TYPE_UPDATE = 'update';
