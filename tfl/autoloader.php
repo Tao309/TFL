@@ -1,6 +1,8 @@
 <?php
-
 use \tfl\utils\tFile;
+
+$zroot = rtrim($_SERVER['DOCUMENT_ROOT'], WEB_PATH);
+define('zROOT', $zroot);
 
 /**
  * @todo Сделать красивый вид и вынести в другие методы

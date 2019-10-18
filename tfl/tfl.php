@@ -3,6 +3,7 @@
 /**
  * Class TFL
  *
+ * @property \tfl\utils\Path path
  * @property \tfl\utils\DB db
  */
 class TFL {
@@ -18,6 +19,7 @@ class TFL {
 
     private function launchSource(): void
     {
+        $this->path = new \tfl\utils\Path();
         $this->db = new \tfl\utils\DB();
 
 //        $this->request;

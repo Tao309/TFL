@@ -1,14 +1,6 @@
 <?php
 
-$config = [];
-$config['HTTP'] = 'http';
-$config['DOMEN'] = 'tfl';
-
-$root = (isset($_SERVER['SERVER_NAME']) && !empty($_SERVER['SERVER_NAME'])) ? $_SERVER['SERVER_NAME'] : $config['DOMEN'];
-define('ROOT', $config['HTTP'] . '://' . $root . '/');
-
-$zroot = rtrim($_SERVER['DOCUMENT_ROOT'], 'web');
-define('zROOT', $zroot);
+define('WEB_PATH', 'web');
 
 if (!defined('PAGE_EOL')) {
     switch (strtoupper(substr(PHP_OS, 0, 3))) {
