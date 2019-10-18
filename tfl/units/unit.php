@@ -10,7 +10,8 @@ use tfl\observers\UnitObserver;
  * * minLimit       - минимальное необходимое значение символов, иначе не проверяется
  * * limit          - максимальное необходимое значение символов, иначе не проверяется
  * * required       - поле должно быть заполнено
- * * secretField    - поле скрывать при показе
+ * * secretField    - поле скрывать при показе, отображать при редактировании
+ * * default        - значение по умолчанию при сохранении/создании
  */
 
 
@@ -34,6 +35,11 @@ abstract class Unit
     protected function isNewModel()
     {
         return !isset($this->id) || !$this->id || $this->id <= 0;
+    }
+
+    public function getLabel($attr)
+    {
+        return $this->translatedLabels()[$attr] ?? 'Label not found';
     }
 
     public function save(): bool

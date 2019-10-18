@@ -33,7 +33,7 @@ trait UnitActiveBuilder
         return get_called_class();
     }
 
-    protected function createModel(array $rowData)//:UnitActive
+    protected function createModel(array $rowData)
     {
         $this->setAttributes($rowData);
 

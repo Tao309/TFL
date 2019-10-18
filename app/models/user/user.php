@@ -14,6 +14,27 @@ use tfl\units\UnitActive;
  */
 class User extends UnitActive
 {
+    /**
+     * Статусы пользователей
+     */
+    const STATUS_GUEST = 0;
+    const STATUS_USER = 10;
+    const STATUS_SUPERUSER = 20;
+    const STATUS_PUBLISHER = 30;
+    const STATUS_MODERATOR = 40;
+    const STATUS_ADMIN = 50;
+    const STATUS_SUPERADMIN = 60;
+
+    private static $statusNames = [
+        self::STATUS_GUEST => 'Гость',
+        self::STATUS_USER => 'Пользователь',
+        self::STATUS_SUPERUSER => 'Супер пользователь',
+        self::STATUS_PUBLISHER => 'Публикатор',
+        self::STATUS_MODERATOR => 'Модератор',
+        self::STATUS_ADMIN => 'Админ',
+        self::STATUS_SUPERADMIN => 'Супер админ',
+    ];
+
     public function unitData(): array
     {
         $data = [
@@ -49,6 +70,12 @@ class User extends UnitActive
                     'required' => true,
                     'secretField' => true,
                 ],
+                'status' => [
+                    'type' => static::RULE_TYPE_INT,
+                    'limit' => 2,
+                    'required' => true,
+                    'default' => self::STATUS_USER,
+                ],
             ],
         ];
 
@@ -68,6 +95,18 @@ class User extends UnitActive
         $labels['dateBirth'] = 'Дата рождения';
 
         return $labels;
+    }
+
+    /**
+     * @param bool $checkAuthStatus Доступ по уровню ниже смотрящего
+     * @return array
+     */
+    public static function getStatusList(bool $checkAuthStatus = false): array
+    {
+        $statusNames = self::$statusNames;
+        unset($statusNames[self::STATUS_GUEST]);
+
+        return $statusNames;
     }
 
 }

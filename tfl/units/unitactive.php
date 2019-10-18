@@ -27,7 +27,9 @@ abstract class UnitActive extends Unit
      * @var $modelName string|null
      */
     private $modelName;
-
+    /**
+     * @var $modelName array|null
+     */
     private $modelUnitData;
 
     public function __construct()
