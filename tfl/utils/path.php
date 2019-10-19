@@ -6,7 +6,8 @@ class Path
 {
     public function __construct()
     {
-        $config = require_once '../config/web.php';
+        // @todo Сделать один раз вывод
+        $config = \TFL::source()->config('web');
 
         if (isset($_SERVER['SERVER_NAME']) && !empty($_SERVER['SERVER_NAME'])) {
             $root = rtrim($_SERVER['SERVER_NAME'], WEB_PATH);

@@ -32,4 +32,14 @@ class TFL {
     {
         return self::$source;
     }
+
+    public function config(string $fileName)
+    {
+        $file = zROOT . 'config/' . $fileName . '.php';
+        if (\tfl\utils\tFile::file_exists($file)) {
+            return require_once $file;
+        }
+
+        return [];
+    }
 }

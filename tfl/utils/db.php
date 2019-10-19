@@ -28,7 +28,7 @@ class DB {
     private function connect(): DB
     {
         if (is_null($this->pdo)) {
-            $config = require_once(zROOT . 'config/sql.php');
+            $config = \TFL::source()->config('sql');
 
             foreach ([
                          'DB_HOST',
