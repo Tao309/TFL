@@ -73,7 +73,7 @@ abstract class Unit
      *
      * @return string
      */
-    protected function getTableName(): string
+    public function getTableName(): string
     {
         return self::DB_MODEL_PREFIX . '_' . mb_strtolower($this->getModelName());
     }

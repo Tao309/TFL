@@ -9,7 +9,7 @@ class DetailsView extends TemplateBuilder
 {
     public function viewTitle(): string
     {
-        return 'Просмотр профиля';
+        return 'Просмотр пользователя';
     }
 
     public function viewData(): array

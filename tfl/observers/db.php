@@ -19,6 +19,12 @@ trait DB
     private function restoreInit()
     {
         $this->init = false;
+
+        foreach (self::$sort as $index => $value) {
+            $attr = '_' . $value;
+            $this->$attr = null;
+        }
+
     }
 
     public function getInit()
