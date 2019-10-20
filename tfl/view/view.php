@@ -10,7 +10,7 @@ class View
 {
     const TYPE_VIEW_DETAILS = 'details';
     const TYPE_VIEW_EDIT = 'edit';
-//    const TYPE_VIEW_DELETE = 'delete';
+    const TYPE_VIEW_DELETE = 'delete';
     const TYPE_VIEW_ADD = 'add';
     const TYPE_VIEW_LIST = 'list';
 
@@ -95,13 +95,16 @@ class View
                 }
             } else {
                 $limit = $data['limit'] ?? null;
+
+                $inputName = $this->dependModel->getModelNameLower() . '[' . $attr . ']';
+
                 switch ($data['type']) {
                     case TemplateBuilder::VIEW_TYPE_TEXT:
-                        $t .= tHTML::inputText($attr, $this->dependModel->$attr, $limit);
+                        $t .= tHTML::inputText($inputName, $this->dependModel->$attr, $limit);
                         break;
                     case TemplateBuilder::VIEW_TYPE_SELECT:
                         $values = $data['values'] ?? [];
-                        $t .= tHTML::inputSelect($attr, $values, $this->dependModel->$attr);
+                        $t .= tHTML::inputSelect($inputName, $values, $this->dependModel->$attr);
                         break;
                 }
             }

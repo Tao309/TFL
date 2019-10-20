@@ -7,7 +7,7 @@ class Path
     public function __construct()
     {
         // @todo Сделать один раз вывод
-        $config = \TFL::source()->config('web');
+        $config = require_once zROOT . 'config/web.php';
 
         if (isset($_SERVER['SERVER_NAME']) && !empty($_SERVER['SERVER_NAME'])) {
             $root = rtrim($_SERVER['SERVER_NAME'], WEB_PATH);

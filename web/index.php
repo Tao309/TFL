@@ -10,6 +10,6 @@ $user = \app\models\User::getById(2);
 //echo '</pre>';
 
 
-$view = new \app\views\models\User\DetailsView($user, 'view');
+$view = new \app\views\models\User\DetailsView($user, 'edit');
 
 echo $view->render();

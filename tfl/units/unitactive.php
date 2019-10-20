@@ -2,10 +2,7 @@
 
 namespace tfl\units;
 
-use tfl\builders\{
-    UnitActiveBuilder,
-    UnitSqlBuilder
-};
+use tfl\builders\{UnitActiveBuilder, UnitActiveSqlBuilder};
 
 /**
  * Class UnitActive
@@ -13,24 +10,12 @@ use tfl\builders\{
  */
 abstract class UnitActive extends Unit
 {
-    use UnitActiveBuilder, UnitSqlBuilder;
-
-    const DB_MODEL_PREFIX = 'model';
-    const DB_TABLE_UNIT = 'unit';
+    use UnitActiveBuilder, UnitActiveSqlBuilder;
 
     const RULE_TYPE_TEXT = 'Text';
     const RULE_TYPE_DATETIME = 'DateTime';
     const RULE_TYPE_DESCRIPTION = 'Description';
     const RULE_TYPE_INT = 'Integer';
-
-    /**
-     * @var $modelName string|null
-     */
-    private $modelName;
-    /**
-     * @var $modelName array|null
-     */
-    private $modelUnitData;
 
     public function __construct()
     {
@@ -38,21 +23,6 @@ abstract class UnitActive extends Unit
 
         $this->setModelName();
         $this->setModelUnitData();
-    }
-
-    /**
-     * Input Model Table Name
-     *
-     * @return string
-     */
-    protected function getTableName()
-    {
-        return self::DB_MODEL_PREFIX . '_' . mb_strtolower($this->modelName);
-    }
-
-    protected function getUnitData(): array
-    {
-        return $this->modelUnitData;
     }
 
     public static function getById(int $id)

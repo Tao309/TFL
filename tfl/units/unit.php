@@ -2,7 +2,10 @@
 
 namespace tfl\units;
 
+use tfl\builders\UnitBuilder;
+use tfl\builders\UnitSqlBuilder;
 use tfl\observers\UnitObserver;
+use tfl\repository\UnitRepository;
 
 /**
  * Rules:
@@ -18,18 +21,41 @@ use tfl\observers\UnitObserver;
 /**
  * Class Unit
  * @package tfl\units
+ *
+ * @property int $id
  */
 abstract class Unit
 {
-    use UnitObserver;
+    use UnitObserver, UnitBuilder, UnitSqlBuilder, UnitRepository;
 
     abstract protected function unitData(): array;
 
     abstract protected function translatedLabels(): array;
 
+    const DB_MODEL_PREFIX = 'model';
+    const DB_TABLE_UNIT = 'unit';
+
+    /**
+     * @var $modelName string|null
+     */
+    private $modelName;
+    /**
+     * @var $modelNameLower string|null
+     */
+    private $modelNameLower;
+    /**
+     * @var $modelName array|null
+     */
+    private $modelUnitData;
+
     public function __construct()
     {
 
+    }
+
+    public function __toString()
+    {
+        return $this->getModelName() . ' #' . $this->id;
     }
 
     protected function isNewModel()
@@ -42,29 +68,36 @@ abstract class Unit
         return $this->translatedLabels()[$attr] ?? 'Label not found';
     }
 
-    public function save(): bool
+    /**
+     * Input Model Table Name
+     *
+     * @return string
+     */
+    protected function getTableName(): string
     {
-        if (!$this->beforeSave()) {
-            return false;
-        }
-
-        //...
-
-        $this->afterSave();
-
-        return true;
+        return self::DB_MODEL_PREFIX . '_' . mb_strtolower($this->getModelName());
     }
 
-    public function delete(): bool
+    /**
+     * Input model name
+     * @return string
+     */
+    public function getModelName(): string
     {
-        if (!$this->beforeDelete()) {
-            return false;
-        }
+        return $this->modelName;
+    }
 
-        //....
+    /**
+     * Input model name lowercase
+     * @return string
+     */
+    public function getModelNameLower(): string
+    {
+        return $this->modelNameLower;
+    }
 
-        $this->afterDelete();
-
-        return true;
+    protected function getUnitData(): array
+    {
+        return $this->modelUnitData;
     }
 }

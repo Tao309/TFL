@@ -58,6 +58,7 @@ abstract class TemplateBuilder
     {
         $this->view = $view;
         $this->dependModel = $model;
+
         if ($this->view == View::TYPE_VIEW_LIST) {
             $this->viewModel = new ViewList($this);
         } else {
@@ -74,7 +75,6 @@ abstract class TemplateBuilder
     {
         return $this->view;
     }
-
 
     public function render()
     {
