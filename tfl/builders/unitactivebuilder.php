@@ -2,13 +2,21 @@
 
 namespace tfl\builders;
 
+use tfl\units\UnitActive;
+
 trait UnitActiveBuilder
 {
-    protected function createModel(array $rowData)
+    public function createModel(array $rowData)
     {
-        $this->setAttributes($rowData);
+        /**
+         * @var $model UnitActive
+         */
+        $modelName = self::getCurrentModel();
+        $model = new $modelName;
 
-        return $this;
+        $model->setAttributes($rowData);
+
+        return $model;
     }
 
     private function setAttributes(array $rowData): void

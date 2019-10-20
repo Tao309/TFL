@@ -2,6 +2,7 @@
 
 namespace tfl\builders;
 
+use tfl\interfaces\UnitInterface;
 use tfl\units\Unit;
 use tfl\view\View;
 use tfl\view\ViewList;
@@ -48,7 +49,7 @@ abstract class TemplateBuilder
      */
     private $view;
     /**
-     * @var Unit
+     * @var UnitInterface
      */
     private $dependModel;
     /**
@@ -56,7 +57,7 @@ abstract class TemplateBuilder
      */
     private $viewModel;
 
-    public function __construct(Unit $model, string $view = View::TYPE_VIEW_DETAILS)
+    public function __construct(UnitInterface $model, string $view = View::TYPE_VIEW_DETAILS)
     {
         $this->view = $view;
         $this->dependModel = $model;

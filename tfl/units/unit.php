@@ -4,6 +4,7 @@ namespace tfl\units;
 
 use tfl\builders\UnitBuilder;
 use tfl\builders\UnitSqlBuilder;
+use tfl\interfaces\UnitInterface;
 use tfl\observers\UnitObserver;
 use tfl\repository\UnitRepository;
 
@@ -24,7 +25,7 @@ use tfl\repository\UnitRepository;
  *
  * @property int $id
  */
-abstract class Unit
+abstract class Unit implements UnitInterface
 {
     use UnitObserver, UnitBuilder, UnitSqlBuilder, UnitRepository;
 

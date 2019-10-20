@@ -2,13 +2,14 @@
 
 namespace tfl\units;
 
+use tfl\interfaces\UnitInterface;
 use tfl\builders\{UnitActiveBuilder, UnitActiveSqlBuilder};
 
 /**
  * Class UnitActive
  * @package tfl\units
  */
-abstract class UnitActive extends Unit
+abstract class UnitActive extends Unit implements UnitInterface
 {
     use UnitActiveBuilder, UnitActiveSqlBuilder;
 
