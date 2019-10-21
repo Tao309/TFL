@@ -22,6 +22,8 @@ class TFL {
         $this->path = new \tfl\utils\Path();
         $this->db = new \tfl\utils\DB();
 
+        $this->initControllerIdentity();
+
 //        $this->request;
 //        $this->session;
 
@@ -41,5 +43,10 @@ class TFL {
         }
 
         return [];
+    }
+
+    private function initControllerIdentity()
+    {
+
     }
 }

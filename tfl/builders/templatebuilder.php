@@ -3,7 +3,6 @@
 namespace tfl\builders;
 
 use tfl\interfaces\UnitInterface;
-use tfl\units\Unit;
 use tfl\view\View;
 use tfl\view\ViewList;
 use tfl\view\ViewUnit;
