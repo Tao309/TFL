@@ -4,7 +4,6 @@ namespace tfl\units;
 
 use tfl\builders\UnitBuilder;
 use tfl\builders\UnitSqlBuilder;
-use tfl\interfaces\UnitInterface;
 use tfl\observers\UnitObserver;
 use tfl\repository\UnitRepository;
 
@@ -25,13 +24,9 @@ use tfl\repository\UnitRepository;
  *
  * @property int $id
  */
-abstract class Unit implements UnitInterface
+abstract class Unit
 {
     use UnitObserver, UnitBuilder, UnitSqlBuilder, UnitRepository;
-
-    abstract protected function unitData(): array;
-
-    abstract protected function translatedLabels(): array;
 
     const DB_MODEL_PREFIX = 'model';
     const DB_TABLE_UNIT = 'unit';

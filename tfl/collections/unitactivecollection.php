@@ -2,6 +2,7 @@
 
 namespace tfl\collections;
 
+use tfl\interfaces\UnitCollectionInterface;
 use tfl\units\Unit;
 
 /*
@@ -13,28 +14,15 @@ use tfl\units\Unit;
  * CollectionBuilder
  */
 
-class UnitActiveCollection
+class UnitActiveCollection extends UnitCollection implements UnitCollectionInterface
 {
-    /**
-     * @var $dependModel Unit
-     */
-    private $dependModel;
-    /**
-     * @var $attributes array
-     */
-    private $attributes;
-
-    /**
-     * @var $rows array
-     */
-    private $rows;
 
     public function __construct(Unit $model)
     {
         $this->dependModel = $model;
     }
 
-    public function setAttributes(array $attrs = [])
+    public function setAttributes(array $attrs = []): void
     {
         // @todo Добавить везде, для показа
         array_unshift($attrs, 'id');
@@ -42,7 +30,17 @@ class UnitActiveCollection
         $this->attributes = array_map('strtolower', $attrs);
     }
 
-    private function getQueryRows()
+    public function setQueryOffset(): int
+    {
+        return 0;
+    }
+
+    public function setQueryLimit(): int
+    {
+        return 20;
+    }
+
+    private function getQueryRows(): array
     {
         if (!is_null($this->rows)) {
             return $this->rows;
@@ -53,7 +51,13 @@ class UnitActiveCollection
         return $this->rows = \TFL:: source()->db
             ->select($names)
             ->from($this->dependModel->getTableName())
+            ->limit($this->setQueryOffset(), $this->setQueryLimit())
             ->findAll();
+    }
+
+    public function getRows()
+    {
+        return $this->getQueryRows();
     }
 
     public function getModels()
@@ -64,10 +68,4 @@ class UnitActiveCollection
             return $this->dependModel->createModel($rowData);
         }, $rows);
     }
-
-    public function getRows()
-    {
-        return $this->getQueryRows();
-    }
-
 }

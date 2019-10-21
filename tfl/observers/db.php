@@ -4,10 +4,12 @@ namespace tfl\observers;
 
 trait DB
 {
+    // @todo Сделать адекватное построение
     private $_select;
     private $_from;
     private $_leftJoin;
     private $_where;
+    private $_limit;
 
     private $init = false;
 
@@ -38,6 +40,7 @@ trait DB
         'from',
         'leftJoin',
         'where',
+        'limit',
     ];
 
     public function select($input = null)
@@ -76,6 +79,13 @@ trait DB
         }
 
         $this->_where = 'WHERE ' . $input;
+
+        return $this;
+    }
+
+    public function limit(int $offset, int $limit)
+    {
+        $this->_limit = 'LIMIT ' . $offset . ',' . $limit;
 
         return $this;
     }

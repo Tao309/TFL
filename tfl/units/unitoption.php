@@ -2,7 +2,9 @@
 
 namespace tfl\units;
 
-abstract class UnitOption extends Unit
+use tfl\interfaces\UnitInterface;
+
+abstract class UnitOption extends Unit implements UnitInterface
 {
 
 }

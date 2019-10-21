@@ -69,7 +69,7 @@ abstract class TemplateBuilder
         }
     }
 
-    public function getDependModel(): Unit
+    public function getDependModel(): UnitInterface
     {
         return $this->dependModel;
     }
