@@ -1,12 +1,14 @@
 <?php
-namespace tfl\utils;
+
+namespace tfl\builders;
 
 /**
  * Class DB
  *
  * @property \PDO pdo
  */
-class DB {
+class DbBuilder
+{
     use \tfl\observers\DB;
 
     const TYPE_INSERT = 'insert';
@@ -25,7 +27,7 @@ class DB {
         $this->connect();
     }
 
-    private function connect(): DB
+    private function connect(): DbBuilder
     {
         if (is_null($this->pdo)) {
             $config = require_once zROOT . 'config/sql.php';

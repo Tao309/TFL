@@ -1,8 +1,8 @@
 <?php
 
-namespace tfl\utils;
+namespace tfl\builders;
 
-class Path
+class PathBuilder
 {
     public function __construct()
     {
