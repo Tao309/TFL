@@ -3,9 +3,10 @@
 /**
  * Class TFL
  *
- * @property \tfl\utils\Path path
- * @property \tfl\utils\DB db
+ * @property \tfl\builders\PathBuilder path
+ * @property \tfl\builders\DbBuilder db
  * @property \tfl\builders\RequestBuilder request
+ * @property \tfl\builders\InitControllerBuilder section
  */
 class TFL {
     /**
@@ -26,14 +27,19 @@ class TFL {
         $this->request = new \tfl\builders\RequestBuilder();
 //        $this->session;
 
-        self::$source = $this;
-
         $this->initControllers();
+
+        self::$source = $this;
     }
 
     public static function source(): TFL
     {
         return self::$source;
+    }
+
+    public function getVersion(): string
+    {
+        return '1.00.000';
     }
 
     public function config(string $fileName)
@@ -46,8 +52,10 @@ class TFL {
         return [];
     }
 
-    private function initControllers(): void
+    private function initControllers()
     {
-        new \tfl\builders\InitControllerBuilder();
+        $section = new \tfl\builders\InitControllerBuilder($this->request);
+
+        $this->section = $section;
     }
 }

@@ -5,4 +5,5 @@ require_once 'autoloader.php';
 
 require_once 'tfl.php';
 
-new TFL;
+$tfl = new TFL;
+$tfl->section->launch();
