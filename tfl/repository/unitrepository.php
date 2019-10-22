@@ -56,6 +56,10 @@ trait UnitRepository
             return false;
         }
 
+        if (!$this->deleteModelRelations()) {
+            return false;
+        }
+
         $this->afterDelete();
 
         return true;

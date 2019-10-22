@@ -94,7 +94,6 @@ trait UnitSqlObserver
 
         return true;
     }
-
     protected function saveModelRelations(): bool
     {
         if ($this instanceof UnitOption) {
@@ -115,7 +114,6 @@ trait UnitSqlObserver
 
         return true;
     }
-
     protected function deleteModelUnit()
     {
         $query = '
@@ -124,6 +122,11 @@ trait UnitSqlObserver
         ';
         \TFL::source()->db->delete($query);
 
+        return true;
+    }
+
+    protected function deleteModelRelations()
+    {
         return true;
     }
 }
