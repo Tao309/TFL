@@ -17,7 +17,7 @@ trait UnitBuilder
         $data['relations'] = $data['relations'] ?? [];
         $data['rules'] = $data['rules'] ?? [];
 
-        $this->modelUnitData = $this->unitData();
+        $this->modelUnitData = $data;
     }
 
     private static function parseModelName(): string

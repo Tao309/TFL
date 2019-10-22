@@ -36,7 +36,7 @@ abstract class UnitActive extends Unit implements UnitInterface
 
         $rowData = $model->prepareRowData('id', $id);
 
-        $model->createModel($rowData);
+        $model->createModel($model, $rowData);
 
         return $model;
     }

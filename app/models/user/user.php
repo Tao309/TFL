@@ -14,6 +14,12 @@ use tfl\units\UnitActive;
  */
 class User extends UnitActive
 {
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->enableDirectSave();
+    }
     /**
      * Статусы пользователей
      */

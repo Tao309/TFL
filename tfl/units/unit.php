@@ -5,18 +5,9 @@ namespace tfl\units;
 use tfl\builders\UnitBuilder;
 use tfl\builders\UnitSqlBuilder;
 use tfl\observers\UnitObserver;
+use tfl\observers\UnitRulesObserver;
+use tfl\observers\UnitSqlObserver;
 use tfl\repository\UnitRepository;
-
-/**
- * Rules:
- * * type           - тип отображаемого элемента
- * * minLimit       - минимальное необходимое значение символов, иначе не проверяется
- * * limit          - максимальное необходимое значение символов, иначе не проверяется
- * * required       - поле должно быть заполнено
- * * secretField    - поле скрывать при показе, отображать при редактировании
- * * default        - значение по умолчанию при сохранении/создании
- */
-
 
 /**
  * Class Unit
@@ -26,7 +17,7 @@ use tfl\repository\UnitRepository;
  */
 abstract class Unit
 {
-    use UnitObserver, UnitBuilder, UnitSqlBuilder, UnitRepository;
+    use UnitObserver, UnitSqlObserver, UnitBuilder, UnitSqlBuilder, UnitRepository, UnitRulesObserver;
 
     const DB_MODEL_PREFIX = 'model';
     const DB_TABLE_UNIT = 'unit';
@@ -40,9 +31,21 @@ abstract class Unit
      */
     private $modelNameLower;
     /**
-     * @var $modelName array|null
+     * @var $modelUnitData array|null
      */
     private $modelUnitData;
+
+    /**
+     * Возможность прямого сохранения
+     * @var bool
+     */
+    protected $directSaveEnabled = false;
+
+    /**
+     * Ошибки при сохранении
+     * @var array
+     */
+    protected $saveErrors = [];
 
     public function __construct()
     {
@@ -61,7 +64,7 @@ abstract class Unit
 
     public function getLabel($attr)
     {
-        return $this->translatedLabels()[$attr] ?? 'Label not found';
+        return $this->translatedLabels()[$attr] ?? "Label <b>$attr</b> not found";
     }
 
     /**
@@ -92,8 +95,31 @@ abstract class Unit
         return $this->modelNameLower;
     }
 
+    protected function hasAttribute($attrName)
+    {
+        return property_exists($this, $attrName);
+    }
+
     protected function getUnitData(): array
     {
         return $this->modelUnitData;
+    }
+
+    /**
+     * Включаем возможность прямого сохранения
+     */
+    protected function enableDirectSave(): void
+    {
+        $this->directSaveEnabled = true;
+    }
+
+    protected function addSaveError(string $name, string $message): void
+    {
+        $this->saveErrors[$name] = $message;
+    }
+
+    public function getSaveErrors(): array
+    {
+        return $this->saveErrors;
     }
 }

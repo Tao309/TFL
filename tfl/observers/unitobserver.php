@@ -6,6 +6,10 @@ trait UnitObserver
 {
     protected function beforeSave(): bool
     {
+        if (!$this->verifyAttrs()) {
+            return false;
+        }
+
         return true;
     }
 

@@ -2,34 +2,35 @@
 
 namespace tfl\builders;
 
+use tfl\units\Unit;
 use tfl\units\UnitActive;
 
 trait UnitActiveBuilder
 {
-    public function createModel(array $rowData)
+    public function createModel(Unit $model, array $rowData)
     {
         /**
          * @var $model UnitActive
          */
-        $modelName = self::getCurrentModel();
-        $model = new $modelName;
 
-        $model->setAttributes($rowData);
+        $model->setAttributes($model, $rowData);
 
         return $model;
     }
 
-    private function setAttributes(array $rowData): void
+    private function setAttributes(Unit $model, array $rowData): void
     {
-        $rules = $this->getUnitData()['rules'];
+        $model->id = $rowData['id'];
 
-        foreach ($this->getUnitData()['details'] as $index => $attr) {
+        $rules = $model->getUnitData()['rules'];
+
+        foreach ($model->getUnitData()['details'] as $index => $attr) {
             if (isset($rules[$attr]['secretField'])) {
                 continue;
             }
 
             $lowAttr = mb_strtolower($attr);
-            $this->$attr = $rowData[$lowAttr] ?? null;
+            $model->$attr = $rowData[$lowAttr] ?? null;
         }
     }
 
