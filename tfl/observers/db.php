@@ -54,6 +54,18 @@ trait DB
         return $this;
     }
 
+    public function addSelect($input)
+    {
+        if (empty($this->_select)) {
+            die('Select fields required for query');
+        }
+
+        $this->_select .= ',' . PAGE_EOL;
+        $this->_select .= $input;
+
+        return $this;
+    }
+
     public function from($input)
     {
         $this->_from = 'FROM ' . $input;
@@ -62,7 +74,8 @@ trait DB
 
     public function leftJoin($input, $cond)
     {
-        $this->_leftJoin = 'LEFT JOIN ' . $input . ' ON (' . $cond . ')';
+        $this->_leftJoin .= 'LEFT JOIN ' . $input . ' ON (' . $cond . ')';
+        $this->_leftJoin .= PAGE_EOL;
         return $this;
     }
 

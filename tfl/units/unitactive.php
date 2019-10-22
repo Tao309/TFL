@@ -2,12 +2,18 @@
 
 namespace tfl\units;
 
+use app\models\User;
 use tfl\interfaces\UnitInterface;
 use tfl\builders\{UnitActiveBuilder, UnitActiveSqlBuilder};
 
 /**
  * Class UnitActive
  * @package tfl\units
+ *
+ * @property int $id
+ * @property \DateTime $createdDateTime
+ * @property \DateTime $lastChangeDateTime
+ * @property User $owner
  */
 abstract class UnitActive extends Unit implements UnitInterface
 {
@@ -36,7 +42,7 @@ abstract class UnitActive extends Unit implements UnitInterface
 
         $rowData = $model->prepareRowData('id', $id);
 
-        $model->createModel($model, $rowData);
+        $model->createModel($model, $rowData, true);
 
         return $model;
     }

@@ -71,6 +71,7 @@ class DbBuilder
     private function prepare($sql)
     {
         $sql = $this->query($sql);
+
         $prepare = $this->pdo->prepare($sql);
 
         if (!$prepare) {
@@ -84,7 +85,10 @@ class DbBuilder
     private function execute($sql)
     {
         $prepare = $this->prepare($sql);
-        $prepare->execute();
+
+        if (!$prepare->execute()) {
+            \tfl\utils\tDebug::printData($prepare->errorInfo()[2]);
+        }
 
         if ($this->type = self::TYPE_INSERT) {
             $this->lastInsertId = $this->pdo->lastInsertId();

@@ -14,6 +14,7 @@ use tfl\units\UnitActive;
  */
 class User extends UnitActive
 {
+    //@todo Переделать в другой метод
     public function __construct()
     {
         parent::__construct();
@@ -30,7 +31,9 @@ class User extends UnitActive
     const STATUS_MODERATOR = 40;
     const STATUS_ADMIN = 50;
     const STATUS_SUPERADMIN = 60;
-
+    /**
+     * Человеко-понятные статусы пользователей
+     */
     private static $statusNames = [
         self::STATUS_GUEST => 'Гость',
         self::STATUS_USER => 'Пользователь',
