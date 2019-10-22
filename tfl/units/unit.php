@@ -13,6 +13,7 @@ use tfl\repository\UnitRepository;
  * Class Unit
  * @package tfl\units
  *
+ * @property int $id
  */
 abstract class Unit
 {

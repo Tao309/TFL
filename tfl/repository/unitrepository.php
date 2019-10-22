@@ -29,6 +29,10 @@ trait UnitRepository
             return false;
         }
 
+        if (!$this->saveModelOwner()) {
+            return false;
+        }
+
         if (!$this->saveModelRelations()) {
             return false;
         }
@@ -44,7 +48,13 @@ trait UnitRepository
             return false;
         }
 
-        //....
+        if (!$this->deleteModel()) {
+            return false;
+        }
+
+        if (!$this->deleteModelUnit()) {
+            return false;
+        }
 
         $this->afterDelete();
 

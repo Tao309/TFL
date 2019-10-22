@@ -2,6 +2,8 @@
 
 namespace tfl\observers;
 
+use tfl\units\UnitActive;
+
 trait UnitObserver
 {
     protected function beforeSave(): bool
@@ -20,6 +22,11 @@ trait UnitObserver
 
     protected function beforeDelete(): bool
     {
+        if (!$this instanceof UnitActive) {
+            $this->addSaveError('model', 'Can not delete this type model');
+            return false;
+        }
+
         return true;
     }
 

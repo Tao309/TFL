@@ -10,7 +10,6 @@ use tfl\builders\{UnitActiveBuilder, UnitActiveSqlBuilder};
  * Class UnitActive
  * @package tfl\units
  *
- * @property int $id
  * @property \DateTime $createdDateTime
  * @property \DateTime $lastChangeDateTime
  * @property User $owner
