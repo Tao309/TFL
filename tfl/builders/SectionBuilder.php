@@ -2,11 +2,15 @@
 
 namespace tfl\builders;
 
-use tfl\observers\SectionObserver;
+use tfl\observers\{
+    ResourceObserver,
+    SectionObserver
+};
+use tfl\utils\tFile;
 
 class SectionBuilder
 {
-    use SectionObserver;
+    use SectionObserver, ResourceObserver;
 
     const DEFAULT_TEMPLATE = 'default';
     const TYPE_HEADER = 'header';
@@ -17,10 +21,30 @@ class SectionBuilder
     private $routeType;
     private $content;
 
+    /**
+     * @var array
+     */
+    private $cssFiles;
+    /**
+     * @var array
+     */
+    private $jsFiles;
+    /**
+     * @var array
+     */
+    private $fontsFiles;
+
     public function __construct($route, $routeType)
     {
         $this->route = $route;
         $this->routeType = $routeType;
+
+        $this->cssFiles = \TFL::source()->config('css');
+        $this->jsFiles = \TFL::source()->config('js');
+        $this->fontsFiles = \TFL::source()->config('fonts');
+
+//        $this->cleanWebFolder();
+        $this->setWebFolder();
     }
 
     private function getTemplateName()
@@ -41,6 +65,10 @@ class SectionBuilder
     private function getContent(string $name, string $type)
     {
         $file = $this->getPath() . $name . '.html';
+
+        if (!tFile::file_exists($file)) {
+            return "<pre>Template file $name not found</pre>";
+        }
 
         ob_start();
         require_once $file;

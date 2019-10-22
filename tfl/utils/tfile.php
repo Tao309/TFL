@@ -11,9 +11,23 @@ class tFile
         return @file_exists($filePath);
     }
 
+    public static function removeIfExists($filePath): bool
+    {
+        if (self::file_exists($filePath)) {
+            return unlink($filePath);
+        }
+
+        return false;
+    }
+
     public static function rename(string $oldFile, string $newFile): void
     {
         rename(zROOT . $oldFile, zROOT . $newFile);
+    }
+
+    public static function copyFile($sourceFile, $destFile)
+    {
+        return copy($sourceFile, $destFile);
     }
 
     public static function checkDirExists(string $dir): bool
@@ -31,9 +45,7 @@ class tFile
         foreach ($values as $index => $value) {
             $dir .= $value . '/';
 
-            if (!self::is_dir($dir)) {
-                self::createDir($dir);
-            }
+            self::createDir($dir);
         }
 
         return true;
@@ -46,9 +58,14 @@ class tFile
         }
     }
 
-    public static function file_get_contents(string $filePath): string
+    public static function file_get_contents(string $filePath)
     {
         return file_get_contents($filePath);
+    }
+
+    public static function file_put_contents(string $filePath, $content)
+    {
+        return file_put_contents($filePath, $content);
     }
 
     public static function filemtime(string $pathName): int

@@ -54,8 +54,6 @@ class TFL {
 
     private function initControllers()
     {
-        $section = new \tfl\builders\InitControllerBuilder($this->request);
-
-        $this->section = $section;
+        $this->section = new \tfl\builders\InitControllerBuilder();
     }
 }

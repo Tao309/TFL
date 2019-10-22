@@ -7,13 +7,17 @@ trait SectionObserver
     protected function replaceConstants(string $type)
     {
         $vars = [];
-        $vars['page'] = [
-            'metatags' => 'Metatags Field',
-        ];
+
+        if ($type == self::TYPE_HEADER) {
+            $vars['header'] = [
+                'lang' => $this->getReplacedConstantsLang(),
+                'metatags' => $this->getReplacedConstantsMetatags(),
+            ];
+        }
 
         $vars['DOM'] = [
-            'CSS' => 'CSS Field',
-            'JS' => 'JS Field',
+            'CSS' => $this->getReplacedConstantsCss($type),
+            'JS' => $this->getReplacedConstantsJs($type),
         ];
 
         $vars['site'] = [

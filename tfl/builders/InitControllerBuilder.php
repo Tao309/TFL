@@ -18,15 +18,12 @@ class InitControllerBuilder
     const DEFAULT_ROUTE_TYPE = 'index';
     const NAME_SECTION_ROUTE = 'sectionRoute';
     const NAME_SECTION_ROUTE_TYPE = 'sectionRouteType';
-
-    private $request;
-
     private $sectionRoute;
     private $sectionRouteType;
 
-    public function __construct(RequestBuilder $request)
+    public function __construct()
     {
-        $this->request = $request;
+
     }
 
     private function getPath(): string
@@ -36,12 +33,12 @@ class InitControllerBuilder
 
     private function sectionRoute()
     {
-        return $this->request->getRequestValue('get', self::NAME_SECTION_ROUTE) ?? self::DEFAULT_ROUTE;
+        return \TFL::source()->request->getRequestValue('get', self::NAME_SECTION_ROUTE) ?? self::DEFAULT_ROUTE;
     }
 
     private function sectionRouteType()
     {
-        return $this->request->getRequestValue('get', self::NAME_SECTION_ROUTE_TYPE) ?? self::DEFAULT_ROUTE;
+        return \TFL::source()->request->getRequestValue('get', self::NAME_SECTION_ROUTE_TYPE) ?? self::DEFAULT_ROUTE;
     }
 
     public function launch(): void
