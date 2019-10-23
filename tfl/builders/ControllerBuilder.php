@@ -3,21 +3,26 @@
 namespace tfl\builders;
 
 use tfl\interfaces\ControllerInterface;
+use tfl\interfaces\InitControllerBuilderInterface;
 
 /**
  * Class ControllerBuilder
  * @package tfl\builders
  *
  * @property SectionBuilder section;
+ * @property InitControllerBuilderInterface initBuilder;
  */
 class ControllerBuilder implements ControllerInterface
 {
     private $section;
+    private $initBuilder;
 
-    public function __construct()
+    public function __construct(InitControllerBuilderInterface $initBuilder)
     {
-        $route = \TFL::source()->section->getSectionRoute();
-        $routeType = \TFL::source()->section->getSectionRouteType();
+        $this->initBuilder = $initBuilder;
+
+        $route = $this->initBuilder->getSectionRoute();
+        $routeType = $this->initBuilder->getSectionRouteType();
 
         $this->section = new SectionBuilder($route, $routeType);
     }

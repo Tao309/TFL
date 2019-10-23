@@ -25,7 +25,11 @@ class tString
 
     public static function checkString($value, $sql = false)
     {
-        //@todo добавить защиту
+        //@todo Добавить защитцу
+        if (is_array($value)) {
+            return $value;
+        }
+
         return trim($value);
     }
 

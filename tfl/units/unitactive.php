@@ -3,6 +3,7 @@
 namespace tfl\units;
 
 use app\models\User;
+use tfl\exceptions\TFLNotFoundModelException;
 use tfl\interfaces\UnitInterface;
 use tfl\builders\{UnitActiveBuilder, UnitActiveSqlBuilder};
 
@@ -39,7 +40,11 @@ abstract class UnitActive extends Unit implements UnitInterface
         $modelName = self::getCurrentModel();
         $model = new $modelName;
 
-        $rowData = $model->prepareRowData('id', $id);
+        $rowData = $model->prepareRowData(['id' => $id]);
+
+        if (!$rowData) {
+            throw new TFLNotFoundModelException("Model {$model->getModelName()} id: #$id is not found");
+        }
 
         $model->createModel($model, $rowData, true);
 

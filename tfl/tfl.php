@@ -7,6 +7,7 @@
  * @property \tfl\builders\DbBuilder db
  * @property \tfl\builders\RequestBuilder request
  * @property \tfl\builders\InitControllerBuilder section
+ * @property \tfl\auth\Session session
  */
 class TFL {
     /**
@@ -21,13 +22,9 @@ class TFL {
 
     private function launchSource(): void
     {
-        $this->path = new \tfl\builders\PathBuilder();
         $this->db = new \tfl\builders\DbBuilder();
-
+        $this->path = new \tfl\builders\PathBuilder();
         $this->request = new \tfl\builders\RequestBuilder();
-//        $this->session;
-
-        $this->initControllers();
 
         self::$source = $this;
     }
@@ -52,8 +49,9 @@ class TFL {
         return [];
     }
 
-    private function initControllers()
+    public function launchAfterInit()
     {
-        $this->section = new \tfl\builders\InitControllerBuilder();
+        self::$source->session = new \tfl\auth\Session();
+        self::$source->section = new \tfl\builders\InitControllerBuilder();
     }
 }

@@ -79,7 +79,7 @@ trait DB
         return $this;
     }
 
-    public function where($input, $args = [])
+    public function where($input, $args = [], $add = false)
     {
         if ($args) {
             foreach ($args as $index => $arg) {
@@ -91,9 +91,18 @@ trait DB
             }
         }
 
-        $this->_where = 'WHERE ' . $input;
+        if ($add && !empty($this->_where)) {
+            $this->_where .= ' AND (' . $input . ')';
+        } else {
+            $this->_where = 'WHERE (' . $input . ')';
+        }
 
         return $this;
+    }
+
+    public function andWhere($input, $args = [])
+    {
+        return $this->where($input, $args, true);
     }
 
     public function limit(int $offset, int $limit)

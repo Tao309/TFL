@@ -19,6 +19,7 @@ trait ResourceObserver
 
     private function checkFoldersExists()
     {
+        tFile::checkDirExists('web/css/plugins/');
         tFile::checkDirExists('web/css/fonts/');
         tFile::checkDirExists('web/js/');
     }
@@ -76,7 +77,11 @@ trait ResourceObserver
             }
             $jsData = ob_get_clean();
 
-            tFile::file_put_contents($jsFile, tObfuscator::compressJS($jsData));
+            if ($groupName != 'jquery') {
+                $jsData = tObfuscator::compressJS($jsData);
+            }
+
+            tFile::file_put_contents($jsFile, $jsData);
         }
     }
 

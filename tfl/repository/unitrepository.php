@@ -16,6 +16,25 @@ trait UnitRepository
             $this->addSaveError('directSave', 'Model can not use direct save');
             return false;
         }
+        if (empty($data)) {
+            $this->addSaveError('directSave', 'Saving fields are empty');
+            return false;
+        }
+
+        $values = [];
+        foreach ($data as $index => $value) {
+            $value = (is_int($value)) ? $value : '"' . $value . '"';
+            $values[] = $index . ' = ' . $value;
+        }
+
+        //@todo add good ORM
+        $query = '
+        UPDATE ' . $this->getTableName() . '
+        SET ' . implode(',', $values) . '        
+        WHERE id = ' . $this->id . '
+        ';
+
+        \TFL::source()->db->update($query);
 
         return true;
     }

@@ -11,27 +11,50 @@ trait UnitSqlBuilder
      * @param string|int $value
      *
      * @return array
-     * @throws TFLNotFoundModelException
      */
-    protected function prepareRowData($name, $value)
+    public function prepareRowData(array $queryData = [])
     {
+        //@todo Add Exception
+        if (empty($queryData)) {
+            return null;
+        }
+        $queryKeys = array_keys($queryData);
+        if (in_array(['id', 'password', 'name'], $queryKeys)) {
+            return null;
+        }
+
         $tableName = $this->getTableName();
 
         $command = \TFL:: source()->db
             ->select(implode(',', $this->getModelColumnAttrs($tableName)))
-            ->from($tableName)
-            ->where("$tableName.$name = :value", [
-                'value' => $value,
-            ]);
+            ->from($tableName);
+
+        foreach ($queryData as $name => $value) {
+            if (is_array($value)) {
+                $query = [];
+                $replaceData = [];
+                foreach ($value as $nameValue => $oneValue) {
+                    $query[] = "$tableName.$nameValue = :$nameValue";
+                    $replaceData[$nameValue] = $oneValue;
+                }
+
+                $command->andWhere(implode(' OR ', $query), $replaceData);
+            } else {
+                $command->andWhere("$tableName.$name = :value", [
+                    'value' => $value,
+                ]);
+            }
+        }
 
         $this->addUnitQuery($command, $tableName);
         $this->addOwnerQuery($command);
 
 //        $row = $command->getSqlRow();
+//        print_r($row);exit;
         $row = $command->find();
 
         if (empty($row)) {
-            throw new TFLNotFoundModelException("Model $this->modelName $name: #$value is not found");
+            return null;
         }
 
         $this->assignRowData($row);

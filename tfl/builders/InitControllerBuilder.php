@@ -2,6 +2,8 @@
 
 namespace tfl\builders;
 
+use tfl\interfaces\InitControllerBuilderInterface;
+
 /**
  * Class InitControllerBuilder
  * @package tfl\builders
@@ -10,7 +12,7 @@ namespace tfl\builders;
  * @property string sectionRoute
  * @property string sectionRouteType
  */
-class InitControllerBuilder
+class InitControllerBuilder implements InitControllerBuilderInterface
 {
     const SUFFIX = 'Controller';
     const PREFIX_SECTION = 'section';
@@ -23,7 +25,7 @@ class InitControllerBuilder
 
     public function __construct()
     {
-
+        $this->launch();
     }
 
     private function getPath(): string
@@ -61,7 +63,7 @@ class InitControllerBuilder
         require_once $file;
 
         $fullClassName = 'app\\controllers\\' . $className;
-        $modelController = new $fullClassName();
+        $modelController = new $fullClassName($this);
 
         $route = self::PREFIX_SECTION . ucfirst($this->sectionRouteType);
 
