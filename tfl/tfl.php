@@ -14,6 +14,10 @@ class TFL {
      * @var TFL
      */
     private static $source;
+    /**
+     * @var array
+     */
+    private static $config;
 
     public function __construct()
     {
@@ -43,7 +47,11 @@ class TFL {
     {
         $file = zROOT . 'config/' . $fileName . '.php';
         if (\tfl\utils\tFile::file_exists($file)) {
-            return require_once $file;
+            if (!isset(self::$config[$fileName])) {
+                self::$config[$fileName] = require $file;
+            }
+
+            return self::$config[$fileName];
         }
 
         return [];

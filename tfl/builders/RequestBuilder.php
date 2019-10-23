@@ -39,8 +39,9 @@ class RequestBuilder
 
     private function hasTflNmHeader()
     {
-        $attr = 'HTTP_X_REQUESTED_WITH';
-        $value = 'tfl-nm-http-request';
+        $attr = \TFL::source()->config('web')['HTTP_REQUESTED'] ?? null;
+        $value = \TFL::source()->config('web')[$attr] ?? null;
+
         return isset($_SERVER[$attr]) && $_SERVER[$attr] == $value;
     }
 
