@@ -9,14 +9,6 @@ class IndexController extends ControllerBuilder
 {
     public function sectionIndex()
     {
-        $loginForm = tHtmlForm::loginForm();
-        $registerForm = tHtmlForm::registerForm();
-
-        $this->addAssignVars([
-            'loginForm' => $loginForm,
-            'registerForm' => $registerForm,
-        ]);
-
         return $this->render();
     }
 

@@ -76,6 +76,28 @@ class tHtmlForm
         return self::simpleForm($data, $elements, [], RequestBuilder::METHOD_POST);
     }
 
+    public static function requestForm()
+    {
+        $data = ['section', 'auth', 'erquest'];
+
+        $elements = [
+            [
+                'type' => 'text',
+                'name' => 'User[email]',
+                'length' => 60,
+                'label' => 'E-mail',
+            ],
+            [
+                'type' => 'submit',
+                'name' => 'submit',
+                'label' => 'Отправить',
+                'align' => 'center',
+            ],
+        ];
+
+        return self::simpleForm($data, $elements, [], RequestBuilder::METHOD_POST);
+    }
+
     public static function simpleForm($data = [], $elements = [], $options = [], $method = null)
     {
         $classNames = [];

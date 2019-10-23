@@ -102,4 +102,27 @@ class tHTML
 
         return $input;
     }
+
+    public static function inputLink($link, $value = null, $options = [])
+    {
+        $input = '<a';
+
+        if (!tString::isUrl($link)) {
+            $link = ROOT . $link;
+        }
+
+        $input .= ' href="' . $link . '"';
+
+        if (isset($options['html'])) {
+            $input .= ' ' . $options['html'];
+            unset($options['html']);
+        }
+
+        $input .= self::decodeOptions($options);
+        $input .= '>';
+        $input .= $value;
+        $input .= '</a>';
+
+        return $input;
+    }
 }

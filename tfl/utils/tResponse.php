@@ -2,8 +2,6 @@
 
 namespace tfl\utils;
 
-use tfl\units\UnitActive;
-
 class tResponse
 {
     public static function resultSuccess($message, $json = true)

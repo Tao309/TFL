@@ -2,6 +2,9 @@
 
 namespace tfl\observers;
 
+use tfl\utils\tHTML;
+use tfl\utils\tHtmlForm;
+
 trait SectionObserver
 {
     protected function replaceConstants(string $type)
@@ -80,7 +83,8 @@ trait SectionObserver
     {
         foreach ($this->generateSectionConstants($this->getGlobalComputeConstants()) as $index => $value) {
             if (is_string($value)) {
-                $value = '"' . $value . '"';
+//                $value = '"' . $value . '"';
+                $value = $value;
             } else {
                 if ($value === true) {
                     $value = 1;
@@ -98,6 +102,7 @@ trait SectionObserver
     private function getGlobalComputeConstants()
     {
         $vars = [
+            'ROOT' => ROOT,
             'user' => [
                 'isGuest' => \TFL::source()->session->isGuest(),
                 'isUser' => \TFL::source()->session->isUser(),
@@ -113,13 +118,68 @@ trait SectionObserver
             $vars['user']['avatar'] = '';
         }
 
-        $vars['button'] = [
-            'toAdmin' => '',
-            'exit' => '',
-            'login' => '',
-            'register' => '',
-        ];
+        $buttonLogin = null;
+        $buttonRegister = null;
+        $buttonRequestPassword = null;
 
+        $buttonToAdmin = null;
+        $buttonExit = null;
+        if ($vars['user']['isUser']) {
+            $buttonToAdmin = tHTML::inputLink(ROOT . 'admin/', 'Админ-центр', [
+                'class' => ['html-button', 'html-button-auth', 'html-button-admin']
+            ]);
+
+            $htmlData = tHtmlForm::generateElementData([
+                'section',
+                'auth',
+                'exit',
+            ], 'POST', [
+                'class' => ['http-request-button', 'html-button', 'html-button-auth', 'html-button-exit']
+            ]);
+            $buttonExit = tHTML::inputLink(ROOT . 'exit/', 'Выход', [
+                'html' => $htmlData,
+            ]);
+        } else {
+            $htmlData = tHtmlForm::generateElementData([
+                'section',
+                'window',
+                'login',
+            ], 'POST', [
+                'class' => ['http-request-button', 'html-button', 'html-button-auth', 'html-button-login']
+            ]);
+            $buttonLogin = tHTML::inputLink(ROOT . 'login/', 'Вход', [
+                'html' => $htmlData,
+            ]);
+
+            $htmlData = tHtmlForm::generateElementData([
+                'section',
+                'window',
+                'register',
+            ], 'POST', [
+                'class' => ['http-request-button', 'html-button', 'html-button-auth', 'html-button-register']
+            ]);
+            $buttonRegister = tHTML::inputLink(ROOT . 'register/', 'Регистрация', [
+                'html' => $htmlData,
+            ]);
+
+            $htmlData = tHtmlForm::generateElementData([
+                'section',
+                'window',
+                'requestpassword',
+            ], 'POST', [
+                'class' => ['http-request-button', 'html-button', 'html-button-auth', 'html-button-requestpassword']
+            ]);
+            $buttonRequestPassword = tHTML::inputLink(ROOT . 'requestpassword/', 'Вернуть пароль', [
+                'html' => $htmlData,
+            ]);
+        }
+        $vars['button'] = [
+            'login' => $buttonLogin,
+            'register' => $buttonRegister,
+            'requestpassword' => $buttonRequestPassword,
+            'toAdmin' => $buttonToAdmin,
+            'exit' => $buttonExit,
+        ];
 
         return $vars;
     }

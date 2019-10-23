@@ -33,9 +33,15 @@ class RequestBuilder
 
     public function isAjaxRequest(): bool
     {
-        //@todo исправить проверку
-        $isAjax = false;
-        return ($this->method === self::METHOD_POST || $this->method === self::METHOD_PUT) && $isAjax;
+        $isAjax = $this->hasTflNmHeader();
+        return $isAjax && (in_array($this->method, [self::METHOD_POST, self::METHOD_PUT]));
+    }
+
+    private function hasTflNmHeader()
+    {
+        $attr = 'HTTP_X_REQUESTED_WITH';
+        $value = 'tfl-nm-http-request';
+        return isset($_SERVER[$attr]) && $_SERVER[$attr] == $value;
     }
 
     public function getRequestValue(string $method, string $nameValue)

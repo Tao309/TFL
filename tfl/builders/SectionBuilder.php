@@ -7,7 +7,6 @@ use tfl\observers\{
     SectionObserver
 };
 use tfl\utils\tFile;
-use tfl\utils\tObfuscator;
 
 class SectionBuilder
 {
@@ -125,4 +124,5 @@ class SectionBuilder
     {
         return $this->getContent('sectionFooter', self::TYPE_FOOTER);
     }
+
 }
