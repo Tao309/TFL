@@ -78,15 +78,7 @@ trait SectionObserver
 
     private function replaceGlobalComputeVars($match)
     {
-        $vars = [
-            'user' => [
-                'isGuest' => \TFL::source()->session->isGuest(),
-                'isUser' => \TFL::source()->session->isUser(),
-                'model' => \TFL::source()->session->currentUser(),
-            ],
-        ];
-
-        foreach ($this->generateSectionConstants($vars) as $index => $value) {
+        foreach ($this->generateSectionConstants($this->getGlobalComputeConstants()) as $index => $value) {
             if (is_string($value)) {
                 $value = '"' . $value . '"';
             } else {
@@ -101,6 +93,35 @@ trait SectionObserver
         }
 
         return $match;
+    }
+
+    private function getGlobalComputeConstants()
+    {
+        $vars = [
+            'user' => [
+                'isGuest' => \TFL::source()->session->isGuest(),
+                'isUser' => \TFL::source()->session->isUser(),
+                'model' => null,
+                'userStatus' => 0,
+                'avatar' => '',
+            ],
+        ];
+        if ($vars['user']['isUser']) {
+            $user = \TFL::source()->session->currentUser();
+            $vars['user']['model'] = $user;
+            $vars['user']['userStatus'] = $user->status;
+            $vars['user']['avatar'] = '';
+        }
+
+        $vars['button'] = [
+            'toAdmin' => '',
+            'exit' => '',
+            'login' => '',
+            'register' => '',
+        ];
+
+
+        return $vars;
     }
 
     private function generateSectionConstants(array $array): array
