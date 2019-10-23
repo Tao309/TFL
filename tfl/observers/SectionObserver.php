@@ -35,20 +35,75 @@ trait SectionObserver
         }
 
         $this->replaceVars($vars);
+        $this->replaceEval();
 
         return $this->content;
     }
 
     private function replaceVars(array $vars): void
     {
-        $vars = $this->generateSectionContants($vars);
+        $vars = $this->generateSectionConstants($vars);
 
         foreach ($vars as $indexName => $valueName) {
             $this->content = preg_replace('/{' . $indexName . '}/i', $valueName, $this->content);
         }
     }
 
-    private function generateSectionContants(array $array): array
+    private function replaceEval(): void
+    {
+        $this->content = preg_replace_callback('/{{(.*?)}}/si', function ($matches) {
+            if (isset($matches[1])) {
+                return $this->replaceComputeVars(trim($matches[1]));
+            }
+
+            return '';
+        }, $this->content);
+    }
+
+    private function replaceComputeVars($match)
+    {
+        $match = $this->replaceGlobalComputeVars($match);
+
+        $computeVars = $this->getComputeVars();
+        if (!empty($computeVars) && is_array($computeVars)) {
+            foreach ($computeVars as $index => $value) {
+                $match = preg_replace('/{' . $index . '}/i', $value, $match);
+            }
+        }
+
+        $match = preg_replace('/{(.*?)}/i', 'null', $match);
+
+        return eval($match);
+    }
+
+    private function replaceGlobalComputeVars($match)
+    {
+        $vars = [
+            'user' => [
+                'isGuest' => \TFL::source()->session->isGuest(),
+                'isUser' => \TFL::source()->session->isUser(),
+                'model' => \TFL::source()->session->currentUser(),
+            ],
+        ];
+
+        foreach ($this->generateSectionConstants($vars) as $index => $value) {
+            if (is_string($value)) {
+                $value = '"' . $value . '"';
+            } else {
+                if ($value === true) {
+                    $value = 1;
+                } elseif ($value === false) {
+                    $value = 0;
+                }
+            }
+
+            $match = preg_replace('/{' . $index . '}/i', $value, $match);
+        }
+
+        return $match;
+    }
+
+    private function generateSectionConstants(array $array): array
     {
         $replaceArray = [];
 

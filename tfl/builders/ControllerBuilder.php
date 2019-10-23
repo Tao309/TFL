@@ -33,6 +33,11 @@ class ControllerBuilder implements ControllerInterface
         $this->section->addAssignVars($vars);
     }
 
+    public function addComputeVars(array $vars = [])
+    {
+        $this->section->addComputeVars($vars);
+    }
+
     public function render()
     {
         return $this->section->renderSection();

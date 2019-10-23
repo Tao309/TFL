@@ -14,13 +14,6 @@ use tfl\units\UnitActive;
  */
 class User extends UnitActive
 {
-    //@todo Переделать в другой метод
-    public function __construct()
-    {
-        parent::__construct();
-
-        $this->enableDirectSave();
-    }
     /**
      * Статусы пользователей
      */
@@ -43,6 +36,23 @@ class User extends UnitActive
         self::STATUS_ADMIN => 'Админ',
         self::STATUS_SUPERADMIN => 'Супер админ',
     ];
+
+    //@todo Переделать в другой метод
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->enableDirectSave();
+    }
+
+    public function __toString()
+    {
+        if ($this->isNewModel()) {
+            return 'Nonamed User';
+        }
+
+        return $this->login;
+    }
 
     public function unitData(): array
     {

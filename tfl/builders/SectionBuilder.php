@@ -35,9 +35,15 @@ class SectionBuilder
      */
     private $fontsFiles;
     /**
+     * Переменные для замены как текст в html
      * @var array
      */
     private $assignVars = [];
+    /**
+     * вычисляемые переменные для замены в html
+     * @var array
+     */
+    private $computeVars = [];
 
     public function __construct($route, $routeType)
     {
@@ -78,6 +84,16 @@ class SectionBuilder
     public function getAssignVars()
     {
         return $this->assignVars;
+    }
+
+    public function addComputeVars(array $vars = [])
+    {
+        $this->computeVars = $vars;
+    }
+
+    public function getComputeVars()
+    {
+        return $this->computeVars;
     }
 
     private function getContent(string $name, string $type)
