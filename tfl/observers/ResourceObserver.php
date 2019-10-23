@@ -46,6 +46,9 @@ trait ResourceObserver
                 require_once $file;
                 $cssData = ob_get_clean();
 
+                tObfuscator::replaceCssProperties($cssData);
+                tObfuscator::replaceCssConstants($cssData);
+
                 tFile::file_put_contents($cssFile, tObfuscator::compressCSS($cssData));
             }
         }

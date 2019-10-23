@@ -71,7 +71,7 @@ trait SectionObserver
             }
         }
 
-        $match = preg_replace('/{(.*?)}/i', 'null', $match);
+        $match = preg_replace('/{(.*?)}/i', '', $match);
 
         return eval($match);
     }
@@ -108,7 +108,7 @@ trait SectionObserver
         ];
         if ($vars['user']['isUser']) {
             $user = \TFL::source()->session->currentUser();
-            $vars['user']['model'] = $user;
+            $vars['user']['model'] = (string)$user;
             $vars['user']['userStatus'] = $user->status;
             $vars['user']['avatar'] = '';
         }

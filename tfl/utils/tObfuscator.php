@@ -12,6 +12,7 @@ class tObfuscator
 //        'khtml',
         'ms',
     ];
+    private static $cssConstants;
 
     public static function compress_code($content = null)
     {
@@ -77,12 +78,8 @@ class tObfuscator
      * @param null $content
      * @return string|null
      */
-    public static function replaceCSSproperties($content = null)
+    public static function replaceCssProperties(&$content): void
     {
-        if (empty($content)) {
-            return $content;
-        }
-
         $standardAttrList = [
             'border-radius',
             'box-shadow',
@@ -133,22 +130,31 @@ class tObfuscator
                 return $content;
             }, $content);
         }
-
-        return $content;
     }
 
     /**
+     * Переменные цветов и др для замены в css файлах
+     * @return array
+     */
+    public static function getCssConstants(): array
+    {
+        if (is_null(self::$cssConstants)) {
+            self::$cssConstants = \TFL::source()->config('cssConstants');
+        }
+
+        return self::$cssConstants;
+    }
+    /**
      * Замена переменных в контенте
      *
-     * @param null $content
+     * @param string $content
      * @param array $constants
-     * @return string|null
+     * @return string
      */
-    public static function replaceConstants($content = null, $constants = [])
+    public static function replaceCssConstants(&$content): void
     {
-        if (empty($content) || empty($constants)) {
-            return $content;
-        }
+        $constants = self::getCssConstants();
+//        print_r($constants);exit;
 
         $search = [];
         $replace = [];
@@ -159,14 +165,12 @@ class tObfuscator
             }
             $name = '$' . $type;
 
-            foreach ($values as $index => $value) {
+            foreach ($values as $index => $colorData) {
                 $search[] = $name . '[' . $index . ']';
-                $replace[] = $value;
+                $replace[] = $colorData['value'];
             }
         }
 
         $content = str_ireplace($search, $replace, $content);
-
-        return $content;
     }
 }
