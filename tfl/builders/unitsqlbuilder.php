@@ -34,13 +34,19 @@ trait UnitSqlBuilder
                 $query = [];
                 $replaceData = [];
                 foreach ($value as $nameValue => $oneValue) {
-                    $query[] = "$tableName.$nameValue = :$nameValue";
+                    $valueName = $tableName . '.' . $nameValue;
+                    \TFL::source()->db->prepareValues($valueName, $oneValue);
+
+                    $query[] = "$valueName = :$nameValue";
                     $replaceData[$nameValue] = $oneValue;
                 }
 
                 $command->andWhere(implode(' OR ', $query), $replaceData);
             } else {
-                $command->andWhere("$tableName.$name = :value", [
+                $valueName = $tableName . '.' . $name;
+                \TFL::source()->db->prepareValues($valueName, $value);
+
+                $command->andWhere("$valueName = :value", [
                     'value' => $value,
                 ]);
             }

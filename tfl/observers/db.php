@@ -112,6 +112,24 @@ trait DB
         return $this;
     }
 
+    public function prepareValues(&$valueName, &$value)
+    {
+        $options = explode('|', $valueName);
+        if (count($options) > 1) {
+            $valueName = $options[0];
+            array_shift($options);
+
+            foreach ($options as $option) {
+                switch ($option) {
+                    case 'lower':
+                        $valueName = 'LOWER(' . $valueName . ')';
+                        $value = mb_strtolower($value);
+                        break;
+                }
+            }
+        }
+    }
+
     //@todo Добавить защиту
     public function getSqlRow()
     {
