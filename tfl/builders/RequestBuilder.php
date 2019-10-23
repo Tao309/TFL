@@ -28,14 +28,14 @@ class RequestBuilder
 
     public function isPostRequest(): bool
     {
-        return $this->method === 'post';
+        return $this->method === self::METHOD_POST;
     }
 
     public function isAjaxRequest(): bool
     {
         //@todo исправить проверку
         $isAjax = false;
-        return ($this->method === 'post' || $this->method === 'put') && $isAjax;
+        return ($this->method === self::METHOD_POST || $this->method === self::METHOD_PUT) && $isAjax;
     }
 
     public function getRequestValue(string $method, string $nameValue)

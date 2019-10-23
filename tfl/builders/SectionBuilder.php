@@ -7,6 +7,7 @@ use tfl\observers\{
     SectionObserver
 };
 use tfl\utils\tFile;
+use tfl\utils\tObfuscator;
 
 class SectionBuilder
 {
@@ -33,6 +34,10 @@ class SectionBuilder
      * @var array
      */
     private $fontsFiles;
+    /**
+     * @var array
+     */
+    private $assignVars = [];
 
     public function __construct($route, $routeType)
     {
@@ -59,7 +64,20 @@ class SectionBuilder
 
     public function renderSection()
     {
-        return $this->renderHeader() . $this->renderBody() . $this->renderFooter();
+        $content = $this->renderHeader() . $this->renderBody() . $this->renderFooter();
+//        $content = tObfuscator::compress_code($content);
+
+        return $content;
+    }
+
+    public function addAssignVars(array $vars = [])
+    {
+        $this->assignVars = $vars;
+    }
+
+    public function getAssignVars()
+    {
+        return $this->assignVars;
     }
 
     private function getContent(string $name, string $type)

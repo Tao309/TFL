@@ -4,7 +4,7 @@ namespace tfl\utils;
 
 class tHTML
 {
-    private static function decodeOptions(array $options = [])
+    public static function decodeOptions(array $options = [])
     {
         $input = '';
         foreach ($options as $optionIndex => $option) {

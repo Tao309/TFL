@@ -26,6 +26,14 @@ trait SectionObserver
             'year_created' => '2019',
         ];
 
+
+        if ($type == self::TYPE_BODY) {
+            $assignVars = $this->getAssignVars();
+            if (!empty($assignVars)) {
+                $vars['page'] = $assignVars;
+            }
+        }
+
         $this->replaceVars($vars);
 
         return $this->content;

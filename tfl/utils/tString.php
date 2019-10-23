@@ -145,4 +145,14 @@ class tString
 
         return strtolower($text);
     }
+
+    public static function isEmail($email)
+    {
+        return preg_match("|[0-9a-z_]+@[0-9a-z_\-^\.]+\.[a-z]{2,3}|i", $email);
+    }
+
+    public static function isUrl($url)
+    {
+        return preg_match("/\b(?:(?:https?|ftp):\/\/|www\.)[-a-z0-9+&@#\/%?=~_|!:,.;]*[-a-z0-9+&@#\/%=~_|]/i", $url);
+    }
 }
