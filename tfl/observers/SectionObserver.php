@@ -2,6 +2,7 @@
 
 namespace tfl\observers;
 
+use tfl\builders\MenuBuilder;
 use tfl\utils\tHTML;
 use tfl\utils\tHtmlForm;
 
@@ -36,6 +37,8 @@ trait SectionObserver
                 $vars['page'] = $assignVars;
             }
         }
+
+        $this->replaceMenuFields();
 
         $this->replaceVars($vars);
         $this->replaceEval();
@@ -199,5 +202,28 @@ trait SectionObserver
         }
 
         return $replaceArray;
+    }
+
+    private function replaceMenuFields()
+    {
+        $this->content = preg_replace_callback('!{menu:(.*?)}!msi', function ($match) {
+            if (!isset($match[1])) {
+                return '';
+            }
+
+            $menuName = ucfirst($match[1]);
+
+            $className = 'app\\models\\menu\\Menu' . $menuName;
+            if (!class_exists($className)) {
+                return '';
+            }
+
+            /**
+             * @var MenuBuilder $model
+             */
+            $model = new $className();
+
+            return $model->render();
+        }, $this->content);
     }
 }

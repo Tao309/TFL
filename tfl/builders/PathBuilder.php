@@ -30,4 +30,9 @@ class PathBuilder
     {
         return zROOT;
     }
+
+    public function getCurrentUrl()
+    {
+        return preg_replace('!^\/(.*?)!', '$1', $_SERVER['REQUEST_URI']);
+    }
 }

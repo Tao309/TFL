@@ -49,7 +49,7 @@ abstract class Unit
 
     public function __construct()
     {
-
+        $this->setModelName();
     }
 
     public function __toString()

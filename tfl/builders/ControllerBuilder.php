@@ -4,7 +4,6 @@ namespace tfl\builders;
 
 use tfl\interfaces\ControllerInterface;
 use tfl\interfaces\InitControllerBuilderInterface;
-use tfl\utils\tDebug;
 use tfl\utils\tProtocolLoader;
 
 /**

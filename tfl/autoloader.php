@@ -15,14 +15,17 @@ function autoload_register($className): void
     $file = null;
 
     $names = explode("\\", $className);
-    $names = array_map('strtolower', $names);
+//    $names = array_map('strtolower', $names);
 
     if (count($names) > 2) {
         if ($names[0] == 'app' && $names[1] == 'models') {
+            $fileName = $names[2];
+            $names[2] = mb_strtolower($names[2]);
+
             if (count($names) > 3) {
                 $file = zROOT . implode('/', $names) . '.php';
             } else {
-                $file = zROOT . implode('/', $names) . '/' . $names[2] . '.php';
+                $file = zROOT . implode('/', $names) . '/' . $fileName . '.php';
             }
         }
     }

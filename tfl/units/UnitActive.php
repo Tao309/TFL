@@ -28,7 +28,6 @@ abstract class UnitActive extends Unit implements UnitInterface
     {
         parent::__construct();
 
-        $this->setModelName();
         $this->setModelUnitData();
     }
 
