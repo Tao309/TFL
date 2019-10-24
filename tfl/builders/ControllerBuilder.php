@@ -4,6 +4,7 @@ namespace tfl\builders;
 
 use tfl\interfaces\ControllerInterface;
 use tfl\interfaces\InitControllerBuilderInterface;
+use tfl\utils\tDebug;
 use tfl\utils\tProtocolLoader;
 
 /**
@@ -25,13 +26,9 @@ class ControllerBuilder implements ControllerInterface
     {
         $this->beforeAction();
 
-        $this->initBuilder = $initBuilder;
+//        $this->initBuilder = $initBuilder;
 
-        $routeDirection = $this->initBuilder->getRouteDirection();
-        $route = $this->initBuilder->getSectionRoute();
-        $routeType = $this->initBuilder->getSectionRouteType();
-
-        $this->section = new SectionBuilder($routeDirection, $route, $routeType);
+        $this->section = new SectionBuilder($this, $initBuilder);
     }
 
     protected function beforeAction(): void

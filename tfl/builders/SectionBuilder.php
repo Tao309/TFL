@@ -6,6 +6,7 @@ use tfl\observers\{
     ResourceObserver,
     SectionObserver
 };
+use tfl\interfaces\InitControllerBuilderInterface;
 use tfl\utils\tFile;
 
 class SectionBuilder
@@ -21,6 +22,15 @@ class SectionBuilder
     private $route;
     private $routeType;
     private $content;
+
+    /**
+     * @var ControllerBuilder
+     */
+    private $contBuilder;
+    /**
+     * @var InitControllerBuilderInterface
+     */
+    private $initBuilder;
 
     /**
      * @var array
@@ -45,11 +55,15 @@ class SectionBuilder
      */
     private $computeVars = [];
 
-    public function __construct($routeDirection, $route, $routeType)
+    public function __construct(
+        ControllerBuilder $contBuilder,
+        InitControllerBuilderInterface $initBuilder
+    )
     {
-        $this->routeDirection = $routeDirection;
-        $this->route = $route;
-        $this->routeType = $routeType;
+        $this->setContBuilder($contBuilder);
+        $this->setInitBuilder($initBuilder);
+
+        $this->checkAdminDirectionAuthExists();
 
         $this->cssFiles = $this->getCssFiles();
         $this->jsFiles = $this->getJsFiles();
@@ -57,6 +71,18 @@ class SectionBuilder
 
 //        $this->cleanWebFolder();
         $this->setWebFolder();
+    }
+
+    private function setContBuilder($contBuilder)
+    {
+        $this->contBuilder = $contBuilder;
+    }
+
+    private function setInitBuilder(InitControllerBuilderInterface $initBuilder)
+    {
+        $this->routeDirection = $initBuilder->getRouteDirection();
+        $this->route = $initBuilder->getSectionRoute();
+        $this->routeType = $initBuilder->getSectionRouteType();
     }
 
     private function getTemplateName(): string
@@ -75,6 +101,7 @@ class SectionBuilder
     private function getCssFiles(): array
     {
         $files = \TFL::source()->config('css');
+
         if ($this->isDefaultDirection()) {
             unset($files['admin']);
         } else if ($this->isAdminDirection()) {
@@ -147,6 +174,16 @@ class SectionBuilder
     private function renderFooter()
     {
         return $this->getContent('sectionFooter', self::TYPE_FOOTER);
+    }
+
+    //Првоерка доступа в админ-центр только для авторизованных
+    private function checkAdminDirectionAuthExists()
+    {
+        if ($this->isAdminDirection()) {
+            if (\TFL::source()->session->isGuest()) {
+                $this->contBuilder->redirect();
+            }
+        }
     }
 
     protected function isDefaultDirection()
