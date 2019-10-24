@@ -34,12 +34,12 @@ class RequestBuilder
     public function isAjaxRequest(): bool
     {
         $isAjax = $this->hasTflNmHeader();
-        return $isAjax && (in_array($this->method, [self::METHOD_POST, self::METHOD_PUT]));
+        return $isAjax && (in_array($this->method, [self::METHOD_POST, self::METHOD_PUT, self::METHOD_GET]));
     }
 
     private function hasTflNmHeader()
     {
-        $attr = \TFL::source()->config('web')['HTTP_REQUESTED'] ?? null;
+        $attr = \TFL::source()->config('web')['HTTP_REQUEST'] ?? null;
         $value = \TFL::source()->config('web')[$attr] ?? null;
 
         return isset($_SERVER[$attr]) && $_SERVER[$attr] == $value;
