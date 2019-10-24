@@ -71,12 +71,13 @@ class InitControllerBuilder implements InitControllerBuilderInterface
         $className = $this->getClassName(ucfirst($this->sectionRoute));
 
         $file = $this->getPath() . mb_strtolower($this->sectionRoute) . '/' . $className . '.php';
+        $route = self::PREFIX_SECTION . ucfirst($this->sectionRouteType);
 
         if (!file_exists($file)) {
 //            $message = 'Not found Controller ' . $this->sectionRoute . '::' . $className;
 //            throw new \tfl\exceptions\TFLNotFoundControllerException($message);
 
-            list($file, $className) = $this->getDefaultControllerData();
+            list($file, $className, $route) = $this->getDefaultControllerData();
         }
 
         require_once $file;
@@ -84,7 +85,6 @@ class InitControllerBuilder implements InitControllerBuilderInterface
         $fullClassName = 'app\\controllers\\' . $className;
         $modelController = new $fullClassName($this);
 
-        $route = self::PREFIX_SECTION . ucfirst($this->sectionRouteType);
 
         echo $modelController->$route();
     }
@@ -102,11 +102,13 @@ class InitControllerBuilder implements InitControllerBuilderInterface
 
     private function getDefaultControllerData()
     {
-        $className = $this->getClassName('Index');
+        $nameRoute = lcfirst(self::DEFAULT_ROUTE);
 
+        $className = $this->getClassName($nameRoute);
         $file = $this->getPath() . 'index/' . $className . '.php';
+        $route = self::PREFIX_SECTION . $nameRoute;
 
-        return [$file, $className];
+        return [$file, $className, $route];
     }
 
     public function getRouteDirection()
