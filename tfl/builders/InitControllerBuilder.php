@@ -68,17 +68,15 @@ class InitControllerBuilder implements InitControllerBuilderInterface
         if (isset($_GET[self::NAME_SECTION_ROUTE])) unset($_GET[self::NAME_SECTION_ROUTE]);
         if (isset($_GET[self::NAME_SECTION_ROUTE_TYPE])) unset($_GET[self::NAME_SECTION_ROUTE_TYPE]);
 
-        $className = ucfirst($this->sectionRoute);
-        if ($this->routeDirection == self::ROUTE_ADMIN_DIRECTION) {
-            $className .= ucfirst($this->routeDirection);
-        }
-        $className .= self::SUFFIX;
+        $className = $this->getClassName(ucfirst($this->sectionRoute));
 
         $file = $this->getPath() . mb_strtolower($this->sectionRoute) . '/' . $className . '.php';
 
         if (!file_exists($file)) {
-            $message = 'Not found Controller ' . $this->sectionRoute . '::' . $className;
-            throw new \tfl\exceptions\TFLNotFoundControllerException($message);
+//            $message = 'Not found Controller ' . $this->sectionRoute . '::' . $className;
+//            throw new \tfl\exceptions\TFLNotFoundControllerException($message);
+
+            list($file, $className) = $this->getDefaultControllerData();
         }
 
         require_once $file;
@@ -89,6 +87,26 @@ class InitControllerBuilder implements InitControllerBuilderInterface
         $route = self::PREFIX_SECTION . ucfirst($this->sectionRouteType);
 
         echo $modelController->$route();
+    }
+
+    private function getClassName(string $name): string
+    {
+        $className = $name;
+        if ($this->routeDirection == self::ROUTE_ADMIN_DIRECTION) {
+            $className .= ucfirst($this->routeDirection);
+        }
+        $className .= self::SUFFIX;
+
+        return $className;
+    }
+
+    private function getDefaultControllerData()
+    {
+        $className = $this->getClassName('Index');
+
+        $file = $this->getPath() . 'index/' . $className . '.php';
+
+        return [$file, $className];
     }
 
     public function getRouteDirection()
