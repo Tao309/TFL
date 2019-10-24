@@ -17,6 +17,7 @@ class SectionBuilder
     const TYPE_BODY = 'body';
     const TYPE_FOOTER = 'footer';
 
+    private $routeDirection;
     private $route;
     private $routeType;
     private $content;
@@ -44,27 +45,50 @@ class SectionBuilder
      */
     private $computeVars = [];
 
-    public function __construct($route, $routeType)
+    public function __construct($routeDirection, $route, $routeType)
     {
+        $this->routeDirection = $routeDirection;
         $this->route = $route;
         $this->routeType = $routeType;
 
-        $this->cssFiles = \TFL::source()->config('css');
-        $this->jsFiles = \TFL::source()->config('js');
+        $this->cssFiles = $this->getCssFiles();
+        $this->jsFiles = $this->getJsFiles();
         $this->fontsFiles = \TFL::source()->config('fonts');
 
 //        $this->cleanWebFolder();
         $this->setWebFolder();
     }
 
-    private function getTemplateName()
+    private function getTemplateName(): string
     {
+        if ($this->routeDirection == InitControllerBuilder::ROUTE_ADMIN_DIRECTION) {
+            return $this->routeDirection;
+        }
         return self::DEFAULT_TEMPLATE;
     }
 
-    private function getPath()
+    private function getPath(): string
     {
         return zROOT . 'resource/templates/' . $this->getTemplateName() . '/';
+    }
+
+    private function getCssFiles(): array
+    {
+        $files = \TFL::source()->config('css');
+        if ($this->isDefaultDirection()) {
+            unset($files['admin']);
+        } else if ($this->isAdminDirection()) {
+            unset($files['template']);
+        }
+
+        return $files;
+    }
+
+    private function getJsFiles(): array
+    {
+        $files = \TFL::source()->config('js');
+
+        return $files;
     }
 
     public function renderSection()
@@ -123,6 +147,21 @@ class SectionBuilder
     private function renderFooter()
     {
         return $this->getContent('sectionFooter', self::TYPE_FOOTER);
+    }
+
+    protected function isDefaultDirection()
+    {
+        return $this->routeDirection == InitControllerBuilder::ROUTE_DEFAULT_DIRECTION;
+    }
+
+    protected function isAdminDirection()
+    {
+        return $this->routeDirection == InitControllerBuilder::ROUTE_ADMIN_DIRECTION;
+    }
+
+    protected function isApiViewDirection()
+    {
+        return $this->routeDirection == InitControllerBuilder::ROUTE_API_DIRECTION;
     }
 
 }

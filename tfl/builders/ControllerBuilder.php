@@ -27,10 +27,11 @@ class ControllerBuilder implements ControllerInterface
 
         $this->initBuilder = $initBuilder;
 
+        $routeDirection = $this->initBuilder->getRouteDirection();
         $route = $this->initBuilder->getSectionRoute();
         $routeType = $this->initBuilder->getSectionRouteType();
 
-        $this->section = new SectionBuilder($route, $routeType);
+        $this->section = new SectionBuilder($routeDirection, $route, $routeType);
     }
 
     protected function beforeAction(): void

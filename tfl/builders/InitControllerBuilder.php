@@ -9,6 +9,7 @@ use tfl\interfaces\InitControllerBuilderInterface;
  * @package tfl\builders
  *
  * @property RequestBuilder request
+ * @property string routeDirection
  * @property string sectionRoute
  * @property string sectionRouteType
  */
@@ -17,9 +18,17 @@ class InitControllerBuilder implements InitControllerBuilderInterface
     const SUFFIX = 'Controller';
     const PREFIX_SECTION = 'section';
     const DEFAULT_ROUTE = 'index';
+
+    const ROUTE_DEFAULT_DIRECTION = 'view';
+    const ROUTE_ADMIN_DIRECTION = 'admin';
+    const ROUTE_API_DIRECTION = 'api';
+
     const DEFAULT_ROUTE_TYPE = 'index';
+    const NAME_SECTION_ROUTE_DIRECTION = 'routeDirection';
     const NAME_SECTION_ROUTE = 'sectionRoute';
     const NAME_SECTION_ROUTE_TYPE = 'sectionRouteType';
+
+    private $routeDirection;
     private $sectionRoute;
     private $sectionRouteType;
 
@@ -31,6 +40,12 @@ class InitControllerBuilder implements InitControllerBuilderInterface
     private function getPath(): string
     {
         return zROOT . 'app/controllers/';
+    }
+
+    private function routeDirection()
+    {
+        return \TFL::source()->request->getRequestValue('get', self::NAME_SECTION_ROUTE_DIRECTION) ??
+            self::ROUTE_DEFAULT_DIRECTION;
     }
 
     private function sectionRoute()
@@ -45,13 +60,19 @@ class InitControllerBuilder implements InitControllerBuilderInterface
 
     public function launch(): void
     {
+        $this->routeDirection = $this->routeDirection();
         $this->sectionRoute = $this->sectionRoute();
         $this->sectionRouteType = $this->sectionRouteType();
 
+        if (isset($_GET[self::NAME_SECTION_ROUTE_DIRECTION])) unset($_GET[self::NAME_SECTION_ROUTE_DIRECTION]);
         if (isset($_GET[self::NAME_SECTION_ROUTE])) unset($_GET[self::NAME_SECTION_ROUTE]);
         if (isset($_GET[self::NAME_SECTION_ROUTE_TYPE])) unset($_GET[self::NAME_SECTION_ROUTE_TYPE]);
 
-        $className = ucfirst($this->sectionRoute) . self::SUFFIX;
+        $className = ucfirst($this->sectionRoute);
+        if ($this->routeDirection == self::ROUTE_ADMIN_DIRECTION) {
+            $className .= ucfirst($this->routeDirection);
+        }
+        $className .= self::SUFFIX;
 
         $file = $this->getPath() . mb_strtolower($this->sectionRoute) . '/' . $className . '.php';
 
@@ -70,6 +91,10 @@ class InitControllerBuilder implements InitControllerBuilderInterface
         echo $modelController->$route();
     }
 
+    public function getRouteDirection()
+    {
+        return $this->routeDirection;
+    }
     public function getSectionRoute()
     {
         return $this->sectionRoute;

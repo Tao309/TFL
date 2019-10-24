@@ -4,7 +4,7 @@ namespace app\controllers;
 
 use tfl\builders\ControllerBuilder;
 
-class IndexController extends ControllerBuilder
+class IndexAdminController extends ControllerBuilder
 {
     public function sectionIndex()
     {
