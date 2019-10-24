@@ -47,7 +47,7 @@ class tHtmlForm
             [
                 'type' => 'text',
                 'name' => 'User[login]',
-                'label' => 'Логин',
+                'label' => 'Login',
                 'length' => 20,
                 'options' => [
 
@@ -63,12 +63,12 @@ class tHtmlForm
                 'type' => 'text',
                 'name' => 'User[password]',
                 'length' => 20,
-                'label' => 'Пароль',
+                'label' => 'Password',
             ],
             [
                 'type' => 'submit',
                 'name' => 'submit',
-                'label' => 'Регистрация',
+                'label' => 'Register',
                 'align' => 'center',
             ],
         ];
@@ -90,7 +90,7 @@ class tHtmlForm
             [
                 'type' => 'submit',
                 'name' => 'submit',
-                'label' => 'Отправить',
+                'label' => 'Send',
                 'align' => 'center',
             ],
         ];

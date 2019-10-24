@@ -30,10 +30,10 @@ class tObfuscator
         return trim($content);
     }
 
-    public static function compressCSS($content = null)
+    public static function compressCSS(&$content = null): void
     {
         if (empty($content)) {
-            return null;
+            return;
         }
 
         $content = preg_replace('/(\/\*).*?(\*\/)/s', '', $content);
@@ -43,13 +43,13 @@ class tObfuscator
         //@todo Заменям пробелы в начале и в конце внутри {}
         //@todo .field {}(вот тут пробелы убрать).name {}
 
-        return self::compress_code($content);
+        $content = self::compress_code($content);
     }
 
-    public static function compressJS($content = null)
+    public static function compressJS(&$content = null): void
     {
         if (empty($content)) {
-            return null;
+            return;
         }
 
         //Убираем // со строкой
@@ -69,7 +69,7 @@ class tObfuscator
         //Заменяем двойные пробелы на один
         $content = preg_replace('/\s\s/', ' ', $content);
 
-        return self::compress_code($content);
+        $content = self::compress_code($content);
     }
 
     /**

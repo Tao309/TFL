@@ -9,7 +9,7 @@ trait ResourceObserver
 {
     protected function cleanWebFolder(): void
     {
-        foreach ($this->cssFiles as $cssFileName) {
+        foreach (array_keys($this->cssFiles) as $cssFileName) {
             tFile::removeIfExists(zROOT . 'web/css/' . $cssFileName . '.css');
         }
         foreach (array_keys($this->jsFiles) as $jsFileName) {
@@ -19,7 +19,6 @@ trait ResourceObserver
 
     private function checkFoldersExists()
     {
-        tFile::checkDirExists('web/css/plugins/');
         tFile::checkDirExists('web/css/fonts/');
         tFile::checkDirExists('web/js/');
     }
@@ -27,31 +26,10 @@ trait ResourceObserver
     protected function setWebFolder(): void
     {
         $this->checkFoldersExists();
-        $this->copyCssFiles();
+
+        $this->sliceFiles('css');
         $this->copyFontsFiles();
-        $this->sliceJsFiles();
-    }
-
-    private function copyCssFiles()
-    {
-        foreach ($this->cssFiles as $cssFileName) {
-            $file = zROOT . 'resource/assets/css/' . $cssFileName . '.css';
-            $cssFile = zROOT . 'web/css/' . $cssFileName . '.css';
-            if (tFile::file_exists($cssFile)) {
-                continue;
-            }
-
-            if (tFile::file_exists($file)) {
-                ob_start();
-                require_once $file;
-                $cssData = ob_get_clean();
-
-                tObfuscator::replaceCssProperties($cssData);
-                tObfuscator::replaceCssConstants($cssData);
-
-                tFile::file_put_contents($cssFile, tObfuscator::compressCSS($cssData));
-            }
-        }
+        $this->sliceFiles('js');
     }
 
     private function copyFontsFiles()
@@ -61,30 +39,45 @@ trait ResourceObserver
         }
     }
 
-    private function sliceJsFiles()
+    private function getResourceFiles(string $ext)
     {
-        foreach ($this->jsFiles as $groupName => $group) {
-            $jsFile = zROOT . 'web/js/' . $groupName . '.js';
+        return ($ext == 'css') ? $this->cssFiles : $this->jsFiles;
+    }
 
-            if (tFile::file_exists($jsFile)) {
+    private function sliceFiles(string $ext): void
+    {
+        if (!in_array($ext, ['css', 'js'])) {
+            return;
+        }
+
+        foreach ($this->getResourceFiles($ext) as $groupName => $group) {
+            $resourceFile = zROOT . 'web/' . $ext . '/' . $groupName . '.' . $ext;
+
+            if (tFile::file_exists($resourceFile)) {
                 continue;
             }
 
             ob_start();
             foreach ($group as $index => $fileName) {
-                $file = zROOT . 'resource/assets/js/' . $fileName . '.js';
+                $file = zROOT . 'resource/assets/' . $ext . '/' . $fileName . '.' . $ext;
                 if (tFile::file_exists($file)) {
                     require_once $file;
                     echo PAGE_EOL;
                 }
             }
-            $jsData = ob_get_clean();
+            $resourceData = ob_get_clean();
 
-            if ($groupName != 'jquery') {
-                $jsData = tObfuscator::compressJS($jsData);
+            if ($ext == 'js') {
+                if ($groupName != 'jquery') {
+                    tObfuscator::compressJS($resourceData);
+                }
+            } else {
+                tObfuscator::replaceCssProperties($resourceData);
+                tObfuscator::replaceCssConstants($resourceData);
+                tObfuscator::compressCSS($resourceData);
             }
 
-            tFile::file_put_contents($jsFile, $jsData);
+            tFile::file_put_contents($resourceFile, $resourceData);
         }
     }
 
@@ -101,35 +94,27 @@ trait ResourceObserver
         return implode(PAGE_EOL, $t) . PAGE_EOL;
     }
 
-    protected function getReplacedConstantsCss(string $type = self::TYPE_HEADER): string
+    protected function getReplacedConstants(string $ext, string $type = self::TYPE_HEADER): string
     {
         $t = '';
-        if ($type == self::TYPE_HEADER) {
-            foreach ($this->cssFiles as $fileName) {
-                $file = ROOT . 'css/' . $fileName . '.css';
-                $filemtime = tFile::filemtime(zROOT . 'web/css/' . $fileName . '.css');
 
-                $file = $file . '?t=' . $filemtime;
-
-                $t .= '<link href="' . $file . '" rel="stylesheet" type="text/css" media="screen"/>';
-                $t .= PAGE_EOL;
-            }
+        if (!in_array($ext, ['css', 'js'])) {
+            return $t;
         }
 
-        return $t;
-    }
-
-    protected function getReplacedConstantsJs(string $type = self::TYPE_HEADER): string
-    {
-        $t = '';
         if ($type == self::TYPE_HEADER) {
-            foreach (array_keys($this->jsFiles) as $fileName) {
-                $file = ROOT . 'js/' . $fileName . '.js';
-                $filemtime = tFile::filemtime(zROOT . 'web/js/' . $fileName . '.js');
+            foreach (array_keys($this->getResourceFiles($ext)) as $fileName) {
+                $file = ROOT . $ext . '/' . $fileName . '.' . $ext;
+                $filemtime = tFile::filemtime(zROOT . 'web/' . $ext . '/' . $fileName . '.' . $ext);
 
-                $file = $file . '?t=' . $filemtime;
+                $file .= '?t=' . $filemtime;
 
-                $t .= '<script type="text/javascript" src="' . $file . '"></script>';
+                if ($ext == 'css') {
+                    $t .= '<link href="' . $file . '" rel="stylesheet" type="text/css" media="screen"/>';
+                } else {
+                    $t .= '<script type="text/javascript" src="' . $file . '"></script>';
+                }
+
                 $t .= PAGE_EOL;
             }
         }

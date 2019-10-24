@@ -2,6 +2,8 @@
 
 namespace tfl\utils;
 
+use tfl\builders\DbBuilder;
+
 class tResponse
 {
     public static function resultSuccess($message, $json = true)
@@ -37,20 +39,21 @@ class tResponse
     {
         return self::resultError('Model not found!');
     }
-//    public static function modalWindow($title, $content, $classNames = [])
-//    {
-//        $data = [
-//            'headerTitle' => $title,
-//            'content' => $content,
-//            'className' => implode(' ', $classNames),
-//
-//            'result' => tString::RESPONSE_RESULT_SUCCESS,
-//            'action' => DB::TYPE_SHOW_MODAL_WINDOW,
-//        ];
-//
-//        echo json_encode($data);
-//        exit;
-//    }
+
+    public static function modalWindow($title, $content, $classNames = [])
+    {
+        $data = [
+            'headerTitle' => $title,
+            'content' => $content,
+            'className' => implode(' ', $classNames),
+
+            'result' => tString::RESPONSE_RESULT_SUCCESS,
+            'action' => DbBuilder::TYPE_SHOW_MODAL_WINDOW,
+        ];
+
+        echo json_encode($data);
+        exit;
+    }
 
 //    public static function delete(UnitActive $model)
 //    {

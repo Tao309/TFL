@@ -17,6 +17,8 @@ class DbBuilder
     const TYPE_SAVE = 'save';
     const TYPE_ERROR = 'error';
 
+    const TYPE_SHOW_MODAL_WINDOW = 'modal_window';
+
     private $type;
     private $lastInsertId = 0;
 

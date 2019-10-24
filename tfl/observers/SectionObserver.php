@@ -19,8 +19,8 @@ trait SectionObserver
         }
 
         $vars['DOM'] = [
-            'CSS' => $this->getReplacedConstantsCss($type),
-            'JS' => $this->getReplacedConstantsJs($type),
+            'CSS' => $this->getReplacedConstants('css', $type),
+            'JS' => $this->getReplacedConstants('js', $type),
         ];
 
         $vars['site'] = [
@@ -144,7 +144,7 @@ trait SectionObserver
                 'section',
                 'window',
                 'login',
-            ], 'POST', [
+            ], 'GET', [
                 'class' => ['http-request-button', 'html-button', 'html-button-auth', 'html-button-login']
             ]);
             $buttonLogin = tHTML::inputLink(ROOT . 'login/', 'Вход', [
@@ -155,7 +155,7 @@ trait SectionObserver
                 'section',
                 'window',
                 'register',
-            ], 'POST', [
+            ], 'GET', [
                 'class' => ['http-request-button', 'html-button', 'html-button-auth', 'html-button-register']
             ]);
             $buttonRegister = tHTML::inputLink(ROOT . 'register/', 'Регистрация', [
@@ -166,7 +166,7 @@ trait SectionObserver
                 'section',
                 'window',
                 'requestpassword',
-            ], 'POST', [
+            ], 'GET', [
                 'class' => ['http-request-button', 'html-button', 'html-button-auth', 'html-button-requestpassword']
             ]);
             $buttonRequestPassword = tHTML::inputLink(ROOT . 'requestpassword/', 'Вернуть пароль', [
