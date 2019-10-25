@@ -82,9 +82,11 @@ class InitControllerBuilder implements InitControllerBuilderInterface
 
         require_once $file;
 
+        /**
+         * $modelController extends ControllerBuilder
+         */
         $fullClassName = 'app\\controllers\\' . $className;
         $modelController = new $fullClassName($this);
-
 
         echo $modelController->$route();
     }

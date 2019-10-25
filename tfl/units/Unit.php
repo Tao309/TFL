@@ -57,6 +57,11 @@ abstract class Unit
      */
     protected $saveErrors = [];
     /**
+     * Ошибки при удалении
+     * @var array
+     */
+    protected $deleteErrors = [];
+    /**
      * Ошибки при заполнении модели из массива запроса
      * @var array
      */
@@ -136,17 +141,25 @@ abstract class Unit
     {
         $this->saveErrors[$name] = $message;
     }
-
     public function getSaveErrors(): string
     {
         return implode(PAGE_BR, $this->saveErrors);
+    }
+
+    protected function addDeleteError(string $name, string $message): void
+    {
+        $this->deleteErrors[$name] = $message;
+    }
+
+    public function getDeleteErrors(): string
+    {
+        return implode(PAGE_BR, $this->deleteErrors);
     }
 
     protected function addLoadDataError(string $message)
     {
         $this->loadDataErrors[] = $message;
     }
-
     public function getLoadDataErrors(): string
     {
         return implode(PAGE_BR, $this->loadDataErrors);
@@ -157,16 +170,59 @@ abstract class Unit
      */
     public function attemptRequestSaveModel(): void
     {
-        if (\TFL::source()->request->isAjaxRequest(RequestBuilder::METHOD_PUT)) {
-            if ($this->attemptLoadData()) {
-                if ($this->save()) {
-                    $action = ($this instanceof UnitActive) ? DbBuilder::TYPE_SAVE : DbBuilder::TYPE_UPDATE;
-                    tResponse::resultSuccess([tString::RESPONSE_OK, $action], true);
+        if (\TFL::source()->request->isAjaxRequest()) {
+            if (\TFL::source()->request->checkForceMethod(RequestBuilder::METHOD_PUT)) {
+                if ($this->attemptLoadData()) {
+                    if ($this->save()) {
+                        $action = ($this instanceof UnitActive) ? DbBuilder::TYPE_SAVE : DbBuilder::TYPE_UPDATE;
+
+                        tResponse::resultSuccess([tString::RESPONSE_OK, $action], true);
+                    } else {
+                        tResponse::resultError($this->getSaveErrors(), true);
+                    }
                 } else {
-                    tResponse::resultError($this->getSaveErrors(), true);
+                    tResponse::resultError($this->getLoadDataErrors(), true);
                 }
-            } else {
-                tResponse::resultError($this->getLoadDataErrors(), true);
+            }
+
+            tProtocolLoader::closeAccess();
+        }
+    }
+
+    /**
+     * Процесс создания модели при отправки запросом
+     */
+    public function attemptRequestCreateModel(): void
+    {
+        if (\TFL::source()->request->isAjaxRequest()) {
+            if (\TFL::source()->request->checkForceMethod(RequestBuilder::METHOD_POST)) {
+                if ($this->attemptLoadData()) {
+                    if ($this->save()) {
+                        tResponse::resultSuccess([tString::RESPONSE_OK, DbBuilder::TYPE_INSERT], true);
+                    } else {
+                        tResponse::resultError($this->getSaveErrors(), true);
+                    }
+                } else {
+                    tResponse::resultError($this->getLoadDataErrors(), true);
+                }
+            }
+
+            tProtocolLoader::closeAccess();
+        }
+    }
+
+    /**
+     * Процесс удаления модели при отправки запросом
+     */
+    public function attemptRequestDeleteModel(): void
+    {
+        if (\TFL::source()->request->isAjaxRequest()) {
+            if (\TFL::source()->request->checkForceMethod(RequestBuilder::METHOD_DELETE)) {
+                if ($this->delete()) {
+                    tResponse::resultSuccess([tString::RESPONSE_OK, DbBuilder::TYPE_DELETE], true);
+                } else {
+                    tResponse::resultError($this->getDeleteErrors(), true);
+                }
             }
 
             tProtocolLoader::closeAccess();

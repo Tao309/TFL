@@ -5,7 +5,7 @@ namespace tfl\units;
 use app\models\User;
 use tfl\exceptions\TFLNotFoundModelException;
 use tfl\interfaces\UnitInterface;
-use tfl\builders\{UnitActiveBuilder, UnitActiveSqlBuilder};
+use tfl\builders\{RequestBuilder, UnitActiveBuilder, UnitActiveSqlBuilder};
 
 /**
  * Class UnitActive
@@ -47,6 +47,14 @@ abstract class UnitActive extends Unit implements UnitInterface
 
     public function attemptLoadData()
     {
+        $data = \TFL::source()->request->getRequestValue(RequestBuilder::METHOD_POST, $this->getModelName());
+
+        if (empty($data)) {
+            $this->addLoadDataError('Request data is empty');
+            return false;
+        }
+        //@todo Добавить далее и добавить в коде
+
         return true;
     }
 }

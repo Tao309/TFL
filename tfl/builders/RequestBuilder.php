@@ -49,7 +49,7 @@ class RequestBuilder
         return $isAjax && $methodAccept;
     }
 
-    private function checkForceMethod($forceMethod)
+    public function checkForceMethod($forceMethod)
     {
         $requestMethod = self::METHOD_GET;
 

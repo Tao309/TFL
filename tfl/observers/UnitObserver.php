@@ -6,6 +6,11 @@ use tfl\units\UnitActive;
 
 trait UnitObserver
 {
+    //@todo ввести везде
+    protected function afterFind(): void
+    {
+
+    }
     protected function beforeSave(): bool
     {
         if (!$this->verifyAttrs()) {

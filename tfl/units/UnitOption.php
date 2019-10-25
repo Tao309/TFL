@@ -77,6 +77,13 @@ abstract class UnitOption extends Unit implements UnitInterface, UnitOptionInter
         return parent::beforeSave();
     }
 
+    protected function afterSave(): bool
+    {
+        //Пересоздать кэш файл настроек
+
+        return parent::afterSave();
+    }
+
     private static function getOptionClassName($name)
     {
         if (isset(self::$optionTitles[$name])) {
