@@ -29,7 +29,7 @@ class tHTML
     }
 
     public static function inputText(
-        string $name = null,
+        string $name,
         string $value = null,
         string $limit = null,
         array $options = []
@@ -54,8 +54,39 @@ class tHTML
         return $input;
     }
 
+    public static function inputHidden(string $name, string $value = null, array $options = [])
+    {
+        $input = '<input type="hidden" value="' . $value . '" name="' . $name . '"';
+        $input .= self::decodeOptions($options);
+        $input .= '/>';
+        return $input;
+    }
+
+    private static $checkBoxNumber = 0;
+
+    public static function inputCheckbox(string $name, $value = 0)
+    {
+        self::$checkBoxNumber += 1;
+        $elementId = 'checkbox-element-' . $name . '-' . self::$checkBoxNumber;
+
+        $t = '<div class="html-element-checkbox">';
+        $checkedHidden = ($value) ? '' : 'checked';
+        $t .= '<input type="checkbox" name="' . $name . '" value="0" hidden ' . $checkedHidden . '/>';
+        $checked = ($value) ? 'checked' : '';
+        $t .= '<input type="checkbox" name="' . $name . '" value="1" class="checkbox" id="' . $elementId . '" ' . $checked . '/>';
+        $t .= '<label for="' . $elementId . '">';
+        $t .= '</label>';
+//        $t .= '<label class="off"></label>';
+        $t .= '';
+        $t .= '';
+        $t .= '</div>';
+
+
+        return $t;
+    }
+
     public static function inputSelect(
-        string $name = null,
+        string $name,
         array $values = [],
         string $selected = null,
         array $options = []

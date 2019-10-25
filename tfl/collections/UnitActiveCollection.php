@@ -65,7 +65,7 @@ class UnitActiveCollection extends UnitCollection implements UnitCollectionInter
         $rows = $this->getQueryRows();
 
         return array_map(function ($rowData) {
-            return $this->dependModel->createModel($rowData);
+            return $this->dependModel->createFinalModel($rowData);
         }, $rows);
     }
 }

@@ -2,12 +2,17 @@
 
 namespace tfl\units;
 
+use tfl\builders\DbBuilder;
+use tfl\builders\RequestBuilder;
 use tfl\builders\UnitBuilder;
 use tfl\builders\UnitSqlBuilder;
 use tfl\observers\UnitObserver;
 use tfl\observers\UnitRulesObserver;
 use tfl\observers\UnitSqlObserver;
 use tfl\repository\UnitRepository;
+use tfl\utils\tProtocolLoader;
+use tfl\utils\tResponse;
+use tfl\utils\tString;
 
 /**
  * Class Unit
@@ -21,6 +26,11 @@ abstract class Unit
 
     const DB_MODEL_PREFIX = 'model';
     const DB_TABLE_UNIT = 'unit';
+
+    const RULE_TYPE_TEXT = 'Text';
+    const RULE_TYPE_DATETIME = 'DateTime';
+    const RULE_TYPE_DESCRIPTION = 'Description';
+    const RULE_TYPE_INT = 'Integer';
 
     /**
      * @var $modelName string|null
@@ -46,6 +56,11 @@ abstract class Unit
      * @var array
      */
     protected $saveErrors = [];
+    /**
+     * Ошибки при заполнении модели из массива запроса
+     * @var array
+     */
+    protected $loadDataErrors = [];
 
     public function __construct()
     {
@@ -64,6 +79,10 @@ abstract class Unit
 
     public function getLabel($attr)
     {
+        if ($this instanceof UnitOption) {
+            return $this->getOptionList()[$attr]['title'] ?? "Option Label <b>$attr</b> not found";
+        }
+
         return $this->translatedLabels()[$attr] ?? "Label <b>$attr</b> not found";
     }
 
@@ -118,8 +137,39 @@ abstract class Unit
         $this->saveErrors[$name] = $message;
     }
 
-    public function getSaveErrors(): array
+    public function getSaveErrors(): string
     {
-        return $this->saveErrors;
+        return implode(PAGE_BR, $this->saveErrors);
+    }
+
+    protected function addLoadDataError(string $message)
+    {
+        $this->loadDataErrors[] = $message;
+    }
+
+    public function getLoadDataErrors(): string
+    {
+        return implode(PAGE_BR, $this->loadDataErrors);
+    }
+
+    /**
+     * Процесс сохранения модели при отправки запросом
+     */
+    public function attemptRequestSaveModel(): void
+    {
+        if (\TFL::source()->request->isAjaxRequest(RequestBuilder::METHOD_PUT)) {
+            if ($this->attemptLoadData()) {
+                if ($this->save()) {
+                    $action = ($this instanceof UnitActive) ? DbBuilder::TYPE_SAVE : DbBuilder::TYPE_UPDATE;
+                    tResponse::resultSuccess([tString::RESPONSE_OK, $action], true);
+                } else {
+                    tResponse::resultError($this->getSaveErrors(), true);
+                }
+            } else {
+                tResponse::resultError($this->getLoadDataErrors(), true);
+            }
+
+            tProtocolLoader::closeAccess();
+        }
     }
 }

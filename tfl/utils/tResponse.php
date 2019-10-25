@@ -6,33 +6,46 @@ use tfl\builders\DbBuilder;
 
 class tResponse
 {
-    public static function resultSuccess($message, $json = true)
+    public static function resultSuccess($input = [], $echo = false, $json = true)
     {
+        list($message, $action) = $input;
+
         $data = [
             'result' => tString::RESPONSE_RESULT_SUCCESS,
-            'message' => $message,
+            'message' => $message ?? tString::RESPONSE_RESULT_SUCCESS,
+            'action' => $action ?? DbBuilder::TYPE_ERROR,
         ];
 
         if ($json) {
-            return json_encode($data);
+            $data = json_encode($data);
         }
 
-        return $data;
+        if ($echo) {
+            echo $data;
+            exit;
+        } else {
+            return $data;
+        }
     }
 
-    public static function resultError($message, $json = true)
+    public static function resultError($message, $echo = false, $json = true)
     {
         $data = [
             'result' => tString::RESPONSE_RESULT_ERROR,
             'message' => $message,
+            'action' => DbBuilder::TYPE_ERROR,
         ];
 
         if ($json) {
-            return json_encode($data);
+            $data = json_encode($data);
         }
 
-        return $data;
-
+        if ($echo) {
+            echo $data;
+            exit;
+        } else {
+            return $data;
+        }
     }
 
     public static function modelNotFound()

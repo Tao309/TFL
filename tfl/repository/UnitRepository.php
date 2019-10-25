@@ -2,6 +2,8 @@
 
 namespace tfl\repository;
 
+use tfl\units\UnitOption;
+
 trait UnitRepository
 {
     /**
@@ -38,6 +40,7 @@ trait UnitRepository
 
         return true;
     }
+
     public function save(): bool
     {
         if (!$this->beforeSave()) {
@@ -48,12 +51,14 @@ trait UnitRepository
             return false;
         }
 
-        if (!$this->saveModelOwner()) {
-            return false;
-        }
+        if (!$this instanceof UnitOption) {
+            if (!$this->saveModelOwner()) {
+                return false;
+            }
 
-        if (!$this->saveModelRelations()) {
-            return false;
+            if (!$this->saveModelRelations()) {
+                return false;
+            }
         }
 
         $this->afterSave();

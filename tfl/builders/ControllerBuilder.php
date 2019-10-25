@@ -4,6 +4,7 @@ namespace tfl\builders;
 
 use tfl\interfaces\ControllerInterface;
 use tfl\interfaces\InitControllerBuilderInterface;
+use tfl\units\UnitOption;
 use tfl\utils\tProtocolLoader;
 
 /**
@@ -48,6 +49,15 @@ class ControllerBuilder implements ControllerInterface
     protected function justAjaxRequest()
     {
         $this->justAjaxRequest = true;
+    }
+
+    /**
+     * Контроллер используется для UnitOption
+     * @param UnitOption $model
+     */
+    protected function appendOptionModel(UnitOption $model)
+    {
+        $this->section->appendOptionModel($model);
     }
 
     public function addAssignVars(array $vars = []): void

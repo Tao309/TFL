@@ -11,6 +11,8 @@ class tHtmlForm
     const INDEX_PAGE_SECTION = 'routeType';
     const INDEX_PAGE_SUB_SECTION = 'routeSubType';
 
+    const NAME_METHOD = '_method';
+
     public static function loginForm()
     {
         $data = ['section', 'auth', 'login'];
@@ -98,24 +100,34 @@ class tHtmlForm
         return self::simpleForm($data, $elements, [], RequestBuilder::METHOD_POST);
     }
 
-    public static function simpleForm($data = [], $elements = [], $options = [], $method = null)
+    public static function simpleForm($data = [], $elements = null, $options = [], $method = null)
     {
         $classNames = [];
         $classNames[] = 'http-request-form';
         $classNames[] = 'html-element';
         $classNames[] = 'html-element-form';
 
-        $htmlFormMethod = $method ? $method : RequestBuilder::METHOD_POST;
-        $form = '<form method="' . $htmlFormMethod . '" enctype="multipart/form-data" ';
+        $form = '<form method="' . RequestBuilder::METHOD_POST . '" enctype="multipart/form-data" ';
         $form .= 'class="' . implode(' ', $classNames) . '" ';
         $form .= 'id="' . implode('-', $data) . '" ';
         $form .= self::generateElementData($data, $method);
         $form .= '>';
-        $form .= '<ul class="html-element-ul">';
 
-        $form .= self::renderElements($elements);
+        if (is_array($elements)) {
+            $form .= '<ul class="html-element-ul">';
 
-        $form .= '</ul>';
+            $elements[] = [
+                'type' => 'hidden',
+                'value' => $method,
+            ];
+
+            $form .= self::renderElements($elements);
+            $form .= '</ul>';
+        } else {
+            $form .= tHTML::inputHidden(self::NAME_METHOD, $method);
+            $form .= $elements;
+        }
+
         $form .= '</form>';
 
         return $form;
@@ -136,7 +148,9 @@ class tHtmlForm
         }
 
         if ($type) {
-            $input[] = 'data-method="' . mb_strtolower($type) . '"';
+            $type = (in_array(mb_strtolower($type), [RequestBuilder::METHOD_POST, RequestBuilder::METHOD_PUT]))
+                ? RequestBuilder::METHOD_POST : RequestBuilder::METHOD_GET;
+            $input[] = 'data-method="' . $type . '"';
         }
 
         if (!empty($options)) {
@@ -194,27 +208,24 @@ class tHtmlForm
             case 'select':
                 $form .= tHTML::inputSelect($element['name'], $values, $value);
                 break;
+            case 'hiddenText':
             case 'hidden':
                 $form .= '<input type="hidden" name="' . $element['name'] . '" class="html-element html-element-hidden" value="' . $value . '"';
                 $form .= '/>';
                 break;
             case 'checkbox':
-            case 'text':
-                if ($element['type'] == 'text') {
-                    $form .= '<input type="text" name="' . $element['name'] . '" class="html-element html-element-text" value="' . $value . '"';
-                    if (isset($element['length']) && $element['length'] > 0) {
-                        $form .= ' maxlength="' . $element['length'] . '"';
-                    }
-                    $form .= '/>';
-                } else if ($element['type'] == 'checkbox') {
-                    $form .= '<input type="checkbox" name="' . $element['name'] . '" class="html-element html-element-text" value="1"';
-                    if ($value) {
-                        $form .= ' checked';
-                    }
-                    $form .= '/>';
+                $form .= '<input type="checkbox" name="' . $element['name'] . '" class="html-element html-element-text" value="1"';
+                if ($value) {
+                    $form .= ' checked';
                 }
-
-                $form .= '</li>';
+                $form .= '/>';
+                break;
+            case 'text':
+                $form .= '<input type="text" name="' . $element['name'] . '" class="html-element html-element-text" value="' . $value . '"';
+                if (isset($element['length']) && $element['length'] > 0) {
+                    $form .= ' maxlength="' . $element['length'] . '"';
+                }
+                $form .= '/>';
                 break;
             case 'submit':
             case 'button':

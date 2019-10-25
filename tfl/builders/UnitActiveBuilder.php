@@ -8,7 +8,7 @@ use tfl\units\UnitActive;
 
 trait UnitActiveBuilder
 {
-    public function createModel(Unit $model, array $rowData, $isPrimaryModel = false)
+    public function createFinalModel(Unit $model, array $rowData, $isPrimaryModel = false)
     {
         /**
          * @var $model UnitActive
@@ -43,7 +43,7 @@ trait UnitActiveBuilder
     private function setOwner(Unit $model, $rowData)
     {
         $owner = new User();
-        $owner->createModel($owner, $rowData['owner']);
+        $owner->createFinalModel($owner, $rowData['owner']);
 
         $model->owner = $owner;
     }

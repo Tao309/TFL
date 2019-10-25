@@ -36,6 +36,10 @@ trait UnitRulesObserver
 
     protected function checkRule(string $attr): bool
     {
+        if (!isset($this->getUnitData()['rules'][$attr])) {
+            return true;
+        }
+
         $this->ruleAttr = $attr;
         $this->ruleValueAttr = $this->$attr;
         $this->ruleData = $this->getUnitData()['rules'][$attr];

@@ -2,6 +2,7 @@
 
 namespace tfl\builders;
 
+use tfl\utils\tHtmlForm;
 use tfl\utils\tString;
 
 class RequestBuilder
@@ -31,10 +32,36 @@ class RequestBuilder
         return $this->method === self::METHOD_POST;
     }
 
-    public function isAjaxRequest(): bool
+    /**
+     * @param string|null $forceMethod
+     * @return bool
+     */
+    public function isAjaxRequest($forceMethod = null): bool
     {
         $isAjax = $this->hasTflNmHeader();
-        return $isAjax && (in_array($this->method, [self::METHOD_POST, self::METHOD_PUT, self::METHOD_GET]));
+
+        $methodAccept = true;
+
+        if ($forceMethod) {
+            $methodAccept = $this->checkForceMethod($forceMethod);
+        }
+
+        return $isAjax && $methodAccept;
+    }
+
+    private function checkForceMethod($forceMethod)
+    {
+        $requestMethod = self::METHOD_GET;
+
+        switch ($forceMethod) {
+            case self::METHOD_POST:
+            case self::METHOD_PUT:
+                $requestMethod = self::METHOD_POST;
+                break;
+        }
+
+        $value = \TFL::source()->request->getRequestValue($requestMethod, tHtmlForm::NAME_METHOD);
+        return ($this->method == $requestMethod) && ($value == $forceMethod);
     }
 
     private function hasTflNmHeader()
@@ -64,9 +91,6 @@ class RequestBuilder
                 break;
             case self::METHOD_GET:
                 return $_GET ?? [];
-                break;
-            case self::METHOD_PUT:
-                return $_PUT ?? [];
                 break;
             default:
                 return [];

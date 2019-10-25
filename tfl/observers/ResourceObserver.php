@@ -72,8 +72,8 @@ trait ResourceObserver
                     tObfuscator::compressJS($resourceData);
                 }
             } else {
-                tObfuscator::replaceCssProperties($resourceData);
                 tObfuscator::replaceCssConstants($resourceData);
+                tObfuscator::replaceCssProperties($resourceData);
                 tObfuscator::compressCSS($resourceData);
             }
 

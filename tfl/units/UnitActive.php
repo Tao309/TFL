@@ -19,11 +19,6 @@ abstract class UnitActive extends Unit implements UnitInterface
 {
     use UnitActiveBuilder, UnitActiveSqlBuilder;
 
-    const RULE_TYPE_TEXT = 'Text';
-    const RULE_TYPE_DATETIME = 'DateTime';
-    const RULE_TYPE_DESCRIPTION = 'Description';
-    const RULE_TYPE_INT = 'Integer';
-
     public function __construct()
     {
         parent::__construct();
@@ -45,8 +40,13 @@ abstract class UnitActive extends Unit implements UnitInterface
             throw new TFLNotFoundModelException("Model {$model->getModelName()} id: #$id is not found");
         }
 
-        $model->createModel($model, $rowData, true);
+        $model->createFinalModel($model, $rowData, true);
 
         return $model;
+    }
+
+    public function attemptLoadData()
+    {
+        return true;
     }
 }

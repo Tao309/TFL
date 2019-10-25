@@ -54,9 +54,11 @@ trait UnitSqlObserver
             if (isset($rules[$attr]['secretField'])) {
                 continue;
             }
+            $value = tString::checkString($this->$attr);
+            $value = (is_int($value)) ? $value : "'" . $value . "'";
 
             $attrs[] = $attr = mb_strtolower($attr);
-            $values[] = $value = '"' . tString::checkString($this->$attr) . '"';
+            $values[] = $value;
             $sliceValues[] = $attr . '=' . $value;
         }
 
@@ -65,10 +67,6 @@ trait UnitSqlObserver
 
     protected function saveModelOwner(): bool
     {
-        if ($this instanceof UnitOption) {
-            return true;
-        }
-
         $dateTime = date('Y-m-d H:i:s');
 
         $data = [
@@ -96,11 +94,6 @@ trait UnitSqlObserver
     }
     protected function saveModelRelations(): bool
     {
-        if ($this instanceof UnitOption) {
-            return true;
-        }
-
-
         return true;
     }
 

@@ -12,7 +12,7 @@ class DbBuilder
     use \tfl\observers\DB;
 
     const TYPE_INSERT = 'insert';
-    const TYPE_UPDATE = 'update';
+    const TYPE_UPDATE = 'update';//Для UnitActive
     const TYPE_DELETE = 'delete';
     const TYPE_SAVE = 'save';
     const TYPE_ERROR = 'error';

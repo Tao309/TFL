@@ -2,12 +2,15 @@
 
 namespace tfl\builders;
 
+use app\views\option\DetailsView;
 use tfl\observers\{
     ResourceObserver,
     SectionObserver
 };
 use tfl\interfaces\InitControllerBuilderInterface;
+use tfl\units\UnitOption;
 use tfl\utils\tFile;
+use tfl\view\View;
 
 class SectionBuilder
 {
@@ -22,6 +25,11 @@ class SectionBuilder
     private $route;
     private $routeType;
     private $content;
+
+    /**
+     * @var UnitOption
+     */
+    private $optionModel;
 
     /**
      * @var ControllerBuilder
@@ -146,6 +154,11 @@ class SectionBuilder
         return $this->computeVars;
     }
 
+    public function appendOptionModel(UnitOption $model)
+    {
+        $this->optionModel = $model;
+    }
+
     private function getContent(string $name, string $type)
     {
         $file = $this->getPath() . $name . '.html';
@@ -168,6 +181,12 @@ class SectionBuilder
 
     private function renderBody()
     {
+        //Вывод списка настроек для UnitOption
+        if ($this->optionModel) {
+            $view = new DetailsView($this->optionModel, View::TYPE_VIEW_EDIT);
+            return $view->render();
+        }
+
         return $this->getContent($this->route . '/' . $this->routeType, self::TYPE_BODY);
     }
 

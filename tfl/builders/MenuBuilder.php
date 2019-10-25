@@ -121,7 +121,7 @@ abstract class MenuBuilder extends Unit
         $class = [];
         if (isset($data['class'])) {
             if (is_array($data['class'])) {
-                $class += $data['class'];
+                $class = array_merge($class, $data['class']);
             } else {
                 $class[] = trim($data['class']);
             }

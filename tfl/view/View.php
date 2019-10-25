@@ -2,9 +2,11 @@
 
 namespace tfl\view;
 
+use tfl\builders\RequestBuilder;
 use tfl\builders\TemplateBuilder;
 use tfl\units\Unit;
 use tfl\utils\tHTML;
+use tfl\utils\tHtmlForm;
 
 class View
 {
@@ -31,32 +33,28 @@ class View
 
     public function render(): string
     {
-        $t = '<div id="view-unit">';
-
-        $t .= $this->viewHeader();
+        $t = $this->viewHeader();
         $t .= $this->viewBody();
         $t .= $this->viewFooter();
-
-        $t .= '</div>';
 
         return $t;
     }
 
     private function viewHeader(): string
     {
-        $t = '<div class="view-header">';
-        $t .= '';
+        $t = '<div class="section-header">';
+        $t .= '<span class="header">';
         $t .= $this->tplBuilder->viewTitle();
-        $t .= '';
+        $t .= '</span>';
         $t .= '</div>';
         return $t;
     }
 
     private function viewFooter(): string
     {
+        //@todo Вывод кнопок сохранения
         return '';
     }
-
 
 
 }
