@@ -48,7 +48,7 @@ class UnitActiveCollection extends UnitCollection implements UnitCollectionInter
 
         $names = implode(',', $this->attributes);
 
-        return $this->rows = \TFL:: source()->db
+        return $this->rows = \TFL::source()->db
             ->select($names)
             ->from($this->dependModel->getTableName())
             ->limit($this->setQueryOffset(), $this->setQueryLimit())

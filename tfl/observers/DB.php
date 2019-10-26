@@ -112,21 +112,29 @@ trait DB
         return $this;
     }
 
-    public function prepareValues(&$valueName, &$value)
+    public function prepareValues(&$fullValueName, &$value, &$valueName = null)
     {
-        $options = explode('|', $valueName);
+        $options = explode('|', $fullValueName);
         if (count($options) > 1) {
-            $valueName = $options[0];
+            $fullValueName = $options[0];
             array_shift($options);
 
             foreach ($options as $option) {
                 switch ($option) {
                     case 'lower':
-                        $valueName = 'LOWER(' . $valueName . ')';
+                        $fullValueName = 'LOWER(' . $fullValueName . ')';
                         $value = mb_strtolower($value);
                         break;
                 }
             }
+        }
+
+        if ($valueName) {
+            $options = explode('|', $valueName);
+            if (count($options) > 1) {
+                $valueName = $valueName[0];
+            }
+
         }
     }
 

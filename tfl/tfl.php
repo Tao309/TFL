@@ -9,7 +9,8 @@
  * @property \tfl\builders\InitControllerBuilder section
  * @property \tfl\auth\Session session
  */
-class TFL {
+class TFL
+{
     /**
      * @var TFL
      */
@@ -38,6 +39,14 @@ class TFL {
         return self::$source;
     }
 
+    public function launchAfterInit()
+    {
+        new \tfl\builders\CacheBuilder();
+
+        self::$source->session = new \tfl\auth\Session();
+        self::$source->section = new \tfl\builders\InitControllerBuilder();
+    }
+
     public function getVersion(): string
     {
         return '1.00.000';
@@ -57,9 +66,11 @@ class TFL {
         return [];
     }
 
-    public function launchAfterInit()
+    public function getOptionValue(string $type, string $value)
     {
-        self::$source->session = new \tfl\auth\Session();
-        self::$source->section = new \tfl\builders\InitControllerBuilder();
+        $data = \tfl\utils\tCaching::getOptionData($type);
+
+        return $data[$value] ?? null;
     }
+
 }

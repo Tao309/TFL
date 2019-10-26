@@ -49,7 +49,7 @@ function exception_handler(Throwable $e)
     $trace = $e->getTrace();
 
     echo '<pre>';
-    print_r($trace[0]);
+    print_r($trace);
     echo '</pre>';
 }
 

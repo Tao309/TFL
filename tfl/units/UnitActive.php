@@ -37,12 +37,34 @@ abstract class UnitActive extends Unit implements UnitInterface
         $rowData = $model->prepareRowData(['id' => $id]);
 
         if (!$rowData) {
-            throw new TFLNotFoundModelException("Model {$model->getModelName()} id: #$id is not found");
+            return null;
+            //@todo Сделать хорошую обработку ошибки, и для getByIds
+//            throw new TFLNotFoundModelException("Model {$model->getModelName()} id: #$id is not found");
         }
 
-        $model->createFinalModel($model, $rowData, true);
+        return $model->createFinalModel($model, $rowData, true);
+    }
 
-        return $model;
+    //@todo Доработать
+    public function getByIds(array $ids)
+    {
+        /**
+         * @var $model UnitActive
+         */
+        $modelName = self::getCurrentModel();
+        $model = new $modelName;
+
+        $rowDatas = $model->prepareRowData(['id' => $ids], true);
+
+        $models = [];
+
+        if (!empty($rowDatas)) {
+            foreach ($rowDatas as $rowData) {
+                $models[] = $model->createFinalModel($model, $rowData, true);
+            }
+        }
+
+        return $models;
     }
 
     public function attemptLoadData()
