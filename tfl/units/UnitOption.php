@@ -145,7 +145,6 @@ class UnitOption extends Unit implements UnitInterface, UnitOptionInterface
      *      'optionName1' => 'optionValue1',
      *      'optionName2' => 'optionValue2',
      * ]
-     * @param array $rowData Массив из БД
      */
     private function getOptionData(array $data): array
     {

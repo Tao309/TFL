@@ -132,10 +132,32 @@ trait ResourceObserver
         $metaValues['author'] = \TFL::source()->getOptionValue(UnitOption::NAME_CORE_SEO, 'metaAuthor');
         $metaValues['copyright'] = \TFL::source()->getOptionValue(UnitOption::NAME_CORE_SEO, 'metaCopyright');
 
-        $metaValues['viewport'] = '';
+        $metaValues['viewport'] = $this->getViewPortValue();
         $metaValues['imageurl'] = '';
 
         return $metaValues;
+    }
+
+    private function getViewPortValue()
+    {
+        $data = [];
+        $data['width'] = \TFL::source()->getOptionValue(UnitOption::NAME_CORE_SEO, 'viewportWidth');
+        $data['height'] = \TFL::source()->getOptionValue(UnitOption::NAME_CORE_SEO, 'viewportHeight');
+        $data['initial-scale'] = \TFL::source()->getOptionValue(UnitOption::NAME_CORE_SEO, 'viewportInitialScale');
+        $data['user-scalable'] = \TFL::source()->getOptionValue(UnitOption::NAME_CORE_SEO, 'viewportUserScalable');
+        $data['minimum-scale'] = \TFL::source()->getOptionValue(UnitOption::NAME_CORE_SEO, 'viewportMinimumScale');
+        $data['maximum-scale'] = \TFL::source()->getOptionValue(UnitOption::NAME_CORE_SEO, 'viewportMaximumScale');
+
+        foreach ($data as $index => $value) {
+            if (empty($value)) {
+                unset($data[$index]);
+                continue;
+            }
+
+            $data[$index] = $index . '=' . $value;
+        }
+
+        return implode(', ', $data);
     }
 
     private function seedMetatagsData(array $metaValues = [])
