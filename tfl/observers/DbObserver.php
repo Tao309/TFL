@@ -2,7 +2,7 @@
 
 namespace tfl\observers;
 
-trait DB
+trait DbObserver
 {
     // @todo Сделать адекватное построение
     private $_select;

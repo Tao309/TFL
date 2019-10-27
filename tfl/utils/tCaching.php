@@ -13,11 +13,14 @@ class tCaching
     public static function recreateUnitOptionFiles(array $models)
     {
         foreach ($models as $model) {
+            /**
+             * @var $model UnitOption
+             */
             $file = $model->getFileName() . '.' . self::FILE_EXT;
 
             tFile::removeIfExists(self::FILE_OPTION_PATH . $file);
 
-            tFile::writeFile(self::FILE_OPTION_PATH, $file, $model->getJustOptionsList(), true);
+            tFile::writeFile(self::FILE_OPTION_PATH, $file, $model->getOptionDataForTmpSave(), true);
         }
     }
 

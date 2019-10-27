@@ -10,7 +10,17 @@ interface UnitInterface
 
     public function unitData(): array;
 
+    /**
+     * Список переведённых атрибутов
+     * @return array
+     */
     public function translatedLabels(): array;
 
+    /**
+     * Записываем в модель данные из request запроса
+     * @return mixed
+     */
     public function attemptLoadData();
+
+    public function getSeoValues(): array;
 }

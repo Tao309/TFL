@@ -66,11 +66,27 @@ class TFL
         return [];
     }
 
-    public function getOptionValue(string $type, string $value)
-    {
-        $data = \tfl\utils\tCaching::getOptionData($type);
+    private static $options = [];
 
-        return $data[$value] ?? null;
+    private function checkOptionExists($type): void
+    {
+        if (!isset(self::$options[$type])) {
+            self::$options[$type] = \tfl\utils\tCaching::getOptionData($type);
+        }
+    }
+
+    public function getOptionValue(string $type, string $name)
+    {
+        $this->checkOptionExists($type);
+
+        return self::$options[$type][$name] ?? null;
+    }
+
+    public function setOptionValue(string $type, string $name, $value): void
+    {
+        $this->checkOptionExists($type);
+
+        self::$options[$type][$name] = $value;
     }
 
 }

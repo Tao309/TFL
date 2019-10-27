@@ -2,6 +2,8 @@
 
 namespace tfl\builders;
 
+use tfl\observers\DbObserver;
+
 /**
  * Class DB
  *
@@ -9,7 +11,7 @@ namespace tfl\builders;
  */
 class DbBuilder
 {
-    use \tfl\observers\DB;
+    use DbObserver;
 
     const TYPE_INSERT = 'insert';
     const TYPE_UPDATE = 'update';//Для UnitActive

@@ -3,6 +3,7 @@
 namespace tfl\units;
 
 use tfl\builders\RequestBuilder;
+use tfl\builders\TemplateBuilder;
 use tfl\interfaces\UnitInterface;
 use tfl\interfaces\UnitOptionInterface;
 use tfl\utils\tCaching;
@@ -139,30 +140,43 @@ class UnitOption extends Unit implements UnitInterface, UnitOptionInterface
 
     /**
      * Подстановка структуры настроек и их значений
-     * @param array $rowData
+     * Структура выводимого массива:
+     * [
+     *      'optionName1' => 'optionValue1',
+     *      'optionName2' => 'optionValue2',
+     * ]
+     * @param array $rowData Массив из БД
      */
-    private function setOptionData(array $data): void
+    private function getOptionData(array $data): array
     {
+        $optionArray = [];
+
         $optionList = $this->getOptionList();
         foreach ($optionList as $index => $row) {
-            if (isset($data[$index])) {
-                $optionList[$index]['value'] = $data[$index];
+            if (isset($row['type']) && $row['type'] == TemplateBuilder::VIEW_TYPE_HEADER) {
+                continue;
+            }
+            $optionArray[$index] = tString::checkString((isset($data[$index])) ? $data[$index] : $row['value']);
+        }
+
+        return $optionArray;
+    }
+
+    public function getOptionDataForTmpSave()
+    {
+        return $this->getOptionData($this->option);
+    }
+
+    public function getOptionDataForView()
+    {
+        $option = $this->getOptionList();
+        foreach ($option as $indexName => $data) {
+            if (isset($this->option[$indexName])) {
+                $option[$indexName]['value'] = $this->option[$indexName];
             }
         }
 
-        $this->option = $optionList;
-    }
-
-    public function getJustOptionsList()
-    {
-        return array_map(function ($row) {
-            return $row;
-        }, $this->option);
-    }
-
-    public function getOptionValue(string $attr)
-    {
-        return $this->option[$attr]['value'] ?? null;
+        return $option;
     }
 
     public function getTableName(): string
@@ -189,9 +203,32 @@ class UnitOption extends Unit implements UnitInterface, UnitOptionInterface
         ];
     }
 
+    public function getSeoValues(): array
+    {
+        return [
+            'title' => $this->getOptionTitle(),
+        ];
+    }
+
     public function getOptionTitle(): string
     {
         return self::$optionTitles[$this->getOptionCodeName()] ?? 'Title not found';
+    }
+
+    public function getOptionValue(string $attr)
+    {
+        return $this->option[$attr] ?? null;
+    }
+
+    /**
+     * Массив с ключами, описанием и значениями полей
+     * @return array
+     */
+    public function getJustOptionsList()
+    {
+        return array_map(function ($row) {
+            return $row;
+        }, $this->option);
     }
 
     public function getFileName()
@@ -205,26 +242,22 @@ class UnitOption extends Unit implements UnitInterface, UnitOptionInterface
         $this->id = $rowData['id'];
 
         $rowData['content'] = !empty($rowData['content']) ? tString::unserialize($rowData['content']) : [];
-        $this->setOptionData($rowData['content']);
+        if (empty($rowData['content'])) $rowData['content'] = [];
+        $this->option = $this->getOptionData($rowData['content']);
 
         return $model;
     }
 
     public function attemptLoadData(): bool
     {
-        $data = \TFL::source()->request->getRequestValue(RequestBuilder::METHOD_POST, $this->getModelName());
+        $loadData = \TFL::source()->request->getRequestValue(RequestBuilder::METHOD_POST, $this->getModelName());
 
-        if (empty($data)) {
+        if (empty($loadData)) {
             $this->addLoadDataError('Request data is empty');
             return false;
         }
 
-        $option = [];
-        foreach ($this->getOptionList() as $index => $value) {
-            if (isset($data[$index])) {
-                $option[$index] = tString::checkString($data[$index]);
-            }
-        }
+        $option = $this->getOptionData((array)$loadData);
 
         if (empty($option)) {
             $this->addLoadDataError('Loaded data is empty');

@@ -2,6 +2,7 @@
 //@todo нужен ли?
 namespace tfl\observers;
 
+use tfl\units\UnitOption;
 use tfl\utils\tFile;
 use tfl\utils\tObfuscator;
 
@@ -83,13 +84,13 @@ trait ResourceObserver
 
     protected function getReplacedConstantsLang(): string
     {
-        return 'en';
+        return \TFL::source()->getOptionValue(UnitOption::NAME_CORE_SEO, 'siteLanguage');
     }
 
+    //@todo Метатэги вынести в другое место, будет замена с других страниц
     protected function getReplacedConstantsMetatags(): string
     {
-        $metaValues = [];
-        $t = $this->seedMetatagsData($metaValues);
+        $t = $this->seedMetatagsData($this->getMetatagsValues());
 
         return implode(PAGE_EOL, $t) . PAGE_EOL;
     }
@@ -122,12 +123,28 @@ trait ResourceObserver
         return $t;
     }
 
+    private function getMetatagsValues()
+    {
+        $metaValues = [];
+        $metaValues['title'] = \TFL::source()->getOptionValue(UnitOption::NAME_CORE_SEO, 'siteName');
+        $metaValues['description'] = \TFL::source()->getOptionValue(UnitOption::NAME_CORE_SEO, 'metaDescription');
+        $metaValues['keywords'] = \TFL::source()->getOptionValue(UnitOption::NAME_CORE_SEO, 'metaKeywords');
+        $metaValues['author'] = \TFL::source()->getOptionValue(UnitOption::NAME_CORE_SEO, 'metaAuthor');
+        $metaValues['copyright'] = \TFL::source()->getOptionValue(UnitOption::NAME_CORE_SEO, 'metaCopyright');
+
+        $metaValues['viewport'] = '';
+        $metaValues['imageurl'] = '';
+
+        return $metaValues;
+    }
+
     private function seedMetatagsData(array $metaValues = [])
     {
         $metaValues['imageurl'] = $metaValues['imageurl'] ?? null;
 
         $metatags = [];
-        $metatags[] = '<title>TFL</title>';
+        $title = $metaValues['title'] ?? '';
+        $metatags[] = '<title>' . $title . '</title>';
 
         $meta = [
             [
@@ -196,6 +213,7 @@ trait ResourceObserver
                 'content' => $metaValues['imageurl'],
             ],
             [
+                //@todo Поставь правильное значение
                 'name' => 'og:url',
                 'content' => ROOT,
             ],

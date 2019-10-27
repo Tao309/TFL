@@ -79,4 +79,9 @@ abstract class UnitActive extends Unit implements UnitInterface
 
         return true;
     }
+
+    public function getSeoValues(): array
+    {
+        return [];
+    }
 }

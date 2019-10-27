@@ -4,6 +4,8 @@ namespace tfl\builders;
 
 use tfl\interfaces\ControllerInterface;
 use tfl\interfaces\InitControllerBuilderInterface;
+use tfl\observers\ControllerBuilderObserver;
+use tfl\units\Unit;
 use tfl\units\UnitOption;
 use tfl\utils\tProtocolLoader;
 
@@ -18,6 +20,8 @@ use tfl\utils\tProtocolLoader;
  */
 class ControllerBuilder implements ControllerInterface
 {
+    use ControllerBuilderObserver;
+
     private $section;
 
     private $sectionRoute;
@@ -70,50 +74,6 @@ class ControllerBuilder implements ControllerInterface
     {
         $this->checkJustAjaxRequest();
         $this->checkAuthOrNotRequire();
-    }
-
-    private function checkJustAjaxRequest()
-    {
-        if ($this->justAjaxRequest && !\TFL::source()->request->isAjaxRequest()) {
-            tProtocolLoader::closeAccess();
-        }
-    }
-
-    private function checkAuthOrNotRequire()
-    {
-        if ($this->checkNoAuthRequired) {
-            if (!\TFL::source()->session->isGuest()) {
-                tProtocolLoader::closeAccess();
-            }
-        } elseif ($this->checkNoAuthRequired) {
-            if (!\TFL::source()->session->isUser()) {
-                tProtocolLoader::closeAccess();
-            }
-        }
-    }
-
-    /**
-     * Запросы на контроллер возможны только через ajax
-     */
-    protected function justAjaxRequest()
-    {
-        $this->justAjaxRequest = true;
-    }
-
-    /**
-     * Запросы на контроллер возможны только для не авторизованных пользователей
-     */
-    protected function enableNoAuthRequired()
-    {
-        $this->checkNoAuthRequired = true;
-    }
-
-    /**
-     * Запросы на контроллер возможны только для авторизованных пользователей
-     */
-    protected function enableAuthRequired()
-    {
-        $this->checkAuthRequired = true;
     }
 
     /**
