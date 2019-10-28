@@ -7,6 +7,7 @@ use tfl\builders\TemplateBuilder;
 use tfl\units\Unit;
 use tfl\utils\tHTML;
 use tfl\utils\tHtmlForm;
+use tfl\utils\tHtmlTags;
 
 class View
 {
@@ -42,11 +43,13 @@ class View
 
     private function viewHeader(): string
     {
-        $t = '<div class="section-header">';
-        $t .= '<span class="header">';
-        $t .= $this->tplBuilder->viewTitle();
-        $t .= '</span>';
-        $t .= '</div>';
+        $t = tHtmlTags::startTag('div', [
+            'class' => 'section-header'
+        ]);
+        $t .= tHtmlTags::render('div', $this->tplBuilder->viewTitle(), [
+            'class' => 'header'
+        ]);
+        $t .= tHtmlTags::endTag('div');
         return $t;
     }
 

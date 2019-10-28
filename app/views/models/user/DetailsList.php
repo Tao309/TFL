@@ -9,7 +9,7 @@ class DetailsList extends TemplateBuilder
 {
     public function viewTitle(): string
     {
-        return 'Список пользователей';
+        return 'User List';
     }
 
     public function viewData(): array

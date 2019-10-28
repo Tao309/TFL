@@ -2,12 +2,12 @@
 
 namespace tfl\builders;
 
-use app\views\option\DetailsView;
 use tfl\observers\{
     ResourceObserver,
     SectionObserver
 };
 use tfl\interfaces\InitControllerBuilderInterface;
+use tfl\units\Unit;
 use tfl\units\UnitOption;
 use tfl\utils\tFile;
 use tfl\view\View;
@@ -27,9 +27,15 @@ class SectionBuilder
     private $content;
 
     /**
-     * @var UnitOption
+     * Показ вида по модели Unit
+     * @var Unit
      */
-    private $optionModel;
+    private $unitModel;
+    /**
+     * Тип пока: view, edit
+     * @var Unit
+     */
+    private $typeView;
 
     /**
      * @var ControllerBuilder
@@ -38,7 +44,7 @@ class SectionBuilder
     /**
      * @var InitControllerBuilderInterface
      */
-    private $initBuilder;
+    public $initBuilder;
 
     /**
      * @var array
@@ -91,6 +97,8 @@ class SectionBuilder
         $this->routeDirection = $initBuilder->getRouteDirection();
         $this->route = $initBuilder->getSectionRoute();
         $this->routeType = $initBuilder->getSectionRouteType();
+
+        $this->initBuilder = $initBuilder;
     }
 
     private function getTemplateName(): string
@@ -154,9 +162,24 @@ class SectionBuilder
         return $this->computeVars;
     }
 
-    public function appendOptionModel(UnitOption $model)
+    public function appendModel(Unit $model)
     {
-        $this->optionModel = $model;
+        $this->unitModel = $model;
+    }
+
+    public function appendTypeView(string $typeView)
+    {
+        $this->typeView = $typeView;
+    }
+
+    public function getTypeView()
+    {
+        return $this->typeView;
+    }
+
+    public function getDependModel()
+    {
+        return $this->unitModel;
     }
 
     private function getContent(string $name, string $type)
@@ -181,9 +204,24 @@ class SectionBuilder
 
     private function renderBody()
     {
-        //Вывод списка настроек для UnitOption
-        if ($this->optionModel) {
-            $view = new DetailsView($this->optionModel, View::TYPE_VIEW_EDIT);
+        if ($this->unitModel) {
+            if (empty($this->typeView)) {
+                $this->typeView = View::TYPE_VIEW_DETAILS;
+            }
+
+            if ($this->unitModel instanceof UnitOption) {
+                $viewClassName = '\app\views\option\\';
+            } else {
+                $viewClassName = '\app\views\models\\' . $this->unitModel->getModelNameLower() . '\\';
+            }
+
+            $viewClassName .= ucfirst($this->typeView) . 'View';
+
+            /**
+             * @var TemplateBuilder $view
+             */
+            $view = new  $viewClassName($this);
+
             return $view->render();
         }
 

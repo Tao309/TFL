@@ -1,4 +1,5 @@
 <?php
+if (!defined('INCLUDE')) exit;
 use \tfl\utils\tFile;
 
 $zroot = rtrim($_SERVER['DOCUMENT_ROOT'], WEB_PATH);

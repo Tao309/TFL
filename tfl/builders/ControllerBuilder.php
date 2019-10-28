@@ -44,6 +44,17 @@ class ControllerBuilder implements ControllerInterface
      */
     private $checkAuthRequired = false;
 
+    /**
+     * Методы section, доступные только авторизованным
+     * @var array
+     */
+    protected $methodAuthRequired = [];
+    /**
+     * Методы section, доступные только не авторизованным
+     * @var array
+     */
+    protected $methodNoAuthRequired = [];
+
     public function __construct(InitControllerBuilderInterface $initBuilder)
     {
         $this->section = new SectionBuilder($this, $initBuilder);
@@ -74,15 +85,25 @@ class ControllerBuilder implements ControllerInterface
     {
         $this->checkJustAjaxRequest();
         $this->checkAuthOrNotRequire();
+        $this->checkMethodAuthRequire();
     }
 
     /**
-     * Контроллер используется для UnitOption
+     * Контроллер используется Unit
      * @param UnitOption $model
      */
-    protected function appendOptionModel(UnitOption $model)
+    protected function appendModel(Unit $model)
     {
-        $this->section->appendOptionModel($model);
+        $this->section->appendModel($model);
+    }
+
+    /**
+     * Выставляем тип просмотра
+     * @param UnitOption $model
+     */
+    protected function appendTypeView(string $typeView)
+    {
+        $this->section->appendTypeView($typeView);
     }
 
     public function addAssignVars(array $vars = []): void

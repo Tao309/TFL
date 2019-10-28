@@ -2,19 +2,30 @@
 
 namespace tfl\view;
 
-use tfl\builders\DbBuilder;
 use tfl\builders\RequestBuilder;
 use tfl\builders\TemplateBuilder;
 use tfl\units\UnitOption;
 use tfl\utils\tHTML;
 use tfl\utils\tHtmlForm;
+use tfl\utils\tHtmlTags;
 
 class ViewUnit extends View
 {
     protected function viewBody(): string
     {
-        $t = '<div class="section-option-list type-' . $this->tplBuilder->geViewType() . '">';
-        $t .= '<div class="view-model-table view-edit">';
+        $t = tHtmlTags::startTag('div', [
+            'class' => [
+                'section-option-list',
+                'type-' . $this->tplBuilder->geViewType()
+            ]
+        ]);
+
+        $t .= tHtmlTags::startTag('div', [
+            'class' => [
+                'view-model-table',
+                'view-edit',
+            ]
+        ]);
 
         $elements = '';
         foreach ($this->tplBuilder->viewData() as $attr => $data) {
@@ -23,15 +34,20 @@ class ViewUnit extends View
 
         if ($this->tplBuilder->geViewType() == self::TYPE_VIEW_EDIT) {
             $elements .= $this->viewActionRow();
-            $data = ['admin/section', 'option', lcfirst($this->dependModel->getModelName())];
+            $data = [
+                $this->tplBuilder->getRouteDirectionLink(),
+                'option',
+                lcfirst($this->dependModel->getModelName())
+            ];
 
             $t .= tHtmlForm::simpleForm($data, $elements, [], RequestBuilder::METHOD_PUT);
         } else {
             $t .= $elements;
         }
 
-        $t .= '</div>';
-        $t .= '</div>';
+        $t .= tHtmlTags::endTag('div');
+        $t .= tHtmlTags::endTag('div');
+
         return $t;
     }
 
@@ -42,12 +58,17 @@ class ViewUnit extends View
             $class = 'view-row-' . $data['type'];
         }
 
-        $t = '<div class="view-row ' . $class . '">';
+        $t = tHtmlTags::startTag('div', [
+            'class' => [
+                'view-row',
+                $class,
+            ]
+        ]);
 
         if ($data['type'] == TemplateBuilder::VIEW_TYPE_HEADER) {
-            $t .= '<div class="view-td-title">';
-            $t .= $data['title'];
-            $t .= '</div>';
+            $t .= tHtmlTags::render('div', $data['title'], [
+                'class' => 'view-td-title'
+            ]);
         } else {
             if ($this->dependModel instanceof UnitOption) {
                 /**
@@ -58,13 +79,16 @@ class ViewUnit extends View
                 $defaultValue = $this->dependModel->$attr;
             }
 
-            $t .= '<div class="view-td-title">';
-            $t .= $this->dependModel->getLabel($attr);
-            $t .= '</div>';
+            $t .= tHtmlTags::render('div', $this->dependModel->getLabel($attr), [
+                'class' => 'view-td-title'
+            ]);
 
-            $t .= '<div class="view-td-value">';
+            $t .= tHtmlTags::startTag('div', [
+                'class' => 'view-td-value'
+            ]);
 
             if ($this->tplBuilder->geViewType() == self::TYPE_VIEW_EDIT) {
+                //EditView
                 $limit = $data['limit'] ?? null;
 
                 $inputName = $this->dependModel->getModelName() . '[' . $attr . ']';
@@ -89,19 +113,20 @@ class ViewUnit extends View
                         break;
                 }
             } else {
+                //DetailsView
                 switch ($data['type']) {
                     case TemplateBuilder::VIEW_TYPE_SELECT:
-                        $t .= $data['values'][$attr] ?? $defaultValue;
+                        $t .= $data['values'][$defaultValue] ?? null;
                         break;
                     default:
                         $t .= $defaultValue;
                 }
             }
 
-            $t .= '</div>';
+            $t .= tHtmlTags::endTag('div');
         }
 
-        $t .= '</div>';
+        $t .= tHtmlTags::endTag('div');
 
         return $t;
     }
@@ -117,8 +142,16 @@ class ViewUnit extends View
             $showButton = true;
             if ($viewType == View::TYPE_VIEW_ADD) $buttonTitle = 'Add';
 
-            $t .= '<div class="view-row view-row-action">';
-            $t .= '<div class="view-td-action">';
+            $t .= tHtmlTags::startTag('div', [
+                'class' => [
+                    'view-row',
+                    'view-row-action',
+                ]
+            ]);
+
+            $t .= tHtmlTags::startTag('div', [
+                'class' => 'view-td-action'
+            ]);
 
             if ($showButton) {
                 $t .= '<button class="html-element html-button" type="submit">' . $buttonTitle . '</button>';
@@ -137,8 +170,8 @@ class ViewUnit extends View
 //                $t .= '>Delete</button>';
 //            }
 
-            $t .= '</div>';
-            $t .= '</div>';
+            $t .= tHtmlTags::endTag('div');
+            $t .= tHtmlTags::endTag('div');
         }
 
         return $t;

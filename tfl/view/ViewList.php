@@ -5,18 +5,28 @@ namespace tfl\view;
 use tfl\builders\TemplateBuilder;
 use tfl\collections\UnitActiveCollection;
 use tfl\units\Unit;
+use tfl\utils\tHtmlTags;
 
 class ViewList extends View
 {
     protected function viewBody(): string
     {
-        $t = '<div class="view-body type-' . $this->tplBuilder->geViewType() . '">';
-
-        $t .= '<div class="view-row type-row-header">';
+        $t = tHtmlTags::startTag('div', [
+            'class' => [
+                'view-body',
+                'type-' . $this->tplBuilder->geViewType(),
+            ]
+        ]);
+        $t .= tHtmlTags::startTag('div', [
+            'class' => [
+                'view-row',
+                'type-row-header',
+            ]
+        ]);
         foreach ($this->tplBuilder->viewData() as $attr => $data) {
             $t .= $this->viewHeaderRow($attr, $data);
         }
-        $t .= '</div>';
+        $t .= tHtmlTags::endTag('div');
 
         $collection = new UnitActiveCollection($this->dependModel);
         $collection->setAttributes(array_keys($this->tplBuilder->viewData()));
@@ -24,17 +34,18 @@ class ViewList extends View
 
         $t .= $this->viewRows($rows);
 
-        $t .= '</div>';
+        $t .= tHtmlTags::endTag('div');
         return $t;
     }
 
     private function viewHeaderRow(string $attr, array $data): string
     {
-        $t = '<div class="column name-' . $attr . '">';
-        $t .= $this->dependModel->getLabel($attr);
-        $t .= '</div>';
-
-        return $t;
+        return tHtmlTags::render('div', $this->dependModel->getLabel($attr), [
+            'class' => [
+                'column',
+                'name-' . $attr,
+            ]
+        ]);
     }
 
     /**
@@ -48,9 +59,19 @@ class ViewList extends View
         $isModel = (isset($rows[0]) && $rows[0] instanceof Unit);
 
         foreach ($rows as $row) {
-            $t .= '<div class="view-row type-row">';
+            $t .= tHtmlTags::startTag('div', [
+                'class' => [
+                    'view-row',
+                    'type-row',
+                ]
+            ]);
             foreach ($this->tplBuilder->viewData() as $attr => $data) {
-                $t .= '<div class="column name-' . $attr . '">';
+                $t .= tHtmlTags::startTag('div', [
+                    'class' => [
+                        'column',
+                        'name-' . $attr,
+                    ]
+                ]);
 
                 if ($isModel) {
                     $t .= $row->$attr;
@@ -58,9 +79,9 @@ class ViewList extends View
                     $t .= $row[$attr] ?? null;
                 }
 
-                $t .= '</div>';
+                $t .= tHtmlTags::endTag('div');
             }
-            $t .= '</div>';
+            $t .= tHtmlTags::endTag('div');
         }
 
         return $t;

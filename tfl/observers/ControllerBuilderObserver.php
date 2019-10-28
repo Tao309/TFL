@@ -34,6 +34,15 @@ trait ControllerBuilderObserver
         }
     }
 
+    private function checkMethodAuthRequire()
+    {
+        if (in_array($this->getSectionRouteType(), $this->methodAuthRequired)) {
+            $this->enableAuthRequired();
+        } elseif (in_array($this->getSectionRouteType(), $this->methodNoAuthRequired)) {
+            $this->enableNoAuthRequired();
+        }
+    }
+
     /**
      * Запросы на контроллер возможны только через ajax
      */

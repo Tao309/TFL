@@ -19,11 +19,10 @@ class InitControllerBuilder implements InitControllerBuilderInterface
     const PREFIX_SECTION = 'section';
     const DEFAULT_ROUTE = 'index';
 
-    const ROUTE_DEFAULT_DIRECTION = 'view';
+    const ROUTE_DEFAULT_DIRECTION = 'site';
     const ROUTE_ADMIN_DIRECTION = 'admin';
     const ROUTE_API_DIRECTION = 'api';
 
-    const DEFAULT_ROUTE_TYPE = 'index';
     const NAME_SECTION_ROUTE_DIRECTION = 'routeDirection';
     const NAME_SECTION_ROUTE = 'sectionRoute';
     const NAME_SECTION_ROUTE_TYPE = 'sectionRouteType';
@@ -60,8 +59,11 @@ class InitControllerBuilder implements InitControllerBuilderInterface
 
     public function launch(): void
     {
+        //Открытая часть, админка или api
         $this->routeDirection = $this->routeDirection();
+        //index, user, option
         $this->sectionRoute = $this->sectionRoute();
+        //index, list
         $this->sectionRouteType = $this->sectionRouteType();
 
         if (isset($_GET[self::NAME_SECTION_ROUTE_DIRECTION])) unset($_GET[self::NAME_SECTION_ROUTE_DIRECTION]);
@@ -74,6 +76,7 @@ class InitControllerBuilder implements InitControllerBuilderInterface
         $route = self::PREFIX_SECTION . ucfirst($this->sectionRouteType);
 
         if (!file_exists($file)) {
+//            @todo Добавить exception
 //            $message = 'Not found Controller ' . $this->sectionRoute . '::' . $className;
 //            throw new \tfl\exceptions\TFLNotFoundControllerException($message);
 

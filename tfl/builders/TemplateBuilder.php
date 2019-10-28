@@ -58,10 +58,17 @@ abstract class TemplateBuilder
      */
     private $viewModel;
 
-    public function __construct(UnitInterface $model, string $view = View::TYPE_VIEW_DETAILS)
+    /**
+     * @var SectionBuilder
+     */
+    private $sectionBuilder;
+
+//    public function __construct(UnitInterface $model, string $view = View::TYPE_VIEW_DETAILS)
+    public function __construct(SectionBuilder $sectionBuilder)
     {
-        $this->view = $view;
-        $this->dependModel = $model;
+        $this->sectionBuilder = $sectionBuilder;
+        $this->view = $sectionBuilder->getTypeView();
+        $this->dependModel = $sectionBuilder->getDependModel();
 
         if ($this->view == View::TYPE_VIEW_LIST) {
             $this->viewModel = new ViewList($this);
@@ -78,6 +85,22 @@ abstract class TemplateBuilder
     public function geViewType(): string
     {
         return $this->view;
+    }
+
+    /**
+     * Получаем строку для подстановки в <form>
+     * @return string
+     */
+    public function getRouteDirectionLink()
+    {
+        $type = $this->sectionBuilder->initBuilder->getRouteDirection();
+        $t = '';
+        if ($type == InitControllerBuilder::ROUTE_ADMIN_DIRECTION) {
+            $t .= 'admin/';
+        }
+        $t .= 'section';
+
+        return $t;
     }
 
     public function render()

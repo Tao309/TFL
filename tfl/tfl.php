@@ -1,4 +1,5 @@
 <?php
+if (!defined('INCLUDE')) exit;
 
 /**
  * Class TFL
