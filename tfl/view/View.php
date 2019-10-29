@@ -2,13 +2,20 @@
 
 namespace tfl\view;
 
-use tfl\builders\RequestBuilder;
 use tfl\builders\TemplateBuilder;
+use tfl\interfaces\view\ViewHandlerInterface;
 use tfl\units\Unit;
-use tfl\utils\tHTML;
-use tfl\utils\tHtmlForm;
+use tfl\units\UnitActive;
 use tfl\utils\tHtmlTags;
 
+/**
+ * Class View
+ * @package tfl\view
+ *
+ * @property TemplateBuilder $tplBuilder
+ * @property UnitActive $dependModel
+ * @property ViewHandlerInterface[] $viewHandlers
+ */
 class View
 {
     const TYPE_VIEW_DETAILS = 'details';
@@ -26,10 +33,33 @@ class View
      */
     protected $dependModel;
 
+    /**
+     * @var array ViewHandlerInterface[]
+     */
+    protected $viewHandlers = [];
+
     public function __construct(TemplateBuilder $tplBuilder)
     {
         $this->tplBuilder = $tplBuilder;
         $this->dependModel = $tplBuilder->getDependModel();
+
+        $this->initViewHandlers();
+    }
+
+    private function initViewHandlers()
+    {
+        foreach ($this->dependModel->unitData()['relations'] as $attr => $data) {
+            $data['model'] = end(explode('\\', $data['model']));
+            $className = '\tfl\handlers\view\\' . $data['model'] . 'ViewHandler';
+
+            $this->viewHandlers[$attr] = new $className($this->dependModel, $attr,
+                $this->tplBuilder->geViewType());
+        }
+    }
+
+    protected function getViewHandler($attr)
+    {
+        return $this->viewHandlers[$attr];
     }
 
     public function render(): string

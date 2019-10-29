@@ -32,6 +32,7 @@ abstract class TemplateBuilder
     const VIEW_TYPE_SELECT = 'select';
     const VIEW_TYPE_CHECKBOX = 'checkbox';
     const VIEW_TYPE_DATETIME = 'datetime';
+    const VIEW_TYPE_MODEL = 'model';
 
     /**
      * Вывод названия страницы

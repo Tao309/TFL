@@ -87,6 +87,7 @@ class ViewUnit extends View
                 'class' => 'view-td-value'
             ]);
 
+
             if ($this->tplBuilder->geViewType() == self::TYPE_VIEW_EDIT) {
                 //EditView
                 $limit = $data['limit'] ?? null;
@@ -111,12 +112,18 @@ class ViewUnit extends View
                         $values = $data['values'] ?? [];
                         $t .= tHTML::inputSelect($inputName, $values, $defaultValue);
                         break;
+                    case TemplateBuilder::VIEW_TYPE_MODEL:
+                        $t .= $this->viewRelationModelRow($attr);
+                        break;
                 }
             } else {
                 //DetailsView
                 switch ($data['type']) {
                     case TemplateBuilder::VIEW_TYPE_SELECT:
                         $t .= $data['values'][$defaultValue] ?? null;
+                        break;
+                    case TemplateBuilder::VIEW_TYPE_MODEL:
+                        $t .= $this->viewRelationModelRow($attr);
                         break;
                     default:
                         $t .= $defaultValue;
@@ -131,7 +138,11 @@ class ViewUnit extends View
         return $t;
     }
 
-    private function viewActionRow()
+    /**
+     * Отображение кнопок действий
+     * @return string
+     */
+    private function viewActionRow(): string
     {
         $t = '';
 
@@ -175,6 +186,16 @@ class ViewUnit extends View
         }
 
         return $t;
+    }
+
+    /**
+     * Отображение строки по relations модели
+     * @param string $attr
+     * @return string
+     */
+    private function viewRelationModelRow(string $attr)
+    {
+        return $this->getViewHandler($attr)->renderRowField();
     }
 
 }

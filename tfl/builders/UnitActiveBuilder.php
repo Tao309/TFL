@@ -2,6 +2,7 @@
 
 namespace tfl\builders;
 
+use app\models\Image;
 use app\models\User;
 use tfl\units\Unit;
 use tfl\units\UnitActive;
@@ -73,8 +74,15 @@ trait UnitActiveBuilder
                  */
                 $relationModel = new $data['model'];
 
+                //Добавление зависимых моделей в модели связи
+                //@todo Добавить в отдельный метод как setDependRelations
+                if ($relationModel instanceof Image) {
+                    $relationModel->model = $model;
+                }
+
                 $model->$attr = $relationModel->createFinalModel($relationModel,
-                    $rowData['relations'][$attr], true, false);
+                    $rowData['relations'][$attr], true, true);
+
             }
         }
     }

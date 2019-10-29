@@ -120,12 +120,12 @@ abstract class Unit
         return $this->modelNameLower;
     }
 
-    protected function hasAttribute($attrName)
+    public function hasAttribute($attrName)
     {
-        return property_exists($this, $attrName);
+        return property_exists($this, $attrName) && !empty($this->$attrName);
     }
 
-    protected function getUnitData(): array
+    public function getUnitData(): array
     {
         return $this->modelUnitData;
     }

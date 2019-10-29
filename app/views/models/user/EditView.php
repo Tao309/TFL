@@ -2,6 +2,7 @@
 
 namespace app\views\models\User;
 
+use app\models\Image;
 use app\models\User;
 use tfl\builders\TemplateBuilder;
 
@@ -15,14 +16,14 @@ class EditView extends TemplateBuilder
     public function viewData(): array
     {
         $data = [
-//            'headerName0' => [
-//                'type' => \Template::VIEW_TYPE_HEADER,
-//                'title' => 'Аватар профиля',
-//            ],
-//            'avatar' => [
-//                'type' => \Template::VIEW_TYPE_MODEL,
-//                'name' => 'Image',
-//            ],
+            'headerName0' => [
+                'type' => static::VIEW_TYPE_HEADER,
+                'title' => 'User Avatar',
+            ],
+            'avatar' => [
+                'type' => static::VIEW_TYPE_MODEL,
+                'model' => Image::class,
+            ],
             'headerName1' => [
                 'type' => static::VIEW_TYPE_HEADER,
                 'title' => 'Данные',

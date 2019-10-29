@@ -113,6 +113,7 @@ class User extends UnitActive
         $labels['email'] = 'E-mail';
         $labels['password'] = 'Пароль';
         $labels['status'] = 'Статус';
+        $labels['avatar'] = 'Аватар';
 
         $labels['firstName'] = 'Имя';
         $labels['lastName'] = 'Фамилия';
