@@ -86,7 +86,7 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
             ]
         ]);
 
-        $t .= '<input type="file" name=""/>';
+        $t .= '<input type="file" name="image"/>';
 
         $t .= tHtmlTags::endTag();
 

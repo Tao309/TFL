@@ -48,9 +48,9 @@ class ViewHandler
     {
         $linkType = $this->parentModel->getUnitData()['relations'][$this->attr]['link'];
         if ($linkType == UnitActive::LINK_HAS_ONE_TO_ONE) {
-            $this->model = Image::TYPE_IMAGE;
+            $this->model->type = Image::TYPE_IMAGE;
         } else if ($linkType == UnitActive::LINK_HAS_ONE_TO_MANY) {
-            $this->model = Image::TYPE_SCREEN;
+            $this->model->type = Image::TYPE_SCREEN;
         }
     }
 }
