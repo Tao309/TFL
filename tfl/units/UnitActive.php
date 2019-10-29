@@ -19,6 +19,10 @@ abstract class UnitActive extends Unit implements UnitInterface
 {
     use UnitActiveBuilder, UnitActiveSqlBuilder;
 
+    const LINK_HAS_ONE_TO_ONE = 'oneToOne';
+    const LINK_HAS_ONE_TO_MANY = 'oneToMany';
+    const LINK_HAS_MANY_TO_MANY = 'manyToMany';
+
     public function __construct()
     {
         parent::__construct();

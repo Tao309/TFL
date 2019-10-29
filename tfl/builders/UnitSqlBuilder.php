@@ -5,6 +5,7 @@ namespace tfl\builders;
 use tfl\exceptions\TFLNotFoundModelException;
 use tfl\units\UnitActive;
 use tfl\units\UnitOption;
+use tfl\utils\tDebug;
 
 trait UnitSqlBuilder
 {
@@ -111,12 +112,12 @@ trait UnitSqlBuilder
         if ($this instanceof UnitActive) {
             $this->addUnitQuery($command, $tableName);
             $this->addOwnerQuery($command);
+            $this->addRelationsQuery($command);
         }
 
-        if ($many) {
-//            print_r($command->getSqlRow());
-//            echo '<hr/>';
+//        tDebug::printDebug($command->getSqlRow());
 
+        if ($many) {
             $rows = $command->findAll();
 
             if (empty($rows)) {
@@ -143,6 +144,28 @@ trait UnitSqlBuilder
     }
 
     /**
+     * Подстановка значения для столбцов, елси они существуют
+     * @param $attr
+     * @param $selectTable
+     * @param $tableName
+     * @param $encase
+     * @return string
+     */
+    private function concatAttr($attr, $selectTable, $tableName, $encase): string
+    {
+        $attrValue = 'IFNULL(';
+        $attrValue .= $selectTable . '.' . $attr;
+        $attrValue .= ', "' . DbBuilder::VALUE_IF_NULL . '")';
+        if ($encase) {
+            $attrValue .= " AS `" . $tableName . '.' . $attr . "`";
+        } else {
+            $attrValue .= " AS " . $attr;
+        }
+
+        return $attrValue;
+    }
+
+    /**
      * Необходимые атрибуты для вывода в select
      *
      * @param $tableName
@@ -157,13 +180,7 @@ trait UnitSqlBuilder
 
         $attrs = [];
 
-        $attr = 'id';
-        $attrValue = $selectTable . '.' . $attr;
-        if ($encase) {
-            $attrValue .= " AS `" . $tableName . '.' . $attr . "`";
-        }
-
-        $attrs[] = $attrValue;
+        $attrs[] = $this->concatAttr('id', $selectTable, $tableName, $encase);
 
         if ($this instanceof UnitOption) {
             $attrs[] = $tableName . '.name';
@@ -174,11 +191,8 @@ trait UnitSqlBuilder
             if (isset($rules[$attr]['secretField'])) {
                 continue;
             }
-            $attrValue = $selectTable . '.' . $attr;
-            if ($encase) {
-                $attrValue .= " AS `" . $tableName . '.' . $attr . "`";
-            }
-            $attrs[] = $attrValue;
+
+            $attrs[] = $this->concatAttr($attr, $selectTable, $tableName, $encase);
         }
 
         return $attrs;
@@ -200,11 +214,7 @@ trait UnitSqlBuilder
             'lastchangedatetime',
         ];
         foreach ($availableAttrs as $availableAttr) {
-            if ($encase) {
-                $attrs[] = $selectTable . '.' . $availableAttr . ' AS `' . $tableName . '.' . $availableAttr . '`';
-            } else {
-                $attrs[] = $selectTable . '.' . $availableAttr;
-            }
+            $attrs[] = $this->concatAttr($availableAttr, $selectTable, $tableName, $encase);
         }
 
         $command->addSelect(implode(',', $attrs))
@@ -213,18 +223,47 @@ trait UnitSqlBuilder
                 AND ' . $selectTable . '.model_name = "' . $this->getModelNameLower() . '"');
     }
 
-    private function addOwnerQuery(DbBuilder &$command)
+    private function addOwnerQuery(DbBuilder &$command, $aliasTable = null)
     {
-        $aliasTable = 'owner';
+        $unitTableAlias = (!empty($aliasTable)) ? '`' . $aliasTable . '.unit`' : static::DB_TABLE_UNIT;
+        $aliasTable = (!empty($aliasTable)) ? $aliasTable . '.owner' : 'owner';
+
         $aliasTableEncase = "`" . $aliasTable . "`";
 
         $attrs = $this->getModelColumnAttrs($aliasTable, true);
 
         $command->addSelect(implode(',', $attrs))
-            ->leftJoin("model_user AS " . $aliasTableEncase, $aliasTableEncase . ".id = " . static::DB_TABLE_UNIT . ".owner_id");
-
+            ->leftJoin("model_user AS " . $aliasTableEncase,
+                $aliasTableEncase . ".id = " . $unitTableAlias . ".owner_id");
 
         $this->addUnitQuery($command, $aliasTableEncase, $aliasTable, true);
+    }
+
+    private function addRelationsQuery(DbBuilder &$command)
+    {
+        foreach ($this->getUnitData()['relations'] as $relationKey => $relationData) {
+            $aliasTable = 'relations.' . $relationKey;
+            $aliasTableEncase = "`" . $aliasTable . "`";
+
+            /**
+             * @var $model UnitActive
+             */
+            $model = new $relationData['model'];
+            $attrs = $model->getModelColumnAttrs($aliasTable, true);
+            $relTableName = $model->getTableName();
+
+            $command->addSelect(implode(',', $attrs));
+
+            $modelName = 'model';
+
+            $command->leftJoin($relTableName . ' AS ' . $aliasTableEncase,
+                $aliasTableEncase . '.' . $modelName . '_name = "' . $this->getModelNameLower() . '" 
+                AND ' . $aliasTableEncase . '.' . $modelName . '_id = ' . $this->getTableName() . '.id'
+            );
+
+            $model->addUnitQuery($command, $aliasTableEncase, $aliasTable, true);
+            $this->addOwnerQuery($command, $aliasTable);
+        }
     }
 
     /**
@@ -234,28 +273,48 @@ trait UnitSqlBuilder
      */
     private function assignRowData(array &$rowData = []): void
     {
+        $newArray = [];
+
         foreach ($rowData as $index => $data) {
             $names = explode('.', $index);
-            $countNames = count($names);
-            if ($countNames > 1) {
-                if (isset($rowData[$names[0]])) {
-                    $current = $newArray = $rowData[$names[0]];
-                } else {
-                    $current = $newArray = [];
-                }
-
-                foreach ($names as $indexName => $name) {
-                    $value = ($countNames == ($indexName + 1)) ? $data : [];
-
-                    if (!isset($current[$name]) && $indexName > 0) {
-                        $newArray = array_merge($newArray, [$name => $value]);
-                        $current = $newArray;
-                    }
-                }
-
-                unset($rowData[$index]);
-                $rowData[$names[0]] = $newArray;
-            }
+            $this->setNewRowData($newArray, $names, $data);
+            unset($rowData[$index]);
         }
+
+        $rowData = $newArray;
+    }
+
+    /**
+     * Распредление на массивы строки:
+     * [owner.email] => 'test@mail.ru'
+     * [relations.avatar.type] => 'image'
+     *
+     * @param $newArray
+     * @param $names
+     * @param $value
+     */
+    private function setNewRowData(&$newArray, $names, $value)
+    {
+        if ($value == DbBuilder::VALUE_IF_NULL) {
+            return;
+        }
+
+        if (!isset($names[0])) {
+            return;
+        }
+
+        if (count($names) == 1) {
+            $newArray[$names[0]] = $value;
+            return;
+        }
+
+        if (!isset($newArray[$names[0]])) {
+            $newArray[$names[0]] = [];
+        }
+
+        $newNames = $names;
+        array_shift($newNames);
+
+        $this->setNewRowData($newArray[$names[0]], $newNames, $value);
     }
 }

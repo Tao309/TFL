@@ -27,6 +27,7 @@ abstract class Unit
     const DB_MODEL_PREFIX = 'model';
     const DB_TABLE_UNIT = 'unit';
 
+    const RULE_TYPE_MODEL = 'Model';
     const RULE_TYPE_TEXT = 'Text';
     const RULE_TYPE_DATETIME = 'DateTime';
     const RULE_TYPE_DESCRIPTION = 'Description';
@@ -130,7 +131,7 @@ abstract class Unit
     }
 
     /**
-     * Включаем возможность прямого сохранения
+     * Включаем возможность прямого сохранения через directSave()
      */
     protected function enableDirectSave(): void
     {

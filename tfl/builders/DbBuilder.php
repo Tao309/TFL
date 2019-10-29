@@ -19,6 +19,8 @@ class DbBuilder
     const TYPE_SAVE = 'save';
     const TYPE_ERROR = 'error';
 
+    const VALUE_IF_NULL = '-------';
+
     const TYPE_SHOW_MODAL_WINDOW = 'modal_window';
 
     private $type;
@@ -79,19 +81,32 @@ class DbBuilder
         $prepare = $this->pdo->prepare($sql);
 
         if (!$prepare) {
-            print_r($this->pdo->errorInfo());
-            exit;
+            \tfl\utils\tDebug::printData($this->pdo->errorInfo());
         }
 
         return $prepare;
     }
+
+    /*
+     * @todo add
+        $this->bindParam(1, $calories, PDO::PARAM_INT);
+        $this->bindValue(2, $colour, PDO::PARAM_STR);
+     */
 
     private function execute($sql)
     {
         $prepare = $this->prepare($sql);
 
         if (!$prepare->execute()) {
-            \tfl\utils\tDebug::printData($prepare->errorInfo()[2]);
+            ob_start();
+            $prepare->debugDumpParams();
+            $debug = ob_get_clean();
+
+            $data = [
+                'error' => $prepare->errorInfo()[2],
+                'debug' => $debug,
+            ];
+            \tfl\utils\tDebug::printData($data);
         }
 
         if ($this->type = self::TYPE_INSERT) {

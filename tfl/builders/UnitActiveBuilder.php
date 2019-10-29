@@ -8,22 +8,32 @@ use tfl\units\UnitActive;
 
 trait UnitActiveBuilder
 {
-    public function createFinalModel(Unit $model, array $rowData, $isPrimaryModel = false)
+    private $rowDataForCreateFinalModel = [];
+
+    public function createFinalModel(Unit $model, array $rowData, $isPrimaryModel = false, $skipRelation = false)
     {
+        $this->rowDataForCreateFinalModel = $rowData;
         /**
          * @var $model UnitActive
          */
-        $model->setAttributes($model, $rowData);
+        $model->setAttributes($model);
+        if (!$skipRelation) {
+            $model->setRelations($model);
+        }
 
         if ($isPrimaryModel) {
-            $model->setOwner($model, $rowData);
+            $model->setOwner($model);
         }
+
+        unset($this->rowDataForCreateFinalModel);
 
         return $model;
     }
 
-    private function setAttributes(Unit $model, array $rowData): void
+    private function setAttributes(Unit $model): void
     {
+        $rowData = $this->rowDataForCreateFinalModel;
+
         $model->id = $rowData['id'];
         $model->createdDateTime = $rowData['createddatetime'];
         $model->lastChangeDateTime = $rowData['lastchangedatetime'];
@@ -40,12 +50,33 @@ trait UnitActiveBuilder
         }
     }
 
-    private function setOwner(Unit $model, $rowData)
+    private function setOwner(Unit $model)
     {
         $owner = new User();
-        $owner->createFinalModel($owner, $rowData['owner']);
+        $owner->createFinalModel($owner, $this->rowDataForCreateFinalModel['owner']);
 
         $model->owner = $owner;
+    }
+
+    private function setRelations(Unit $model)
+    {
+        $rowData = $this->rowDataForCreateFinalModel;
+        foreach ($model->getUnitData()['relations'] as $attr => $data) {
+            if ($data['type'] == static::RULE_TYPE_MODEL && isset($data['model'])) {
+                if (!isset($rowData['relations'][$attr])) {
+                    $model->$attr = null;
+                    continue;
+                }
+
+                /**
+                 * @var UnitActive $relationModel
+                 */
+                $relationModel = new $data['model'];
+
+                $model->$attr = $relationModel->createFinalModel($relationModel,
+                    $rowData['relations'][$attr], true, false);
+            }
+        }
     }
 
 }

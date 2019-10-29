@@ -11,6 +11,7 @@ use tfl\units\UnitActive;
  * @property string $login
  * @property string $email
  * @property string $status
+ * @property Image $avatar
  */
 class User extends UnitActive
 {
@@ -56,7 +57,7 @@ class User extends UnitActive
 
     public function unitData(): array
     {
-        $data = [
+        return [
             'details' => [
                 'login',
                 'email',
@@ -64,10 +65,16 @@ class User extends UnitActive
                 'status',
             ],
             'relations' => [
-//                'avatar' => [
-//                    'type' => self::HAS_ONE,
-//                    'model' => self::MODEl_NAME_IMAGE,
-//                ],
+                'avatar' => [
+                    'type' => self::RULE_TYPE_MODEL,
+                    'model' => Image::class,
+                    'link' => static::LINK_HAS_ONE_TO_ONE,
+                    'data' => [
+                        [40, 40],
+                        [120, 120],
+                        [280, 280],
+                    ]
+                ],
             ],
             'rules' => [
                 'login' => [
@@ -97,8 +104,6 @@ class User extends UnitActive
                 ],
             ],
         ];
-
-        return $data;
     }
 
     public function translatedLabels(): array

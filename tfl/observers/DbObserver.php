@@ -8,6 +8,8 @@ trait DbObserver
     private $_select;
     private $_from;
     private $_leftJoin;
+    private $_rightJoin;
+    private $_innerJoin;
     private $_where;
     private $_limit;
 
@@ -39,6 +41,8 @@ trait DbObserver
         'select',
         'from',
         'leftJoin',
+        'rightJoin',
+        'innerJoin',
         'where',
         'limit',
     ];
@@ -72,9 +76,22 @@ trait DbObserver
         return $this;
     }
 
+    public function innerJoin($input, $cond)
+    {
+        $this->_innerJoin .= 'INNER JOIN ' . $input . ' ON (' . $cond . ')';
+        $this->_innerJoin .= PAGE_EOL;
+        return $this;
+    }
     public function leftJoin($input, $cond)
     {
         $this->_leftJoin .= 'LEFT JOIN ' . $input . ' ON (' . $cond . ')';
+        $this->_leftJoin .= PAGE_EOL;
+        return $this;
+    }
+
+    public function rightJoin($input, $cond)
+    {
+        $this->_leftJoin .= 'RIGHT JOIN ' . $input . ' ON (' . $cond . ')';
         $this->_leftJoin .= PAGE_EOL;
         return $this;
     }
