@@ -54,11 +54,11 @@ class View
         foreach ($this->dependModel->unitData()['relations'] as $attr => $data) {
 
             if ($data['model'] == Image::class) {
-                $this->viewHandlers[$attr] = new ImageViewHandler($this->dependModel, $attr,
-                    $this->tplBuilder->geViewType());
+                $this->viewHandlers[$attr] = new ImageViewHandler($attr,
+                    $this->tplBuilder->geViewType(), $this->dependModel);
             } else {
-                $this->viewHandlers[$attr] = new ViewHandler($this->dependModel, $attr,
-                    $this->tplBuilder->geViewType());
+                $this->viewHandlers[$attr] = new ViewHandler($attr,
+                    $this->tplBuilder->geViewType(), $this->dependModel);
             }
         }
     }

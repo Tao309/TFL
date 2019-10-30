@@ -70,7 +70,7 @@ abstract class Unit
 
     public function __construct()
     {
-        $this->setModelName();
+        $this->beforeFind();
     }
 
     public function __toString()
@@ -179,39 +179,31 @@ abstract class Unit
     }
 
     /**
-     * Процесс сохранения модели при отправки запросом
-     */
-    public function attemptRequestSaveModel(): void
-    {
-        if (\TFL::source()->request->isAjaxRequest()) {
-            if (\TFL::source()->request->checkForceMethod(RequestBuilder::METHOD_PUT)) {
-                if ($this->attemptLoadData()) {
-                    if ($this->save()) {
-                        $action = ($this instanceof UnitActive) ? DbBuilder::TYPE_SAVE : DbBuilder::TYPE_UPDATE;
-
-                        tResponse::resultSuccess([tString::RESPONSE_OK, $action], true, true, $this);
-                    } else {
-                        tResponse::resultError($this->getSaveErrors(), true);
-                    }
-                } else {
-                    tResponse::resultError($this->getLoadDataErrors(), true);
-                }
-            }
-
-            tProtocolLoader::closeAccess();
-        }
-    }
-
-    /**
      * Процесс создания модели при отправки запросом
      */
     public function attemptRequestCreateModel(): void
     {
+        $this->attemptRequestSaveModel(true);
+    }
+
+    /**
+     * Процесс сохранения модели при отправки запросом
+     */
+    public function attemptRequestSaveModel($create = false): void
+    {
+        if ($create) {
+            $method = RequestBuilder::METHOD_POST;
+            $action = DbBuilder::TYPE_INSERT;
+        } else {
+            $method = RequestBuilder::METHOD_PUT;
+            $action = ($this instanceof UnitActive) ? DbBuilder::TYPE_SAVE : DbBuilder::TYPE_UPDATE;
+        }
+
         if (\TFL::source()->request->isAjaxRequest()) {
-            if (\TFL::source()->request->checkForceMethod(RequestBuilder::METHOD_POST)) {
+            if (\TFL::source()->request->checkForceMethod($method)) {
                 if ($this->attemptLoadData()) {
                     if ($this->save()) {
-                        tResponse::resultSuccess([tString::RESPONSE_OK, DbBuilder::TYPE_INSERT], true, true, $this);
+                        tResponse::resultSuccess([tString::RESPONSE_OK, $action], true, true, $this);
                     } else {
                         tResponse::resultError($this->getSaveErrors(), true);
                     }

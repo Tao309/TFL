@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use tfl\observers\models\UserObserver;
 use tfl\units\UnitActive;
 
 /**
@@ -15,6 +16,8 @@ use tfl\units\UnitActive;
  */
 class User extends UnitActive
 {
+    use UserObserver;
+
     /**
      * Статусы пользователей
      */
@@ -37,14 +40,6 @@ class User extends UnitActive
         self::STATUS_ADMIN => 'Админ',
         self::STATUS_SUPERADMIN => 'Супер админ',
     ];
-
-    //@todo Переделать в другой метод
-    public function __construct()
-    {
-        parent::__construct();
-
-        $this->enableDirectSave();
-    }
 
     public function __toString()
     {

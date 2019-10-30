@@ -4,7 +4,6 @@ namespace tfl\handlers\view;
 
 use app\models\Image;
 use tfl\interfaces\view\ViewHandlerInterface;
-use tfl\units\Unit;
 use tfl\units\UnitActive;
 use tfl\view\View;
 
@@ -12,7 +11,7 @@ use tfl\view\View;
  * Class ViewHandler
  * @package tfl\handlers\view
  *
- * @property Unit $parentModel
+ * @property UnitActive $parentModel
  * @property UnitActive $model
  * @property string $attr
  * @property string $viewType
@@ -24,39 +23,45 @@ class ViewHandler implements ViewHandlerInterface
     protected $attr;
     protected $viewType;
 
-    public function __construct(Unit $parentModel, $attr, $viewType)
+    public function __construct($attr, $viewType, UnitActive $parentModel = null, UnitActive $model = null)
     {
-        $this->parentModel = $parentModel;
         $this->attr = $attr;
         $this->viewType = $viewType;
 
-        if ($this->parentModel->hasAttribute($attr)) {
-            $this->model = $parentModel->$attr;
-        } else {
-            $modelClassName = $this->parentModel->getUnitData()['relations'][$this->attr]['model'];
-            $this->model = new $modelClassName;
+        if ($parentModel && !$model) {
+            $this->parentModel = $parentModel;
 
-            if ($modelClassName === Image::class) {
-                $this->prepareImageModel();
+            if ($parentModel->hasAttribute($attr)) {
+                $this->model = $parentModel->$attr;
+            } else {
+                $modelClassName = $parentModel->getUnitData()['relations'][$this->attr]['model'];
+                $this->model = new $modelClassName;
+
+                if ($modelClassName === Image::class) {
+                    $this->prepareNewImageModel();
+                }
             }
+        }
+        if ($model) {
+            $this->model = $model;
         }
     }
 
     /**
      * Дополнительные действия для подстановки модели \app\models\Image
+     * @todo перенести в image
      */
-    private function prepareImageModel(): void
+    private function prepareNewImageModel(): void
     {
-        if ($this->model->hasAttribute('type')) {
-            return;
-        }
-
         $linkType = $this->parentModel->getUnitData()['relations'][$this->attr]['link'];
         if ($linkType == UnitActive::LINK_HAS_ONE_TO_ONE) {
             $this->model->type = Image::TYPE_IMAGE;
         } else if ($linkType == UnitActive::LINK_HAS_ONE_TO_MANY) {
             $this->model->type = Image::TYPE_SCREEN;
         }
+
+        $this->model->model_name = $this->parentModel->getModelNameLower();
+        $this->model->model_id = $this->parentModel->id;
     }
 
 

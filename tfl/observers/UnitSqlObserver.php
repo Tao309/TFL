@@ -3,6 +3,7 @@
 namespace tfl\observers;
 
 use tfl\units\Unit;
+use tfl\units\UnitActive;
 use tfl\units\UnitOption;
 use tfl\utils\tString;
 
@@ -65,17 +66,20 @@ trait UnitSqlObserver
 
         foreach ($this->getUnitData()['relations'] as $attr => $data) {
             if ($data['type'] == static::RULE_TYPE_MODEL) {
-                $attr = mb_strtolower($attr);
 
-                $attr_id = $attr . '_id';
-                $attrs[] = $attr_id;
-                $values[] = $this->$attr->id;
-                $sliceValues[] = $attr_id . '=' . $this->$attr->id;
+                if ($data['model'] == UnitActive::class) {
+                    $attr = mb_strtolower($attr);
 
-                $attr_name = $attr . '_name';
-                $attrs[] = $attr_name;
-                $values[] = '"' . $this->$attr->getModelNameLower() . '"';
-                $sliceValues[] = $attr_name . '="' . $this->$attr->getModelNameLower() . '"';
+                    $attr_id = $attr . '_id';
+                    $attrs[] = $attr_id;
+                    $values[] = $this->$attr->id;
+                    $sliceValues[] = $attr_id . '=' . $this->$attr->id;
+
+                    $attr_name = $attr . '_name';
+                    $attrs[] = $attr_name;
+                    $values[] = '"' . $this->$attr->getModelNameLower() . '"';
+                    $sliceValues[] = $attr_name . '="' . $this->$attr->getModelNameLower() . '"';
+                }
             }
 
         }

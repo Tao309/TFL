@@ -56,23 +56,36 @@ trait UnitActiveBuilder
                 continue;
             }
 
-            $attr_id = 'id';
-            $attr_name = 'name';
+            if ($data['model'] === UnitActive::class) {
+                $attr_id = 'id';
+                $attr_name = 'name';
 
+                if (!isset($request[$attr][$attr_id]) || !isset($request[$attr][$attr_name])) {
+                    continue;
+                }
 
-            if (!isset($request[$attr][$attr_id]) || !isset($request[$attr][$attr_name])) {
-                continue;
+                $id = tString::checkNum($request[$attr][$attr_id]);
+                $name = tString::checkString($request[$attr][$attr_name]);
+
+                $this->{$attr . '_name'} = $name;
+                $this->{$attr . '_id'} = $id;
+
+                if ($this instanceof Image) {
+                    if (!isset($request[$attr]['attr'])) {
+                        continue;
+                    }
+                    $this->attr = tString::checkString($request[$attr]['attr']);
+                }
+            } else {
+                if ($this->isNewModel()) {
+                    /**
+                     * @var UnitActive $modelClassName
+                     */
+                    $modelClassName = $data['model'];
+                    //@todo Сделать одним запросом все получения, в будущем или после сейва подставлять всё
+                    $this->$attr = $modelClassName::getById($id);
+                }
             }
-
-            $id = tString::checkNum($request[$attr][$attr_id]);
-            $name = tString::checkString($request[$attr][$attr_name]);
-
-            /**
-             * @var UnitActive $findClassName
-             */
-            $findClassName = 'app\models\\' . ucfirst($name);
-
-            $this->$attr = $findClassName::getById($id);
         }
     }
 
@@ -92,6 +105,8 @@ trait UnitActiveBuilder
         }
 
         unset($this->rowDataForCreateFinalModel);
+
+        $this->afterFind();
 
         return $model;
     }
@@ -114,6 +129,15 @@ trait UnitActiveBuilder
             $lowAttr = mb_strtolower($attr);
             $model->$attr = $rowData[$lowAttr] ?? null;
         }
+
+        foreach ($this->getUnitData()['relations'] as $attr => $data) {
+            //Добавления для столбцов где UnitActive, а не точная модель
+            if ($data['type'] == static::RULE_TYPE_MODEL && $data['model'] == UnitActive::class) {
+                $attr = mb_strtolower($attr);
+                $model->{$attr . '_name'} = $rowData[$attr . '_name'] ?? null;
+                $model->{$attr . '_id'} = $rowData[$attr . '_id'] ?? null;
+            }
+        }
     }
 
     private function setOwner(Unit $model)
@@ -133,6 +157,9 @@ trait UnitActiveBuilder
                     $model->$attr = null;
                     continue;
                 }
+                /*
+                 * Когда создаём Image, в него подставлем User, но у юзера нет модела user->avatar внутри
+                 */
 
                 /**
                  * @var UnitActive $relationModel

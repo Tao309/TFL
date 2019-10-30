@@ -180,6 +180,14 @@ trait UnitSqlBuilder
             $attrs[] = $this->concatAttr($attr, $selectTable, $tableName, $encase);
         }
 
+        foreach ($this->getUnitData()['relations'] as $attr => $data) {
+            //Добавления для столбцов где UnitActive, а не точная модель
+            if ($data['type'] == static::RULE_TYPE_MODEL && $data['model'] == UnitActive::class) {
+                $attrs[] = $this->concatAttr($attr . '_name', $selectTable, $tableName, $encase);
+                $attrs[] = $this->concatAttr($attr . '_id', $selectTable, $tableName, $encase);
+            }
+        }
+
         return $attrs;
     }
 
@@ -232,11 +240,7 @@ trait UnitSqlBuilder
         foreach ($this->getUnitData()['relations'] as $relationKey => $relationData) {
             $modelClass = $relationData['model'];
             if ($relationData['model'] == UnitActive::class) {
-                //@todo Внести правки при работе не с Image
-                /*
-                 * Убрать model_name, model_id
-                 * В юзере поставить avatar_id
-                 */
+                //@todo Внести правки при работе не с Image=
                 continue;
             }
 

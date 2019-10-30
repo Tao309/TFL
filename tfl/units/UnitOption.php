@@ -244,6 +244,8 @@ class UnitOption extends Unit implements UnitInterface, UnitOptionInterface
         if (empty($rowData['content'])) $rowData['content'] = [];
         $this->option = $this->getOptionData($rowData['content']);
 
+        $this->afterFind();
+
         return $model;
     }
 

@@ -26,15 +26,19 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
                 'type-view-' . $this->viewType,
             ]
         ]);
+
         $loaded = null;
-        if ($this->parentModel->hasAttribute($this->attr)) {
+//        if ($this->parentModel->hasAttribute($this->attr)) {
+//            $loaded = 'loaded';
+//        }
+        if ($this->model->isLoaded()) {
             $loaded = 'loaded';
         }
 
         $t .= tHtmlTags::startTag('div', [
             'class' => [
                 'image-add-file',
-                'type-' . $this->model->type,
+                'type-' . ($this->model->type ?? 'cover'),//@todo доработать
                 $loaded,
             ]
         ]);
@@ -54,8 +58,10 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
     private function getHiddenData(string $method): array
     {
         return [
-            'Image[model][name]' => $this->parentModel->getModelNameLower(),
-            'Image[model][id]' => $this->parentModel->id,
+//            'Image[model][name]' => $this->parentModel->getModelNameLower(),
+//            'Image[model][id]' => $this->parentModel->id,
+            'Image[model][name]' => $this->model->model_name,
+            'Image[model][id]' => $this->model->model_id,
             'Image[type]' => $this->model->type,
             'Image[attr]' => $this->attr,
             'Image[id]' => $this->model->id ?? 0,
@@ -154,7 +160,8 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
                 'image-field image-' . $this->model->type . '-field',
             ]
         ]);
-        if ($this->parentModel->hasAttribute($this->attr)) {
+//        if ($this->parentModel->hasAttribute($this->attr)) {
+        if ($this->model->isLoaded()) {
             $t .= $this->renderJustView();
         }
         $t .= tHtmlTags::endTag();
