@@ -6,6 +6,7 @@ use app\models\User;
 use tfl\exceptions\TFLNotFoundModelException;
 use tfl\interfaces\UnitInterface;
 use tfl\builders\{RequestBuilder, UnitActiveBuilder, UnitActiveSqlBuilder};
+use tfl\utils\tResponse;
 
 /**
  * Class UnitActive
@@ -36,6 +37,7 @@ abstract class UnitActive extends Unit implements UnitInterface
          * @var $model UnitActive
          */
         $modelName = self::getCurrentModel();
+
         $model = new $modelName;
 
         $rowData = $model->prepareRowData(['id' => $id]);
@@ -47,6 +49,20 @@ abstract class UnitActive extends Unit implements UnitInterface
         }
 
         return $model->createFinalModel($model, $rowData, true);
+    }
+
+    public static function getModelByIdOrCatchError(int $id)
+    {
+        if (!$id) {
+            tResponse::modelNotFound(true);
+        }
+
+        $model = static::getById($id);
+        if (!$model) {
+            tResponse::modelNotFound(true);
+        }
+
+        return $model;
     }
 
     //@todo Доработать
@@ -79,7 +95,12 @@ abstract class UnitActive extends Unit implements UnitInterface
             $this->addLoadDataError('Request data is empty');
             return false;
         }
-        //@todo Добавить далее и добавить в коде
+        /**
+         * @var array $data
+         */
+        $this->setAttrsFromRequestData($data);
+        $this->setRelationsFromRequestData($data);
+        $this->setAttrsFromFilesData();
 
         return true;
     }

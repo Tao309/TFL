@@ -167,6 +167,18 @@ abstract class Unit
     }
 
     /**
+     * Добавление данных в tResponse при ответе
+     * @return array
+     */
+    public function getResponse(string $actionType): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->getModelNameLower(),
+        ];
+    }
+
+    /**
      * Процесс сохранения модели при отправки запросом
      */
     public function attemptRequestSaveModel(): void
@@ -177,7 +189,7 @@ abstract class Unit
                     if ($this->save()) {
                         $action = ($this instanceof UnitActive) ? DbBuilder::TYPE_SAVE : DbBuilder::TYPE_UPDATE;
 
-                        tResponse::resultSuccess([tString::RESPONSE_OK, $action], true);
+                        tResponse::resultSuccess([tString::RESPONSE_OK, $action], true, true, $this);
                     } else {
                         tResponse::resultError($this->getSaveErrors(), true);
                     }
@@ -199,7 +211,7 @@ abstract class Unit
             if (\TFL::source()->request->checkForceMethod(RequestBuilder::METHOD_POST)) {
                 if ($this->attemptLoadData()) {
                     if ($this->save()) {
-                        tResponse::resultSuccess([tString::RESPONSE_OK, DbBuilder::TYPE_INSERT], true);
+                        tResponse::resultSuccess([tString::RESPONSE_OK, DbBuilder::TYPE_INSERT], true, true, $this);
                     } else {
                         tResponse::resultError($this->getSaveErrors(), true);
                     }
@@ -220,7 +232,7 @@ abstract class Unit
         if (\TFL::source()->request->isAjaxRequest()) {
             if (\TFL::source()->request->checkForceMethod(RequestBuilder::METHOD_DELETE)) {
                 if ($this->delete()) {
-                    tResponse::resultSuccess([tString::RESPONSE_OK, DbBuilder::TYPE_DELETE], true);
+                    tResponse::resultSuccess([tString::RESPONSE_OK, DbBuilder::TYPE_DELETE], true, true, $this);
                 } else {
                     tResponse::resultError($this->getDeleteErrors(), true);
                 }

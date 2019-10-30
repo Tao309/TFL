@@ -3,10 +3,11 @@
 namespace tfl\utils;
 
 use tfl\builders\DbBuilder;
+use tfl\units\Unit;
 
 class tResponse
 {
-    public static function resultSuccess($input = [], $echo = false, $json = true)
+    public static function resultSuccess($input = [], $echo = false, $json = true, Unit $model = null)
     {
         list($message, $action) = $input;
 
@@ -16,6 +17,10 @@ class tResponse
             'action' => $action ?? DbBuilder::TYPE_ERROR,
         ];
 
+        if ($model && $addResponse = $model->getResponse($data['action'])) {
+            $data['model'] = $addResponse;
+        }
+
         if ($json) {
             $data = json_encode($data);
         }
@@ -28,7 +33,7 @@ class tResponse
         }
     }
 
-    public static function resultError($message, $echo = false, $json = true)
+    public static function resultError($message, $echo = false, $json = true, Unit $model = null)
     {
         $data = [
             'result' => tString::RESPONSE_RESULT_ERROR,
@@ -36,6 +41,10 @@ class tResponse
             'action' => DbBuilder::TYPE_ERROR,
         ];
 
+        if ($model && $addResponse = $model->getResponse()) {
+            $data['model'] = $addResponse;
+        }
+
         if ($json) {
             $data = json_encode($data);
         }
@@ -48,9 +57,9 @@ class tResponse
         }
     }
 
-    public static function modelNotFound()
+    public static function modelNotFound($echo = false)
     {
-        return self::resultError('Model not found!');
+        return self::resultError('Model not found!', $echo);
     }
 
     public static function modalWindow($title, $content, $classNames = [])

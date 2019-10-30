@@ -37,7 +37,7 @@ class tHTML
     {
         $input = '<input type="text" value="' . $value . '" name="' . $name . '"';
         if ($limit) {
-            $limit = (int)$limit;
+            $limit = tString::checkNum($limit);
             $input .= ' maxlength="' . $limit . '"';
         }
 
@@ -62,8 +62,35 @@ class tHTML
         return $input;
     }
 
-    private static $checkBoxNumber = 0;
+    public static function inputFile(string $name, string $value = null, array $options = [])
+    {
+        $input = '<input type="file" value="' . $value . '" name="' . $name . '"';
+        $input .= self::decodeOptions($options);
+        $input .= '/>';
+        return $input;
+    }
 
+    public static function inputActionButton($name, $value, $elementData = null, array $options = [])
+    {
+        if (isset($options['class'])) {
+            $options['class'][] = 'http-request-button';
+        }
+
+        $input = '<button';
+        $input .= ' name="' . $name . '"';
+        $input .= ' type="button"';
+        $input .= self::decodeOptions($options);
+        if ($elementData) {
+            $input .= "" . $elementData;
+        }
+        $input .= '>';
+        $input .= $value;
+        $input .= '</button>';
+
+        return $input;
+    }
+
+    private static $checkBoxNumber = 0;
     public static function inputCheckbox(string $name, $value = 0)
     {
         self::$checkBoxNumber += 1;

@@ -8,6 +8,7 @@ use tfl\utils\tString;
 class RequestBuilder
 {
     const METHOD_POST = 'post';
+    const METHOD_FILES = 'files';
     const METHOD_GET = 'get';
     const METHOD_PUT = 'put';
     const METHOD_DELETE = 'delete';
@@ -54,6 +55,7 @@ class RequestBuilder
         $requestMethod = self::METHOD_GET;
 
         switch ($forceMethod) {
+            case self::METHOD_DELETE:
             case self::METHOD_POST:
             case self::METHOD_PUT:
                 $requestMethod = self::METHOD_POST;
@@ -91,6 +93,9 @@ class RequestBuilder
                 break;
             case self::METHOD_GET:
                 return $_GET ?? [];
+                break;
+            case self::METHOD_FILES:
+                return $_FILES ?? [];
                 break;
             default:
                 return [];

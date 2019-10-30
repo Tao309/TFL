@@ -2,6 +2,7 @@
 
 namespace tfl\observers;
 
+use tfl\units\Unit;
 use tfl\units\UnitOption;
 use tfl\utils\tString;
 
@@ -62,6 +63,23 @@ trait UnitSqlObserver
             $sliceValues[] = $attr . '=' . $value;
         }
 
+        foreach ($this->getUnitData()['relations'] as $attr => $data) {
+            if ($data['type'] == static::RULE_TYPE_MODEL) {
+                $attr = mb_strtolower($attr);
+
+                $attr_id = $attr . '_id';
+                $attrs[] = $attr_id;
+                $values[] = $this->$attr->id;
+                $sliceValues[] = $attr_id . '=' . $this->$attr->id;
+
+                $attr_name = $attr . '_name';
+                $attrs[] = $attr_name;
+                $values[] = '"' . $this->$attr->getModelNameLower() . '"';
+                $sliceValues[] = $attr_name . '="' . $this->$attr->getModelNameLower() . '"';
+            }
+
+        }
+
         return [$attrs, $values, $sliceValues];
     }
 
@@ -92,6 +110,7 @@ trait UnitSqlObserver
 
         return true;
     }
+
     protected function saveModelRelations(): bool
     {
         return true;
@@ -107,6 +126,7 @@ trait UnitSqlObserver
 
         return true;
     }
+
     protected function deleteModelUnit()
     {
         $query = '

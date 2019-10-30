@@ -33,6 +33,11 @@ class tString
         return trim($value);
     }
 
+    public static function checkNum($value, $sql = false)
+    {
+        return (int)$value;
+    }
+
     public static function getCurentDate()
     {
         $date = new \DateTime();

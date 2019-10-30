@@ -56,6 +56,7 @@ trait UnitRepository
                 return false;
             }
 
+            //В saveModelAttrs() проходит подстановка атрибутов
             if (!$this->saveModelRelations()) {
                 return false;
             }

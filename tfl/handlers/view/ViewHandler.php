@@ -3,8 +3,10 @@
 namespace tfl\handlers\view;
 
 use app\models\Image;
+use tfl\interfaces\view\ViewHandlerInterface;
 use tfl\units\Unit;
 use tfl\units\UnitActive;
+use tfl\view\View;
 
 /**
  * Class ViewHandler
@@ -15,19 +17,18 @@ use tfl\units\UnitActive;
  * @property string $attr
  * @property string $viewType
  */
-class ViewHandler
+class ViewHandler implements ViewHandlerInterface
 {
     protected $parentModel;
     protected $model;
     protected $attr;
     protected $viewType;
 
-    public function __construct($parentModel, $attr, $viewType)
+    public function __construct(Unit $parentModel, $attr, $viewType)
     {
         $this->parentModel = $parentModel;
         $this->attr = $attr;
         $this->viewType = $viewType;
-
 
         if ($this->parentModel->hasAttribute($attr)) {
             $this->model = $parentModel->$attr;
@@ -46,11 +47,39 @@ class ViewHandler
      */
     private function prepareImageModel(): void
     {
+        if ($this->model->hasAttribute('type')) {
+            return;
+        }
+
         $linkType = $this->parentModel->getUnitData()['relations'][$this->attr]['link'];
         if ($linkType == UnitActive::LINK_HAS_ONE_TO_ONE) {
             $this->model->type = Image::TYPE_IMAGE;
         } else if ($linkType == UnitActive::LINK_HAS_ONE_TO_MANY) {
             $this->model->type = Image::TYPE_SCREEN;
         }
+    }
+
+
+    /**
+     * Общий метод, который распредляется в зависимости от $viewType
+     * @return string
+     */
+    public function renderRowField(): string
+    {
+        if ($this->viewType == View::TYPE_VIEW_EDIT) {
+            return $this->renderEditField();
+        }
+
+        return $this->renderViewField();
+    }
+
+    public function renderViewField(): string
+    {
+        return 'renderViewField';
+    }
+
+    public function renderEditField(): string
+    {
+        return 'renderEditField';
     }
 }

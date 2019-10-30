@@ -2,7 +2,10 @@
 
 namespace tfl\view;
 
+use app\models\Image;
 use tfl\builders\TemplateBuilder;
+use tfl\handlers\view\ImageViewHandler;
+use tfl\handlers\view\ViewHandler;
 use tfl\interfaces\view\ViewHandlerInterface;
 use tfl\units\Unit;
 use tfl\units\UnitActive;
@@ -49,11 +52,14 @@ class View
     private function initViewHandlers()
     {
         foreach ($this->dependModel->unitData()['relations'] as $attr => $data) {
-            $data['model'] = end(explode('\\', $data['model']));
-            $className = '\tfl\handlers\view\\' . $data['model'] . 'ViewHandler';
 
-            $this->viewHandlers[$attr] = new $className($this->dependModel, $attr,
-                $this->tplBuilder->geViewType());
+            if ($data['model'] == Image::class) {
+                $this->viewHandlers[$attr] = new ImageViewHandler($this->dependModel, $attr,
+                    $this->tplBuilder->geViewType());
+            } else {
+                $this->viewHandlers[$attr] = new ViewHandler($this->dependModel, $attr,
+                    $this->tplBuilder->geViewType());
+            }
         }
     }
 

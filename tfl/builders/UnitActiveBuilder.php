@@ -6,10 +6,75 @@ use app\models\Image;
 use app\models\User;
 use tfl\units\Unit;
 use tfl\units\UnitActive;
+use tfl\utils\tString;
 
 trait UnitActiveBuilder
 {
     private $rowDataForCreateFinalModel = [];
+
+    /**
+     * Распределяем данные из request по атрибутам модели
+     * @param array $request
+     */
+    protected function setAttrsFromRequestData(array $request): void
+    {
+        foreach ($this->getUnitData()['details'] as $attr) {
+            if (!isset($request[$attr])) {
+                continue;
+            }
+
+            $this->$attr = tString::checkString($request[$attr]);
+        }
+    }
+
+    /**
+     * Подставляем данные из $_FILES
+     */
+    protected function setAttrsFromFilesData(): void
+    {
+        $request = \TFL::source()->request->getRequestData(RequestBuilder::METHOD_FILES);
+
+        if (!empty($request)) {
+            foreach ($this->getUnitData()['details'] as $attr) {
+                if (!isset($request[$attr])) {
+                    continue;
+                }
+
+                $this->$attr = $request[$attr];
+            }
+        }
+    }
+
+    /**
+     * Распределяем данные из request по relations модели
+     * @param array $request
+     */
+    protected function setRelationsFromRequestData(array $request): void
+    {
+        foreach ($this->getUnitData()['relations'] as $attr => $data) {
+            if (!isset($request[$attr])) {
+                continue;
+            }
+
+            $attr_id = 'id';
+            $attr_name = 'name';
+
+
+            if (!isset($request[$attr][$attr_id]) || !isset($request[$attr][$attr_name])) {
+                continue;
+            }
+
+            $id = tString::checkNum($request[$attr][$attr_id]);
+            $name = tString::checkString($request[$attr][$attr_name]);
+
+            /**
+             * @var UnitActive $findClassName
+             */
+            $findClassName = 'app\models\\' . ucfirst($name);
+
+            $this->$attr = $findClassName::getById($id);
+        }
+    }
 
     public function createFinalModel(Unit $model, array $rowData, $isPrimaryModel = false, $skipRelation = false)
     {
@@ -77,6 +142,7 @@ trait UnitActiveBuilder
                 //Добавление зависимых моделей в модели связи
                 //@todo Добавить в отдельный метод как setDependRelations
                 if ($relationModel instanceof Image) {
+                    $relationModel->attr = $attr;
                     $relationModel->model = $model;
                 }
 

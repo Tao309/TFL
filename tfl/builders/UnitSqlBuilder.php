@@ -2,10 +2,12 @@
 
 namespace tfl\builders;
 
+use app\models\User;
 use tfl\exceptions\TFLNotFoundModelException;
 use tfl\units\UnitActive;
 use tfl\units\UnitOption;
 use tfl\utils\tDebug;
+use tfl\utils\tString;
 
 trait UnitSqlBuilder
 {
@@ -32,26 +34,9 @@ trait UnitSqlBuilder
             ->from($tableName);
 
         foreach ($queryData as $name => $value) {
-            /*
-                $value:
-                    $name = string
-                    Array
-                    (
-                        [0] => core.system
-                        [1] => core.seo
-                        [2] => core.cms
-                        [3] => design.colors
-                    )
-                    $name = int
-                    Array
-                    (
-                        [login|lower] => Tao309
-                        [email|lower] => Tao309
-                    )
-             */
             if ($many && $name == 'id' && is_array($value)) {
                 $ids = array_map(function ($id) {
-                    return (int)$id;
+                    return tString::checkNum($id);
                 }, $value);
                 $query = $tableName . '.' . $name . ' IN (' . implode(',', $ids) . ')';
 
@@ -230,7 +215,10 @@ trait UnitSqlBuilder
 
         $aliasTableEncase = "`" . $aliasTable . "`";
 
-        $attrs = $this->getModelColumnAttrs($aliasTable, true);
+        //@todo исправить, добавить в переменную
+        $model = new User();
+
+        $attrs = $model->getModelColumnAttrs($aliasTable, true);
 
         $command->addSelect(implode(',', $attrs))
             ->leftJoin("model_user AS " . $aliasTableEncase,
@@ -242,13 +230,23 @@ trait UnitSqlBuilder
     private function addRelationsQuery(DbBuilder &$command)
     {
         foreach ($this->getUnitData()['relations'] as $relationKey => $relationData) {
+            $modelClass = $relationData['model'];
+            if ($relationData['model'] == UnitActive::class) {
+                //@todo Внести правки при работе не с Image
+                /*
+                 * Убрать model_name, model_id
+                 * В юзере поставить avatar_id
+                 */
+                continue;
+            }
+
             $aliasTable = 'relations.' . $relationKey;
             $aliasTableEncase = "`" . $aliasTable . "`";
 
             /**
              * @var $model UnitActive
              */
-            $model = new $relationData['model'];
+            $model = new $modelClass;
             $attrs = $model->getModelColumnAttrs($aliasTable, true);
             $relTableName = $model->getTableName();
 
@@ -287,7 +285,7 @@ trait UnitSqlBuilder
     /**
      * Распредление на массивы строки:
      * [owner.email] => 'test@mail.ru'
-     * [relations.avatar.type] => 'image'
+     * [relations.avatar.type] => 'cover'
      *
      * @param $newArray
      * @param $names

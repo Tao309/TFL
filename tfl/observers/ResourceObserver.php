@@ -11,10 +11,10 @@ trait ResourceObserver
     protected function cleanWebFolder(): void
     {
         foreach (array_keys($this->cssFiles) as $cssFileName) {
-            tFile::removeIfExists(zROOT . 'web/css/' . $cssFileName . '.css');
+            tFile::removeIfExists(zROOT . WEB_PATH . '/css/' . $cssFileName . '.css');
         }
         foreach (array_keys($this->jsFiles) as $jsFileName) {
-            tFile::removeIfExists(zROOT . 'web/js/' . $jsFileName . '.js');
+            tFile::removeIfExists(zROOT . WEB_PATH . '/js/' . $jsFileName . '.js');
         }
     }
 
@@ -52,7 +52,7 @@ trait ResourceObserver
         }
 
         foreach ($this->getResourceFiles($ext) as $groupName => $group) {
-            $resourceFile = zROOT . 'web/' . $ext . '/' . $groupName . '.' . $ext;
+            $resourceFile = zROOT . WEB_PATH . '/' . $ext . '/' . $groupName . '.' . $ext;
 
             if (tFile::file_exists($resourceFile)) {
                 continue;
@@ -106,7 +106,7 @@ trait ResourceObserver
         if ($type == self::TYPE_HEADER) {
             foreach (array_keys($this->getResourceFiles($ext)) as $fileName) {
                 $file = ROOT . $ext . '/' . $fileName . '.' . $ext;
-                $filemtime = tFile::filemtime(zROOT . 'web/' . $ext . '/' . $fileName . '.' . $ext);
+                $filemtime = tFile::filemtime(zROOT . WEB_PATH . '/' . $ext . '/' . $fileName . '.' . $ext);
 
                 $file .= '?t=' . $filemtime;
 

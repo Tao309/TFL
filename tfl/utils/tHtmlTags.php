@@ -13,15 +13,15 @@ class tHtmlTags
         return $t;
     }
 
-    public static function renderClosedTag(string $tag, $attrList = null)
+    public static function renderClosedTag(string $tag, $attrList = null, $text = null)
     {
-        $t = self::startTag($tag, $attrList, false);
+        $t = self::startTag($tag, $attrList, false, $text);
         $t .= '/>';
 
         return $t;
     }
 
-    public static function startTag(string $tag = 'div', $attrList = null, $close = true)
+    public static function startTag(string $tag = 'div', $attrList = null, $close = true, $text = null)
     {
         $t = '<' . $tag;
 
@@ -37,6 +37,10 @@ class tHtmlTags
             } else {
                 $t .= ' ' . $attrList;
             }
+        }
+
+        if ($text) {
+            $t .= $text;
         }
 
         if ($close) {

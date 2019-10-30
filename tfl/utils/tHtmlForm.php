@@ -80,7 +80,7 @@ class tHtmlForm
 
     public static function requestForm()
     {
-        $data = ['section', 'auth', 'erquest'];
+        $data = ['section', 'auth', 'request'];
 
         $elements = [
             [
@@ -113,6 +113,8 @@ class tHtmlForm
         $form .= self::generateElementData($data, $method);
         $form .= '>';
 
+        $form .= tHTML::inputHidden(self::NAME_METHOD, $method);
+
         if (is_array($elements)) {
             $form .= '<ul class="html-element-ul">';
 
@@ -124,7 +126,6 @@ class tHtmlForm
             $form .= self::renderElements($elements);
             $form .= '</ul>';
         } else {
-            $form .= tHTML::inputHidden(self::NAME_METHOD, $method);
             $form .= $elements;
         }
 
@@ -158,6 +159,18 @@ class tHtmlForm
         }
 
         return ' ' . implode(' ', $input);
+    }
+
+    public static function generateDataParams($data = [], $view = false)
+    {
+        if (empty($data)) {
+            return null;
+        }
+        if ($view) {
+            return json_encode($data);
+        }
+
+        return " data-params='" . json_encode($data) . "'";
     }
 
     private static function renderElements($elements)
