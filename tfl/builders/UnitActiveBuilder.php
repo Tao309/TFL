@@ -181,25 +181,35 @@ trait UnitActiveBuilder
                     continue;
                 }
 
-                /**
-                 * @var UnitActive $relationModel
-                 */
-                $relationModel = new $data['model'];
-
-                //Добавление зависимых моделей в модели связи
-                //@todo Добавить в отдельный метод как setDependRelations. Првоерить это
-                if ($relationModel instanceof Image) {
-                    $relationModel->model_name = $model->getModelNameLower();
-                    $relationModel->model_id = $model->id;
-                    $relationModel->model_attr = $attr;
-                    $relationModel->model = $model;
+                if ($data['link'] == static::LINK_HAS_ONE_TO_MANY) {
+                    $model->$attr = function ($rowData, $attr, $model, $data) {
+                        foreach ($rowData['relations'][$attr] as $index => $row) {
+                            yield $this->setRelationOneModel($model, $data, $attr, $row);
+                        }
+                    };
+                } else if ($data['link'] == static::LINK_HAS_ONE_TO_ONE) {
+                    $model->$attr = $this->setRelationOneModel($model, $data, $attr, $rowData['relations'][$attr]);
                 }
-
-                $model->$attr = $relationModel->createFinalModel($relationModel,
-                    $rowData['relations'][$attr], true, true);
-
             }
         }
+    }
+
+    private function setRelationOneModel(Unit $model, array $data, string $attr, array $rowData)
+    {
+        /**
+         * @var UnitActive $relationModel
+         */
+        $relationModel = new $data['model'];
+
+        //Добавление зависимых моделей в модели связи
+        if ($relationModel instanceof Image) {
+            $relationModel->model_name = $model->getModelNameLower();
+            $relationModel->model_id = $model->id;
+            $relationModel->model_attr = $attr;
+            $relationModel->model = $model;
+        }
+
+        return $relationModel->createFinalModel($relationModel, $rowData, true, true);
     }
 
 }

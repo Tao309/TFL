@@ -167,9 +167,12 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
                 'image-field image-' . $this->model->type . '-field',
             ]
         ]);
+
+        //Для screens всегда загрузка есть
         if ($this->model->isLoaded()) {
             $t .= $this->renderJustView();
         }
+
         $t .= tHtmlTags::endTag();
 
         $t .= self::renderFieldFooter();

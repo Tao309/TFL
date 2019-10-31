@@ -160,4 +160,21 @@ class tString
     {
         return preg_match("/\b(?:(?:https?|ftp):\/\/|www\.)[-a-z0-9+&@#\/%?=~_|!:,.;]*[-a-z0-9+&@#\/%=~_|]/i", $url);
     }
+
+    /**
+     * Преобразование concat данных relations в массив
+     * '{value1},{value2},{value3}' => ['value1','value2','value3']
+     * @param null $value
+     * @return array
+     */
+    public static function relationStrToArray(string $value)
+    {
+        $arr = [];
+        $string = explode(',', $value);
+        foreach ($string as $str) {
+            $arr[] = preg_replace('!{(.*?)}!si', '$1', $str);
+        }
+
+        return $arr;
+    }
 }

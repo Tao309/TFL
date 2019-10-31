@@ -85,10 +85,17 @@ trait DbObserver
         return $this;
     }
 
-    public function leftJoin($input, $cond)
+    public function leftJoin($input, array $cond)
     {
-        $this->_leftJoin .= 'LEFT JOIN ' . $input . ' ON (' . $cond . ')';
-        $this->_leftJoin .= PAGE_EOL;
+        $this->_leftJoin .= 'LEFT JOIN ' . $input . ' ON (' . PAGE_EOL;
+
+        $where = [];
+        foreach ($cond as $name => $value) {
+            $where[] = $name . ' = ' . $value;
+        }
+
+        $this->_leftJoin .= implode(' AND ', $where) . PAGE_EOL;
+        $this->_leftJoin .= ')' . PAGE_EOL;
         return $this;
     }
 
