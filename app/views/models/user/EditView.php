@@ -26,7 +26,7 @@ class EditView extends TemplateBuilder
             ],
             'headerName1' => [
                 'type' => static::VIEW_TYPE_HEADER,
-                'title' => 'Данные',
+                'title' => 'Data',
             ],
             'login' => [
                 'type' => static::VIEW_TYPE_TEXT,

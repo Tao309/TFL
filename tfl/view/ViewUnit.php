@@ -32,13 +32,22 @@ class ViewUnit extends View
             $elements .= $this->viewRow($attr, $data);
         }
 
-        if ($this->tplBuilder->geViewType() == self::TYPE_VIEW_EDIT) {
+        if ($this->tplBuilder->geViewType() == static::TYPE_VIEW_EDIT) {
             $elements .= $this->viewActionRow();
-            $data = [
-                $this->tplBuilder->getRouteDirectionLink(),
-                'option',
-                lcfirst($this->dependModel->getModelName())
-            ];
+
+            if ($this->dependModel instanceof UnitOption) {
+                $data = [
+                    $this->tplBuilder->getRouteDirectionLink(),
+                    'option',
+                    lcfirst($this->dependModel->getModelName())
+                ];
+            } else {
+                $data = [
+                    $this->tplBuilder->getRouteDirectionLink(),
+                    $this->dependModel->getModelNameLower() . '/' . $this->dependModel->id,
+                    static::TYPE_VIEW_SAVE
+                ];
+            }
 
             $t .= tHtmlForm::simpleForm($data, $elements, [], RequestBuilder::METHOD_PUT);
         } else {
@@ -102,6 +111,9 @@ class ViewUnit extends View
                 }
 
                 switch ($data['type']) {
+                    case TemplateBuilder::VIEW_TYPE_TEXTAREA:
+                        $t .= tHTML::inputTextarea($inputName, $defaultValue, $limit, $options);
+                        break;
                     case TemplateBuilder::VIEW_TYPE_CHECKBOX:
                         $t .= tHTML::inputCheckbox($inputName, $defaultValue);
                         break;

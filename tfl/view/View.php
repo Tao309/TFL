@@ -23,6 +23,7 @@ class View
 {
     const TYPE_VIEW_DETAILS = 'details';
     const TYPE_VIEW_EDIT = 'edit';
+    const TYPE_VIEW_SAVE = 'save';//Только для route section ajax
     const TYPE_VIEW_DELETE = 'delete';
     const TYPE_VIEW_ADD = 'add';
     const TYPE_VIEW_LIST = 'list';
@@ -51,6 +52,7 @@ class View
 
     private function initViewHandlers()
     {
+        //@todo Поправь для Option
         foreach ($this->dependModel->unitData()['relations'] as $attr => $data) {
 
             if ($data['model'] == Image::class) {

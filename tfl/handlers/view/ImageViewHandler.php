@@ -28,9 +28,6 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
         ]);
 
         $loaded = null;
-//        if ($this->parentModel->hasAttribute($this->attr)) {
-//            $loaded = 'loaded';
-//        }
         if ($this->model->isLoaded()) {
             $loaded = 'loaded';
         }
@@ -57,16 +54,20 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
 
     private function getHiddenData(string $method): array
     {
-        return [
-//            'Image[model][name]' => $this->parentModel->getModelNameLower(),
-//            'Image[model][id]' => $this->parentModel->id,
+        $data = [
             'Image[model][name]' => $this->model->model_name,
             'Image[model][id]' => $this->model->model_id,
+            'Image[model][attr]' => $this->model->model_attr,
             'Image[type]' => $this->model->type,
-            'Image[attr]' => $this->attr,
-            'Image[id]' => $this->model->id ?? 0,
+//            'Image[id]' => $this->model->id ?? 0,
             tHtmlForm::NAME_METHOD => $method,
         ];
+
+        if ($method == RequestBuilder::METHOD_DELETE) {
+            $data['Image[id]'] = $this->model->id;
+        }
+
+        return $data;
     }
 
     /**
@@ -86,9 +87,15 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
                 'class' => 'action',
             ]);
 
+            $route = 'image';
+
+            if ($this->viewType == View::TYPE_VIEW_EDIT) {
+                $route .= '/' . $this->model->id;
+            }
+
             $htmlData = tHtmlForm::generateElementData([
                 'section',
-                'image',
+                $route,
                 'delete',
             ], RequestBuilder::METHOD_POST);
 
@@ -103,7 +110,7 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
         }
 
         $t .= tHtmlTags::renderClosedTag('img', [
-            'src' => $this->model->getImageUrl($this->attr),
+            'src' => $this->model->getImageUrl(),
         ]);
 
         $t .= tHtmlTags::endTag();
@@ -135,7 +142,7 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
         $htmlData = tHtmlForm::generateElementData([
             'section',
             'image',
-            'upload',
+            'create',
         ], RequestBuilder::METHOD_POST, [
             'class' => ['http-request-upload']
         ]);
@@ -160,7 +167,6 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
                 'image-field image-' . $this->model->type . '-field',
             ]
         ]);
-//        if ($this->parentModel->hasAttribute($this->attr)) {
         if ($this->model->isLoaded()) {
             $t .= $this->renderJustView();
         }

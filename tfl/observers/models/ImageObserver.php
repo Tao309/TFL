@@ -2,6 +2,7 @@
 
 namespace tfl\observers\models;
 
+use app\models\Image;
 use tfl\builders\RequestBuilder;
 use tfl\handlers\ImageUploadHandler;
 use tfl\units\UnitActive;
@@ -10,53 +11,40 @@ use tfl\utils\tString;
 
 trait ImageObserver
 {
-    protected function beforeFind()
+    protected function beforeFind(): void
     {
         parent::beforeFind();
         $this->enableDirectSave();
     }
 
-    protected function afterFind()
-    {
-        parent::afterFind();
-    }
-
+    /**
+     * Сохраняется всегда только новая модель, пересохранения нет
+     * @return bool
+     */
     protected function beforeSave(): bool
     {
-        if (empty($this->model) || (!$this->model instanceof UnitActive)) {
-            $this->addSaveError('model', "Parent model is not found");
+        if (!parent::beforeSave()) {
             return false;
         }
 
-        $postData = \TFL::source()->request->getRequestValue(RequestBuilder::METHOD_POST, $this->getModelName());
-
-        //Сохраняем для действий в afterSave
         $this->fileData = $this->filename;
-        $this->attr = tString::checkString($postData['attr']);
 
-        $this->filename = 'tempName';
+        $this->filename = null;
 
-        return parent::beforeSave();
+        return true;
     }
 
     protected function afterSave(): bool
     {
-        //В parentModel воткнуть изображение
-        if (!$this->model->hasAttribute($this->attr)) {
-            $this->model->{$this->attr} = $this;
-        }
-
         $uploader = new ImageUploadHandler($this);
         unset($this->fileData);
-//        unset($this->attr);
         if (!$uploader->upload()) {
-            $this->addSaveError('upload', $uploader->getErrorText());
+            $this->addSaveError('create', $uploader->getErrorText());
             return false;
         }
 
         $this->filename = $uploader->getFileName();
 
-        //Сделать массовый directSave
         $this->directSave([
             'filename' => $this->filename,
         ]);

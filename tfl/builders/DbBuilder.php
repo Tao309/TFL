@@ -150,7 +150,7 @@ class DbBuilder
         return $this->find($query)['count'];
     }
 
-    public function update($sql = null)
+    protected function updateRow($sql = null)
     {
         $this->type = self::TYPE_UPDATE;
         $exec = $this->execute($sql);
@@ -158,7 +158,7 @@ class DbBuilder
         return $this;
     }
 
-    public function delete($sql = null)
+    protected function deleteRow($sql = null)
     {
         $this->type = self::TYPE_DELETE;
         $exec = $this->execute($sql);
@@ -166,7 +166,7 @@ class DbBuilder
         return $this;
     }
 
-    public function insert($sql = null)
+    protected function insertRow($sql = null)
     {
         $this->type = self::TYPE_INSERT;
         $exec = $this->execute($sql);

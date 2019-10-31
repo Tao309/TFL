@@ -70,6 +70,24 @@ class tHTML
         return $input;
     }
 
+    public static function inputTextarea(string $name,
+                                         string $value = null,
+                                         string $limit = null,
+                                         array $options = [])
+    {
+        $t = tHtmlTags::startTag('textarea', [
+            'name' => $name,
+            'id' => $name,
+            'class' => 'html-element-textarea',
+        ]);
+
+        $t .= $value;
+
+        $t .= tHtmlTags::endTag('textarea');
+
+        return $t;
+    }
+
     public static function inputActionButton($name, $value, $elementData = null, array $options = [])
     {
         if (isset($options['class'])) {

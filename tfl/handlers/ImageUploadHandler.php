@@ -14,16 +14,13 @@ use tfl\utils\tString;
  * @property resource $fileData
  * @property int $model_id
  * @property string $model_name
- * @property string $attr
+ * @property string $model_attr
  * @property int $id
  *
  * @property string $fileName
  */
-class ImageUploadHandler
+class ImageUploadHandler extends UploadHandler
 {
-    const SAVE_PATH = 'upload/';
-    const CACHE_PATH = 'cache/';
-
     const FILE_NAME_NO_FOTO = 'nofoto';
     const FILE_NAME_NO_IMAGE = 'noimage';
     const FILE_NAME_DEFAULT_AVATAR = 'default_avatar';
@@ -37,7 +34,7 @@ class ImageUploadHandler
     private $fileData;
     private $model_name;
     private $model_id;
-    private $attr;
+    private $model_attr;
     private $id;
 
     /**
@@ -52,6 +49,11 @@ class ImageUploadHandler
      * @var array
      */
     private $errorText = [];
+    /**
+     * Настройки размеров для загрузки
+     * @var array
+     */
+    private $sizeData = [];
 
     /**
      * вычисление параметров сторон при обрезке
@@ -119,12 +121,22 @@ class ImageUploadHandler
     public function __construct(Image $model)
     {
         $this->fileData = $model->fileData;
-        $this->model_name = $model->model->getModelNameLower();
-        $this->model_id = $model->model->id;
-        $this->attr = $model->attr;
+        $this->model_name = $model->model_name;
+        $this->model_id = $model->model_id;
+        $this->model_attr = $model->model_attr;
         $this->id = $model->id;
 
         $this->setImageData();
+        $this->setSizeData();
+    }
+
+    public function setSizeData(array $data = [])
+    {
+        $this->sizeData = [
+            Image::NAME_SIZE_MINI => [$data[Image::NAME_SIZE_MINI][0] ?? 40, $data[Image::NAME_SIZE_MINI][1] ?? 40],
+            Image::NAME_SIZE_NORMAL => [$data[Image::NAME_SIZE_NORMAL][0] ?? 150, $data[Image::NAME_SIZE_NORMAL][1] ?? 150],
+            Image::NAME_SIZE_FULL => [$data[Image::NAME_SIZE_FULL][0] ?? 360, $data[Image::NAME_SIZE_FULL][1] ?? 360],
+        ];
     }
 
     private function setImageData()
@@ -156,7 +168,7 @@ class ImageUploadHandler
     {
         if (
             empty($this->fileData) || empty($this->model_name)
-            || empty($this->model_id) || empty($this->attr) || empty($this->id)
+            || empty($this->model_id) || empty($this->model_attr) || empty($this->id)
         ) {
             $this->addErrorText('Required fields: file, model name and id and attr');
             return false;
@@ -202,13 +214,7 @@ class ImageUploadHandler
 
     private function getDataSizes(): array
     {
-        $dataSizes = [
-            Image::NAME_SIZE_MINI => [40, 40],
-            Image::NAME_SIZE_NORMAL => [150, 150],
-            Image::NAME_SIZE_FULL => [360, 360],
-        ];
-
-        return $dataSizes;
+        return $this->sizeData;
     }
 
     public function useWaterMark()
@@ -233,7 +239,7 @@ class ImageUploadHandler
             return false;
         }
 
-        $dirPath = WEB_PATH . '/upload/' . $this->model_name . '/' . $this->attr . '/';
+        $dirPath = WEB_PATH . '/upload/' . $this->model_name . '/' . $this->model_attr . '/';
         $this->checkDirExists($dirPath);
         $zPath = zROOT . $dirPath;
 

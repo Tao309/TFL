@@ -21,6 +21,10 @@ class tResponse
             $data['model'] = $addResponse;
         }
 
+        if ($action == DbBuilder::TYPE_INSERT) {
+            $data['event'] = 'clickButton';
+        }
+
         if ($json) {
             $data = json_encode($data);
         }

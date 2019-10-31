@@ -7,8 +7,16 @@ use tfl\interfaces\InitControllerBuilderInterface;
 use tfl\observers\ControllerBuilderObserver;
 use tfl\units\Unit;
 use tfl\units\UnitOption;
-use tfl\utils\tProtocolLoader;
 
+/**
+ * 'section/page/'          => sectionList (GET)
+ * 'section/page/add/       => sectionAdd (GET)
+ * 'section/page/create/    => sectionCreate (POST)
+ * 'section/page/2/         => sectionDetails (GET)
+ * 'section/page/2/edit'    => sectionEdit (GET)
+ * 'section/page/2/         => sectionSave (PUT)
+ * 'section/page/2/delete'  => sectionDelete (DELETE)
+ */
 /**
  * Class ControllerBuilder
  * @package tfl\builders

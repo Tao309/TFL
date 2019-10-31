@@ -2,6 +2,7 @@
 
 namespace tfl\observers;
 
+use app\models\User;
 use tfl\units\Unit;
 use tfl\units\UnitActive;
 use tfl\units\UnitOption;
@@ -12,35 +13,23 @@ trait UnitSqlObserver
     private function saveModelAttrs(): bool
     {
         //@todo Добавить проверку атрибутов
-        list($attrs, $values, $sliceValues) = $this->getAttrAndValuesForSave();
+        list($attrs, $values) = $this->getAttrAndValuesForSave();
 
         if (empty($attrs)) {
             $this->addSaveError('attributes', 'Not found attributes');
             return false;
         }
 
-        //@todo исправтиь на ORM
-        //@todo Добавить проверку на запись
-
         if ($this->isNewModel()) {
-            $query = '
-            INSERT INTO ' . $this->getTableName() . '(' . implode(',', $attrs) . ')
-            VALUES (' . implode(',', $values) . ')
-            ';
-
-            \TFL::source()->db->insert($query);
+            \TFL::source()->db->insert($this->getTableName(), array_combine($attrs, $values));
 
             $id = \TFL::source()->db->getLastInsertId();
 
             $this->id = $id;
         } else {
-            $query = '
-            UPDATE ' . $this->getTableName() . '
-            SET ' . implode(',', $sliceValues) . '
-            WHERE id = ' . $this->id . '
-            ';
-
-            \TFL::source()->db->update($query);
+            \TFL::source()->db->update($this->getTableName(), array_combine($attrs, $values), [
+                'id' => $this->id,
+            ]);
         }
 
         return true;
@@ -56,12 +45,9 @@ trait UnitSqlObserver
             if (isset($rules[$attr]['secretField'])) {
                 continue;
             }
-            $value = tString::checkString($this->$attr);
-            $value = (is_int($value)) ? $value : "'" . $value . "'";
 
             $attrs[] = $attr = mb_strtolower($attr);
-            $values[] = $value;
-            $sliceValues[] = $attr . '=' . $value;
+            $values[] = $this->$attr;
         }
 
         foreach ($this->getUnitData()['relations'] as $attr => $data) {
@@ -72,45 +58,44 @@ trait UnitSqlObserver
 
                     $attr_id = $attr . '_id';
                     $attrs[] = $attr_id;
-                    $values[] = $this->$attr->id;
-                    $sliceValues[] = $attr_id . '=' . $this->$attr->id;
+                    $values[] = $this->$attr_id;
 
                     $attr_name = $attr . '_name';
                     $attrs[] = $attr_name;
-                    $values[] = '"' . $this->$attr->getModelNameLower() . '"';
-                    $sliceValues[] = $attr_name . '="' . $this->$attr->getModelNameLower() . '"';
+                    $values[] = $this->$attr_name;
+
+
+                    $attr_attr = $attr . '_attr';
+                    $attrs[] = $attr_attr;
+                    $values[] = $this->$attr_attr;
                 }
             }
 
         }
 
-        return [$attrs, $values, $sliceValues];
+        return [$attrs, $values];
     }
 
-    protected function saveModelOwner(): bool
+    protected function saveModelUnit(): bool
     {
         $dateTime = date('Y-m-d H:i:s');
+
+        $ownerId = User::ID_USER_SYSTEM;
+        if (\TFL::source()->session->isUser()) {
+            $ownerId = \TFL::source()->session->currentUser()->id;
+        }
 
         $data = [
             'model_name' => $this->getModelNameLower(),
             'model_id' => $this->id,
             'createddatetime' => $dateTime,
             'lastchangedatetime' => $dateTime,
-            'owner_id' => 1,//@todo Подстановка того кто создал
+            'owner_id' => $ownerId,
         ];
 
-        $attrs = array_keys($data);
-        $values = array_map(function ($value) {
-            return (is_int($value) ? $value : '"' . $value . '"');
-        }, $data);
-
-        //@todo исправтиь на ORM
-        $query = '
-            INSERT INTO ' . static::DB_TABLE_UNIT . '(' . implode(',', $attrs) . ')
-            VALUES (' . implode(',', $values) . ')
-            ';
-
-        \TFL::source()->db->insert($query);
+        \TFL::source()->db->insert(static::DB_TABLE_UNIT, $data, [
+            'lastchangedatetime'
+        ]);
 
         return true;
     }
@@ -122,22 +107,19 @@ trait UnitSqlObserver
 
     protected function deleteModel()
     {
-        $query = '
-        DELETE FROM ' . $this->getTableName() . '
-        WHERE id = ' . $this->id . '
-        ';
-        \TFL::source()->db->delete($query);
+        \TFL::source()->db->delete($this->getTableName(), [
+            'id' => $this->id
+        ]);
 
         return true;
     }
 
     protected function deleteModelUnit()
     {
-        $query = '
-        DELETE FROM ' . static::DB_TABLE_UNIT . '
-        WHERE model_name = "' . $this->getModelNameLower() . '" AND model_id = ' . $this->id . '
-        ';
-        \TFL::source()->db->delete($query);
+        \TFL::source()->db->delete(static::DB_TABLE_UNIT, [
+            'model_name' => $this->getModelNameLower(),
+            'model_id' => $this->id,
+        ]);
 
         return true;
     }

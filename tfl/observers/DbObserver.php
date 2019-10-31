@@ -2,6 +2,8 @@
 
 namespace tfl\observers;
 
+use tfl\utils\tString;
+
 trait DbObserver
 {
     // @todo Сделать адекватное построение
@@ -82,6 +84,7 @@ trait DbObserver
         $this->_innerJoin .= PAGE_EOL;
         return $this;
     }
+
     public function leftJoin($input, $cond)
     {
         $this->_leftJoin .= 'LEFT JOIN ' . $input . ' ON (' . $cond . ')';
@@ -127,6 +130,71 @@ trait DbObserver
         $this->_limit = 'LIMIT ' . $offset . ',' . $limit;
 
         return $this;
+    }
+
+    public function insert(string $table, array $sliceValues, array $duplicateUpdate = [])
+    {
+        list($names, $values) = $this->getSliceValues($sliceValues);
+
+        $query = 'INSERT INTO ' . $table . PAGE_EOL;
+        $query .= "(" . implode(',', $names) . ")" . PAGE_EOL;
+        $query .= "VALUES(" . implode(',', $values) . ")" . PAGE_EOL;
+
+        if (!empty($duplicateUpdate)) {
+            $query .= 'ON DUPLICATE KEY UPDATE' . PAGE_EOL;
+            $dupl = [];
+            foreach ($duplicateUpdate as $index => $value) {
+                $dupl[] = $table . '.' . $value . ' = VALUES(' . $table . '.' . $value . ')';
+            }
+            $query .= implode(', ', $dupl);
+        }
+
+        return $this->insertRow($query);
+    }
+
+    public function update(string $table, array $sliceValues, array $condition)
+    {
+        list($names, $values) = $this->getSliceValues($sliceValues);
+
+        $query = 'UPDATE ' . $table . ' SET' . PAGE_EOL;
+        $upd = [];
+        foreach ($names as $index => $name) {
+            $upd[] = $table . '.' . $name . ' = ' . $values[$index];
+        }
+        $query .= implode(', ', $upd) . PAGE_EOL;
+
+        $where = [];
+        foreach ($condition as $condName => $condValue) {
+            $condValue = is_int($condValue) ? (int)$condValue : tString::checkString($condValue, true);
+            $where[] = $table . '.' . $condName . ' = ' . $condValue;
+        }
+        $query .= 'WHERE ' . implode(' AND ', $where);
+
+        return $this->updateRow($query);
+    }
+
+    public function delete(string $table, array $condition)
+    {
+        $query = 'DELETE FROM ' . $table . PAGE_EOL;
+
+        $where = [];
+        foreach ($condition as $condName => $condValue) {
+            $condValue = is_int($condValue) ? (int)$condValue : '"' . tString::checkString($condValue, true) . '"';
+            $where[] = $table . '.' . $condName . ' = ' . $condValue;
+        }
+        $query .= 'WHERE ' . implode(' AND ', $where);
+
+        return $this->deleteRow($query);
+    }
+
+    private function getSliceValues(array $sliceValues)
+    {
+        $names = $values = [];
+        foreach ($sliceValues as $index => $value) {
+            $names[] = $index;
+            $values[] = is_int($value) ? (int)$value : '"' . tString::checkString($value, true) . '"';
+        }
+        return [$names, $values];
     }
 
     public function prepareValues(&$fullValueName, &$value, &$valueName = null)

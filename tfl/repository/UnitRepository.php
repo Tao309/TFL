@@ -23,20 +23,9 @@ trait UnitRepository
             return false;
         }
 
-        $values = [];
-        foreach ($data as $index => $value) {
-            $value = (is_int($value)) ? $value : '"' . $value . '"';
-            $values[] = $index . ' = ' . $value;
-        }
-
-        //@todo add good ORM
-        $query = '
-        UPDATE ' . $this->getTableName() . '
-        SET ' . implode(',', $values) . '        
-        WHERE id = ' . $this->id . '
-        ';
-
-        \TFL::source()->db->update($query);
+        \TFL::source()->db->update($this->getTableName(), $data, [
+            'id' => $this->id
+        ]);
 
         return true;
     }
@@ -52,7 +41,7 @@ trait UnitRepository
         }
 
         if (!$this instanceof UnitOption) {
-            if (!$this->saveModelOwner()) {
+            if (!$this->saveModelUnit()) {
                 return false;
             }
 

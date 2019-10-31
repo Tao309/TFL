@@ -28,6 +28,11 @@ class User extends UnitActive
     const STATUS_MODERATOR = 40;
     const STATUS_ADMIN = 50;
     const STATUS_SUPERADMIN = 60;
+
+    const ID_USER_SYSTEM = 1;
+    const ID_USER_ADMIN = 2;
+    const ID_USER_TAO309 = 3;
+
     /**
      * Человеко-понятные статусы пользователей
      */

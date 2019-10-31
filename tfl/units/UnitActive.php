@@ -3,9 +3,9 @@
 namespace tfl\units;
 
 use app\models\User;
-use tfl\exceptions\TFLNotFoundModelException;
 use tfl\interfaces\UnitInterface;
 use tfl\builders\{RequestBuilder, UnitActiveBuilder, UnitActiveSqlBuilder};
+use tfl\utils\tDebug;
 use tfl\utils\tResponse;
 
 /**
@@ -24,7 +24,7 @@ abstract class UnitActive extends Unit implements UnitInterface
     const LINK_HAS_ONE_TO_MANY = 'oneToMany';
     const LINK_HAS_MANY_TO_MANY = 'manyToMany';
 
-    protected function beforeFind()
+    protected function beforeFind(): void
     {
         parent::beforeFind();
         $this->setModelUnitData();
@@ -64,7 +64,6 @@ abstract class UnitActive extends Unit implements UnitInterface
         return $model;
     }
 
-    //@todo Доработать
     public function getByIds(array $ids)
     {
         /**
@@ -94,6 +93,7 @@ abstract class UnitActive extends Unit implements UnitInterface
             $this->addLoadDataError('Request data is empty');
             return false;
         }
+
         /**
          * @var array $data
          */

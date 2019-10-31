@@ -19,6 +19,10 @@ trait UnitObserver
 
     protected function beforeSave(): bool
     {
+        if (!empty($this->loadDataErrors)) {
+            return false;
+        }
+
         if (!$this->verifyAttrs()) {
             return false;
         }

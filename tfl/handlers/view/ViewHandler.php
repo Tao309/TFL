@@ -62,6 +62,7 @@ class ViewHandler implements ViewHandlerInterface
 
         $this->model->model_name = $this->parentModel->getModelNameLower();
         $this->model->model_id = $this->parentModel->id;
+        $this->model->model_attr = $this->attr;
     }
 
 

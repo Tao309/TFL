@@ -3,6 +3,7 @@
 namespace tfl\builders;
 
 use app\models\Image;
+use app\models\Page;
 use app\models\User;
 use tfl\units\Unit;
 use tfl\units\UnitActive;
@@ -57,34 +58,55 @@ trait UnitActiveBuilder
             }
 
             if ($data['model'] === UnitActive::class) {
-                $attr_id = 'id';
-                $attr_name = 'name';
+                $attrNames = ['id', 'name', 'attr'];
 
-                if (!isset($request[$attr][$attr_id]) || !isset($request[$attr][$attr_name])) {
-                    continue;
-                }
-
-                $id = tString::checkNum($request[$attr][$attr_id]);
-                $name = tString::checkString($request[$attr][$attr_name]);
-
-                $this->{$attr . '_name'} = $name;
-                $this->{$attr . '_id'} = $id;
-
-                if ($this instanceof Image) {
-                    if (!isset($request[$attr]['attr'])) {
-                        continue;
+                $hasError = false;
+                foreach ($attrNames as $attrName) {
+                    if (!isset($request[$attr][$attrName])) {
+                        $hasError = true;
+                        $this->addSaveError('model', 'Field ' . $attrName . ' for model UnitActive is not found');
+                        break;
                     }
-                    $this->attr = tString::checkString($request[$attr]['attr']);
+
+                    if ($attrName == 'id') {
+                        $attrValue = tString::checkNum($request[$attr][$attrName]);
+                    } else {
+                        $attrValue = tString::checkString($request[$attr][$attrName]);
+                    }
+
+                    $this->{$attr . '_' . $attrName} = $attrValue;
                 }
+
+                if ($hasError) {
+                    break;
+                }
+
+                if (!isset($request['model']['name'])) {
+                    $this->addSaveError('model', 'Model name is not found');
+                    break;
+                }
+
+                switch ($request['model']['name']) {
+                    case 'user':
+                        $modelClass = User::class;
+                        break;
+                    case 'page':
+                        $modelClass = Page::class;
+                        break;
+                }
+
+//                $modelClassName = 'app\models\\'.ucfirst($request['model']['name']);
+//                $modelClass = $modelClassName::class;
             } else {
-                if ($this->isNewModel()) {
-                    /**
-                     * @var UnitActive $modelClassName
-                     */
-                    $modelClassName = $data['model'];
-                    //@todo Сделать одним запросом все получения, в будущем или после сейва подставлять всё
-                    $this->$attr = $modelClassName::getById($id);
-                }
+                $modelClass = $data['model'];
+            }
+
+            if ($this->isNewModel()) {
+                /**
+                 * @var UnitActive $modelClassName
+                 */
+                //@todo Сделать одним запросом все получения, в будущем или после сейва подставлять всё
+//                $this->$attr = $modelClass::getById($id);
             }
         }
     }
@@ -136,6 +158,7 @@ trait UnitActiveBuilder
                 $attr = mb_strtolower($attr);
                 $model->{$attr . '_name'} = $rowData[$attr . '_name'] ?? null;
                 $model->{$attr . '_id'} = $rowData[$attr . '_id'] ?? null;
+                $model->{$attr . '_attr'} = $rowData[$attr . '_attr'] ?? null;
             }
         }
     }
@@ -157,9 +180,6 @@ trait UnitActiveBuilder
                     $model->$attr = null;
                     continue;
                 }
-                /*
-                 * Когда создаём Image, в него подставлем User, но у юзера нет модела user->avatar внутри
-                 */
 
                 /**
                  * @var UnitActive $relationModel
@@ -167,9 +187,11 @@ trait UnitActiveBuilder
                 $relationModel = new $data['model'];
 
                 //Добавление зависимых моделей в модели связи
-                //@todo Добавить в отдельный метод как setDependRelations
+                //@todo Добавить в отдельный метод как setDependRelations. Првоерить это
                 if ($relationModel instanceof Image) {
-                    $relationModel->attr = $attr;
+                    $relationModel->model_name = $model->getModelNameLower();
+                    $relationModel->model_id = $model->id;
+                    $relationModel->model_attr = $attr;
                     $relationModel->model = $model;
                 }
 

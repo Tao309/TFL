@@ -2,7 +2,6 @@
 
 namespace tfl\view;
 
-use tfl\builders\TemplateBuilder;
 use tfl\collections\UnitActiveCollection;
 use tfl\units\Unit;
 use tfl\utils\tHtmlTags;

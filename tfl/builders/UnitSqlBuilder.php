@@ -2,6 +2,7 @@
 
 namespace tfl\builders;
 
+use app\models\Image;
 use app\models\User;
 use tfl\exceptions\TFLNotFoundModelException;
 use tfl\units\UnitActive;
@@ -111,6 +112,7 @@ trait UnitSqlBuilder
 
             $rows = array_map(function ($row) {
                 $this->assignRowData($row);
+
                 return $row;
             }, $rows);
 
@@ -185,6 +187,7 @@ trait UnitSqlBuilder
             if ($data['type'] == static::RULE_TYPE_MODEL && $data['model'] == UnitActive::class) {
                 $attrs[] = $this->concatAttr($attr . '_name', $selectTable, $tableName, $encase);
                 $attrs[] = $this->concatAttr($attr . '_id', $selectTable, $tableName, $encase);
+                $attrs[] = $this->concatAttr($attr . '_attr', $selectTable, $tableName, $encase);
             }
         }
 
@@ -239,32 +242,38 @@ trait UnitSqlBuilder
     {
         foreach ($this->getUnitData()['relations'] as $relationKey => $relationData) {
             $modelClass = $relationData['model'];
-            if ($relationData['model'] == UnitActive::class) {
-                //@todo Внести правки при работе не с Image=
-                continue;
-            }
-
             $aliasTable = 'relations.' . $relationKey;
             $aliasTableEncase = "`" . $aliasTable . "`";
 
-            /**
-             * @var $model UnitActive
-             */
-            $model = new $modelClass;
-            $attrs = $model->getModelColumnAttrs($aliasTable, true);
-            $relTableName = $model->getTableName();
+            //Добработать в будущем действия не с Image
+            if ($relationData['model'] == UnitActive::class) {
+                //Нельзя получить название модели, потому что оно в строке
+//                $command->addSelect(implode(',', [
+//                    $this->getTableName().'.'.$relationKey.'_id AS `'.$aliasTable.'.id`',
+//                    $this->getTableName().'.'.$relationKey.'_name AS `'.$aliasTable.'.name`',
+//                ]));
+//                    $command->leftJoin('model_page AS '.$aliasTableEncase,
+//                        $aliasTableEncase.'.id = '.$this->getTableName().'.'.$relationKey.'_id');
+            } else {
+                /**
+                 * @var $model UnitActive
+                 */
+                $model = new $modelClass;
+                $attrs = $model->getModelColumnAttrs($aliasTable, true);
+                $relTableName = $model->getTableName();
 
-            $command->addSelect(implode(',', $attrs));
+                $command->addSelect(implode(',', $attrs));
 
-            $modelName = 'model';
+                $modelName = 'model';
 
-            $command->leftJoin($relTableName . ' AS ' . $aliasTableEncase,
-                $aliasTableEncase . '.' . $modelName . '_name = "' . $this->getModelNameLower() . '" 
+                $command->leftJoin($relTableName . ' AS ' . $aliasTableEncase,
+                    $aliasTableEncase . '.' . $modelName . '_name = "' . $this->getModelNameLower() . '" 
                 AND ' . $aliasTableEncase . '.' . $modelName . '_id = ' . $this->getTableName() . '.id'
-            );
+                );
 
-            $model->addUnitQuery($command, $aliasTableEncase, $aliasTable, true);
-            $this->addOwnerQuery($command, $aliasTable);
+                $model->addUnitQuery($command, $aliasTableEncase, $aliasTable, true);
+                $this->addOwnerQuery($command, $aliasTable);
+            }
         }
     }
 
