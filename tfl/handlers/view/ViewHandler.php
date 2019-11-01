@@ -31,29 +31,18 @@ abstract class ViewHandler implements ViewHandlerInterface
     {
         $this->attr = $attr;
         $this->viewType = $viewType;
+        $this->parentModel = $parentModel;
 
-//        if ($parentModel) {
-            $this->parentModel = $parentModel;
         $relationData = $parentModel->getUnitDataRelation($this->attr);
-
         $this->typeLink = $relationData['link'];
 
-            if ($parentModel->hasAttribute($attr)) {
-                if ($this->typeLink == UnitActive::LINK_HAS_ONE_TO_MANY) {
-                    $this->models = $parentModel->$attr;
-                } else {
-                    $this->model = $parentModel->$attr;
-                }
+        if ($parentModel->hasAttribute($attr)) {
+            if ($this->typeLink == UnitActive::LINK_HAS_ONE_TO_MANY) {
+                $this->models = $parentModel->$attr;
             } else {
-//                $modelClassName = $relationData['model'];
-//                $this->model = new $modelClassName;
-//
-//                $this->prepareInputModel();
+                $this->model = $parentModel->$attr;
             }
-//        }
-//        elseif ($model) {
-//            $this->model = $model;
-//        }
+        }
 
         $this->prepareInputModel();
     }

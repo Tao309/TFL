@@ -46,6 +46,18 @@ class User extends UnitActive
         self::STATUS_SUPERADMIN => 'Супер админ',
     ];
 
+    /**
+     * @param bool $checkAuthStatus Доступ по уровню ниже смотрящего
+     * @return array
+     */
+    public static function getStatusList(bool $checkAuthStatus = false): array
+    {
+        $statusNames = self::$statusNames;
+        unset($statusNames[self::STATUS_GUEST]);
+
+        return $statusNames;
+    }
+
     public function __toString()
     {
         if ($this->isNewModel()) {
@@ -122,17 +134,19 @@ class User extends UnitActive
         return $labels;
     }
 
-    /**
-     * @param bool $checkAuthStatus Доступ по уровню ниже смотрящего
-     * @return array
-     */
-    public static function getStatusList(bool $checkAuthStatus = false): array
+    public function getAvatar()
     {
-        $statusNames = self::$statusNames;
-        unset($statusNames[self::STATUS_GUEST]);
+        if ($this->hasAttribute('avatar') && $this->avatar->isLoaded()) {
+            return $this->avatar->getImageUrl(Image::NAME_SIZE_MINI);
+        }
 
-        return $statusNames;
+        return $this->getDefaultUserAvatar();
     }
 
+    public function getDefaultUserAvatar()
+    {
+        //@todo создание кэш картинок для nofoto
+        return ROOT . 'images/default_avatar.jpg';
+    }
 }
 

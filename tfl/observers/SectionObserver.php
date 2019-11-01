@@ -118,7 +118,7 @@ trait SectionObserver
             $user = \TFL::source()->session->currentUser();
             $vars['user']['model'] = (string)$user;
             $vars['user']['userStatus'] = $user->status;
-            $vars['user']['avatar'] = '';
+            $vars['user']['avatar'] = \TFL::source()->session->currentUser()->getAvatar();
         }
 
         $buttonLogin = null;

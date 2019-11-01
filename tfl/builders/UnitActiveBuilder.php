@@ -100,7 +100,7 @@ trait UnitActiveBuilder
                     /**
                      * @var UnitActive $modelClass
                      */
-                    //@todo Сделать одним запросом все получения, в будущем или после сейва подставлять всё
+                    //@todo Сделать одним запросом все получения
                     $this->$attr = $modelClass::getById($this->{$attr . '_id'});
                 }
 

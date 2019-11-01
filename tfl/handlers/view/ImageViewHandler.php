@@ -3,6 +3,7 @@
 namespace tfl\handlers\view;
 
 use app\models\Image;
+use app\models\User;
 use tfl\builders\RequestBuilder;
 use tfl\interfaces\view\ViewHandlerInterface;
 use tfl\units\UnitActive;
@@ -73,7 +74,6 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
 
         return $t;
     }
-
     /**
      * Загрузка изображения
      * @return string
@@ -136,6 +136,67 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
 
         return $t;
     }
+    private function renderOpenButton(Image $model): string
+    {
+        return tHTML::inputLink($model->getImageUrl(), 'o', [
+            'class' => ['html-icon-button', 'icon-image-view', 'tImage'],
+            'title' => 'Open',
+            'target' => '_blank',
+        ]);
+    }
+    private function renderInsertButton(Image $model): string
+    {
+        return tHTML::inputActionButton('insert', 'v', [], [
+            'class' => ['html-icon-button', 'icon-image-insert', 'insert-tag'],
+            'title' => 'Insert',
+            'data-tag' => 'thumb',
+//            'data-field' => ucfirst($this->model_name).'[description]',
+//            'data-value' => $this->getInsertTagUrl(self::IMAGE_SIZE_FULL),
+        ]);
+    }
+    private function renderDeleteButton(Image $model, string $route): string
+    {
+        $htmlData = tHtmlForm::generateElementData([
+            'section',
+            $route,
+            'delete',
+        ], RequestBuilder::METHOD_POST);
+
+        $hiddenData = $this->getHiddenData(RequestBuilder::METHOD_DELETE, $model);
+
+        return tHTML::inputActionButton('delete', 'x', $htmlData, [
+            'class' => ['html-icon-button', 'icon-image-delete'],
+            'title' => 'Delete',
+            'data-params' => tHtmlForm::generateDataParams($hiddenData, true),
+        ]);
+    }
+
+    /**
+     * Создаём пустую модель для вводных параметров
+     */
+    private function initNullImageModel()
+    {
+        $this->model = new Image();
+        $this->model->model_name = $this->parentModel->getModelNameLower();
+        $this->model->model_id = $this->parentModel->id;
+        $this->model->model_attr = $this->attr;
+        $this->model->type = $this->modelType;
+    }
+
+    private function renderImageViewDetails(string $imageUrl)
+    {
+        $t = tHtmlTags::startTag('div', [
+            'class' => 'view',
+        ]);
+        $t .= tHtmlTags::renderClosedTag('img', [
+            'src' => $imageUrl,
+        ]);
+        $t .= tHtmlTags::endTag();
+
+        return $t;
+    }
+
+
     /**
      * Показ только изображения
      * @return string
@@ -143,6 +204,12 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
     public function renderJustView(Image $model)
     {
         if (!$model->isLoaded()) {
+            if ($this->viewType == View::TYPE_VIEW_DETAILS) {
+                if ($this->parentModel instanceof User) {
+                    return $this->renderImageViewDetails($this->parentModel->getDefaultUserAvatar());
+                }
+            }
+
             return '';
         }
 
@@ -162,8 +229,10 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
             if ($this->viewType == View::TYPE_VIEW_EDIT) {
                 $route .= '/' . $model->id;
             }
+
+            $t .= $this->renderOpenButton($model);
+
             if ($this->typeLink == UnitActive::LINK_HAS_ONE_TO_MANY) {
-                $t .= $this->renderOpenButton($model);
                 $t .= $this->renderInsertButton($model);
             }
 
@@ -172,57 +241,12 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
             $t .= tHtmlTags::endTag();
         }
 
-        $t .= tHtmlTags::startTag('div', [
-            'class' => 'view',
-        ]);
-        $t .= tHtmlTags::renderClosedTag('img', [
-            'src' => $model->getImageUrl(),
-        ]);
-        $t .= tHtmlTags::endTag();
+        $t .= $this->renderImageViewDetails($model->getImageUrl());
 
         $t .= tHtmlTags::endTag();
 
         return $t;
     }
-
-    private function renderOpenButton(Image $model): string
-    {
-        return tHTML::inputLink($model->getImageUrl(), 'o', [
-            'class' => ['html-icon-button', 'icon-image-view', 'tImage'],
-            'title' => 'Open',
-            'target' => '_blank',
-        ]);
-    }
-
-    private function renderInsertButton(Image $model): string
-    {
-        return tHTML::inputActionButton('insert', 'v', [], [
-            'class' => ['html-icon-button', 'icon-image-insert', 'insert-tag'],
-            'title' => 'Insert',
-            'data-tag' => 'thumb',
-//            'data-field' => ucfirst($this->model_name).'[description]',
-//            'data-value' => $this->getInsertTagUrl(self::IMAGE_SIZE_FULL),
-        ]);
-    }
-
-    private function renderDeleteButton(Image $model, string $route): string
-    {
-        $htmlData = tHtmlForm::generateElementData([
-            'section',
-            $route,
-            'delete',
-        ], RequestBuilder::METHOD_POST);
-
-        $hiddenData = $this->getHiddenData(RequestBuilder::METHOD_DELETE, $model);
-
-        return tHTML::inputActionButton('delete', 'x', $htmlData, [
-            'class' => ['html-icon-button', 'icon-image-delete'],
-            'title' => 'Delete',
-            'data-params' => tHtmlForm::generateDataParams($hiddenData, true),
-        ]);
-    }
-
-
     public function renderViewField(): string
     {
         $t = $this->renderFieldHeader();
@@ -241,7 +265,6 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
 
         return $t;
     }
-
     /**
      * Дополнительные действия для подстановки модели
      */
@@ -250,14 +273,13 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
         if ($this->typeLink == UnitActive::LINK_HAS_ONE_TO_MANY) {
             $this->modelType = Image::TYPE_SCREEN;
 
-            //Создаём модель для вводных параметров
-            $this->model = new Image();
-            $this->model->model_name = $this->parentModel->getModelNameLower();
-            $this->model->model_id = $this->parentModel->id;
-            $this->model->model_attr = $this->attr;
-            $this->model->type = Image::TYPE_SCREEN;
+            $this->initNullImageModel();
         } else {
             $this->modelType = Image::TYPE_IMAGE;
+
+            if (empty($this->model)) {
+                $this->initNullImageModel();
+            }
         }
     }
 }

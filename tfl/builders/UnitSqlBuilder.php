@@ -3,9 +3,8 @@
 namespace tfl\builders;
 
 use app\models\Image;
+use app\models\Page;
 use app\models\User;
-use tfl\exceptions\TFLNotFoundModelException;
-use tfl\units\Unit;
 use tfl\units\UnitActive;
 use tfl\units\UnitOption;
 use tfl\utils\tDebug;
@@ -13,6 +12,12 @@ use tfl\utils\tString;
 
 trait UnitSqlBuilder
 {
+    /**
+     * Тип relation связи по умолчанию
+     * @var string
+     */
+    private $linkType;
+
     /**
      * @param array $queryData
      * @param bool $many Вывод множества значений
@@ -28,6 +33,7 @@ trait UnitSqlBuilder
         if (in_array(['id', 'password', 'name'], array_keys($queryData))) {
             return null;
         }
+        $this->setDefaultLinkType();
 
         $tableName = $this->getTableName();
 
@@ -102,7 +108,6 @@ trait UnitSqlBuilder
             $this->addRelationsQuery($command);
         }
 
-
         if ($many) {
             $rows = $command->findAll();
 
@@ -128,8 +133,6 @@ trait UnitSqlBuilder
             $this->assignRowData($row);
             $this->assignRelationsData($row);
 
-//            tDebug::printDebug($row);
-
             return $row;
         }
     }
@@ -142,12 +145,11 @@ trait UnitSqlBuilder
      * @param $encase
      * @return string
      */
-    private function concatAttr($attr, $selectTable, $tableName, $encase,
-                                $linkType = UnitActive::LINK_HAS_ONE_TO_ONE): string
+    private function concatAttr($attr, $selectTable, $tableName, $encase): string
     {
         $attrValue = 'IFNULL(';
 
-        if ($linkType == UnitActive::LINK_HAS_ONE_TO_MANY) {
+        if ($this->linkType == UnitActive::LINK_HAS_ONE_TO_MANY) {
             $attrValue .= 'GROUP_CONCAT("{", ' . $selectTable . '.' . $attr . ', "}")';
         } else {
             $attrValue .= $selectTable . '.' . $attr;
@@ -170,8 +172,7 @@ trait UnitSqlBuilder
      * @param bool $encase
      * @return array
      */
-    private function getModelColumnAttrs($tableName, bool $encase = false,
-                                         $linkType = UnitActive::LINK_HAS_ONE_TO_ONE): array
+    private function getModelColumnAttrs($tableName, bool $encase = false): array
     {
         $rules = $this->getUnitData()['rules'];
 
@@ -179,7 +180,7 @@ trait UnitSqlBuilder
 
         $attrs = [];
 
-        $attrs[] = $this->concatAttr('id', $selectTable, $tableName, $encase, $linkType);
+        $attrs[] = $this->concatAttr('id', $selectTable, $tableName, $encase);
 
         if ($this instanceof UnitOption) {
             $attrs[] = $tableName . '.name';
@@ -191,23 +192,22 @@ trait UnitSqlBuilder
                 continue;
             }
 
-            $attrs[] = $this->concatAttr($attr, $selectTable, $tableName, $encase, $linkType);
+            $attrs[] = $this->concatAttr($attr, $selectTable, $tableName, $encase);
         }
 
         foreach ($this->getUnitData()['relations'] as $attr => $data) {
             //Добавления для столбцов где UnitActive, а не точная модель
             if ($data['type'] == static::RULE_TYPE_MODEL && $data['model'] == UnitActive::class) {
-                $attrs[] = $this->concatAttr($attr . '_name', $selectTable, $tableName, $encase, $linkType);
-                $attrs[] = $this->concatAttr($attr . '_id', $selectTable, $tableName, $encase, $linkType);
-                $attrs[] = $this->concatAttr($attr . '_attr', $selectTable, $tableName, $encase, $linkType);
+                $attrs[] = $this->concatAttr($attr . '_name', $selectTable, $tableName, $encase);
+                $attrs[] = $this->concatAttr($attr . '_id', $selectTable, $tableName, $encase);
+                $attrs[] = $this->concatAttr($attr . '_attr', $selectTable, $tableName, $encase);
             }
         }
 
         return $attrs;
     }
 
-    private function addUnitQuery(DbBuilder &$command, $userTableName, $tableName = null, $encase = false,
-                                  $linkType = UnitActive::LINK_HAS_ONE_TO_ONE)
+    private function addUnitQuery(DbBuilder &$command, $userTableName, $tableName = null, $encase = false)
     {
         $selectTable = $tableName ?? 'unit';
         $tableNameJoin = static::DB_TABLE_UNIT;
@@ -223,7 +223,7 @@ trait UnitSqlBuilder
             'lastchangedatetime',
         ];
         foreach ($availableAttrs as $availableAttr) {
-            $attrs[] = $this->concatAttr($availableAttr, $selectTable, $tableName, $encase, $linkType);
+            $attrs[] = $this->concatAttr($availableAttr, $selectTable, $tableName, $encase);
         }
 
         $command->addSelect(implode(',', $attrs))
@@ -233,8 +233,7 @@ trait UnitSqlBuilder
             ]);
     }
 
-    private function addOwnerQuery(DbBuilder &$command, $aliasTable = null,
-                                   $linkType = UnitActive::LINK_HAS_ONE_TO_ONE)
+    private function addOwnerQuery(DbBuilder &$command, $aliasTable = null)
     {
         $unitTableAlias = (!empty($aliasTable)) ? '`' . $aliasTable . '.unit`' : static::DB_TABLE_UNIT;
         $aliasTable = (!empty($aliasTable)) ? $aliasTable . '.owner' : 'owner';
@@ -243,15 +242,16 @@ trait UnitSqlBuilder
 
         //@todo исправить, добавить в переменную
         $model = new User();
+        $model->setNewLinkType($this->linkType);
 
-        $attrs = $model->getModelColumnAttrs($aliasTable, true, $linkType);
+        $attrs = $model->getModelColumnAttrs($aliasTable, true);
 
         $command->addSelect(implode(',', $attrs))
             ->leftJoin("model_user AS " . $aliasTableEncase, [
                 $aliasTableEncase . '.id' => $unitTableAlias . '.owner_id'
             ]);
 
-        $this->addUnitQuery($command, $aliasTableEncase, $aliasTable, true, $linkType);
+        $this->addUnitQuery($command, $aliasTableEncase, $aliasTable, true);
     }
 
     private function addRelationsQuery(DbBuilder &$command)
@@ -267,7 +267,10 @@ trait UnitSqlBuilder
                  * @var $model UnitActive
                  */
                 $model = new $modelClass;
-                $attrs = $model->getModelColumnAttrs($aliasTable, true, $relationData['link']);
+
+                $model->setNewLinkType($relationData['link']);
+
+                $attrs = $model->getModelColumnAttrs($aliasTable, true);
                 $relTableName = $model->getTableName();
 
                 $command->addSelect(implode(',', $attrs));
@@ -285,10 +288,24 @@ trait UnitSqlBuilder
 
                 $command->leftJoin($relTableName . ' AS ' . $aliasTableEncase, $whereCond);
 
-                $model->addUnitQuery($command, $aliasTableEncase, $aliasTable, true, $relationData['link']);
-                $this->addOwnerQuery($command, $aliasTable, $relationData['link']);
+                $model->addUnitQuery($command, $aliasTableEncase, $aliasTable, true);
+
+//                $this->addOwnerQuery($command, $aliasTable);
+                $model->addOwnerQuery($command, $aliasTable);
+
+                $model->setDefaultLinkType();
             }
         }
+    }
+
+    private function setNewLinkType(string $linkType): void
+    {
+        $this->linkType = $linkType;
+    }
+
+    private function setDefaultLinkType(): void
+    {
+        $this->linkType = UnitActive::LINK_HAS_ONE_TO_ONE;
     }
 
     /**
