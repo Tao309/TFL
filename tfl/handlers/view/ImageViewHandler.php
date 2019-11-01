@@ -5,6 +5,7 @@ namespace tfl\handlers\view;
 use app\models\Image;
 use tfl\builders\RequestBuilder;
 use tfl\interfaces\view\ViewHandlerInterface;
+use tfl\units\UnitActive;
 use tfl\utils\tHTML;
 use tfl\utils\tHtmlForm;
 use tfl\utils\tHtmlTags;
@@ -14,35 +15,56 @@ use tfl\view\View;
  * Class ImageViewHandler
  * @package tfl\handlers\view
  *
+ * @property string $modelType Тип показа модели: cover, screen
  * @property Image $model
+ * @property Image[] $models
  */
 class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
 {
+    private $modelType;
+
+    private function getHiddenData(string $method, Image $model): array
+    {
+        $data = [
+            'Image[model][name]' => $model->model_name,
+            'Image[model][id]' => $model->model_id,
+            'Image[model][attr]' => $model->model_attr,
+            'Image[type]' => $model->type,
+            tHtmlForm::NAME_METHOD => $method,
+        ];
+
+        if ($method == RequestBuilder::METHOD_DELETE) {
+            $data['Image[id]'] = $model->id;
+        }
+
+        return $data;
+    }
     private function renderFieldHeader(): string
     {
         $t = tHtmlTags::startTag('div', [
             'class' => [
-                'image-screen-field',
+                'image-model-field',
                 'type-view-' . $this->viewType,
             ]
         ]);
 
         $loaded = null;
-        if ($this->model->isLoaded()) {
-            $loaded = 'loaded';
+        if ($this->typeLink == UnitActive::LINK_HAS_ONE_TO_ONE) {
+            if ($this->model->isLoaded()) {
+                $loaded = 'loaded';
+            }
         }
 
         $t .= tHtmlTags::startTag('div', [
             'class' => [
                 'image-add-file',
-                'type-' . ($this->model->type ?? 'cover'),//@todo доработать
+                'type-' . $this->modelType,
                 $loaded,
             ]
         ]);
 
         return $t;
     }
-
     private function renderFieldFooter(): string
     {
         $t = '';
@@ -52,89 +74,20 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
         return $t;
     }
 
-    private function getHiddenData(string $method): array
-    {
-        $data = [
-            'Image[model][name]' => $this->model->model_name,
-            'Image[model][id]' => $this->model->model_id,
-            'Image[model][attr]' => $this->model->model_attr,
-            'Image[type]' => $this->model->type,
-//            'Image[id]' => $this->model->id ?? 0,
-            tHtmlForm::NAME_METHOD => $method,
-        ];
-
-        if ($method == RequestBuilder::METHOD_DELETE) {
-            $data['Image[id]'] = $this->model->id;
-        }
-
-        return $data;
-    }
-
     /**
-     * Показ только изображения
+     * Загрузка изображения
      * @return string
      */
-    public function renderJustView()
+    private function renderEditFieldBody()
     {
-        $t = tHtmlTags::startTag('div', [
-            'class' => [
-                'view',
-            ]
-        ]);
-
-        if ($this->viewType == View::TYPE_VIEW_EDIT || $this->viewType == View::TYPE_VIEW_ADD) {
+        $t = '';
+        if ($this->typeLink == UnitActive::LINK_HAS_ONE_TO_MANY) {
             $t .= tHtmlTags::startTag('div', [
-                'class' => 'action',
+                'class' => ['image-add-file', 'type-screen']
             ]);
-
-            $route = 'image';
-
-            if ($this->viewType == View::TYPE_VIEW_EDIT) {
-                $route .= '/' . $this->model->id;
-            }
-
-            $htmlData = tHtmlForm::generateElementData([
-                'section',
-                $route,
-                'delete',
-            ], RequestBuilder::METHOD_POST);
-
-            $hiddenData = $this->getHiddenData(RequestBuilder::METHOD_DELETE);
-            $t .= tHTML::inputActionButton('delete', 'x', $htmlData, [
-                'class' => ['html-icon-button', 'icon-image-delete'],
-                'title' => 'Delete',
-                'data-params' => tHtmlForm::generateDataParams($hiddenData, true),
-            ]);
-
-            $t .= tHtmlTags::endTag();
         }
 
-        $t .= tHtmlTags::renderClosedTag('img', [
-            'src' => $this->model->getImageUrl(),
-        ]);
-
-        $t .= tHtmlTags::endTag();
-
-        return $t;
-    }
-
-    public function renderViewField(): string
-    {
-        $t = $this->renderFieldHeader();
-
-        $t .= $this->renderJustView();
-
-        $t .= self::renderFieldFooter();
-
-        return $t;
-    }
-
-    public function renderEditField(): string
-    {
-        $t = $this->renderFieldHeader();
-
-        //Загрузка изображения
-        $t .= tHtmlTags::startTag('div', [
+        $t = tHtmlTags::startTag('div', [
             'class' => [
                 'file-action',
             ]
@@ -146,7 +99,7 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
         ], RequestBuilder::METHOD_POST, [
             'class' => ['http-request-upload']
         ]);
-        $hiddenData = $this->getHiddenData(RequestBuilder::METHOD_POST);
+        $hiddenData = $this->getHiddenData(RequestBuilder::METHOD_POST, $this->model);
         $htmlData .= tHtmlForm::generateDataParams($hiddenData);
 
         $inputFile = tHtmlTags::renderClosedTag('input', [
@@ -160,23 +113,151 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
         ]);
         $t .= tHtmlTags::endTag();
 
+        if ($this->typeLink == UnitActive::LINK_HAS_ONE_TO_MANY) {
+            $t .= tHtmlTags::endTag();
+        }
 
         //Показ изображения
         $t .= tHtmlTags::startTag('div', [
             'class' => [
-                'image-field image-' . $this->model->type . '-field',
+                'image-' . $this->modelType . '-field',
             ]
         ]);
 
-        //Для screens всегда загрузка есть
-        if ($this->model->isLoaded()) {
-            $t .= $this->renderJustView();
+        if ($this->typeLink == UnitActive::LINK_HAS_ONE_TO_MANY) {
+            foreach ($this->models as $index => $model) {
+                $t .= $this->renderJustView($model);
+            }
+        } else {
+            $t .= $this->renderJustView($this->model);
         }
 
         $t .= tHtmlTags::endTag();
 
+        return $t;
+    }
+    /**
+     * Показ только изображения
+     * @return string
+     */
+    public function renderJustView(Image $model)
+    {
+        if (!$model->isLoaded()) {
+            return '';
+        }
+
+        $t = tHtmlTags::startTag('div', [
+            'class' => [
+                'one-image',
+            ]
+        ]);
+
+        if ($this->viewType == View::TYPE_VIEW_EDIT || $this->viewType == View::TYPE_VIEW_ADD) {
+            $t .= tHtmlTags::startTag('div', [
+                'class' => 'action',
+            ]);
+
+            $route = 'image';
+
+            if ($this->viewType == View::TYPE_VIEW_EDIT) {
+                $route .= '/' . $model->id;
+            }
+            if ($this->typeLink == UnitActive::LINK_HAS_ONE_TO_MANY) {
+                $t .= $this->renderOpenButton($model);
+                $t .= $this->renderInsertButton($model);
+            }
+
+            $t .= $this->renderDeleteButton($model, $route);
+
+            $t .= tHtmlTags::endTag();
+        }
+
+        $t .= tHtmlTags::startTag('div', [
+            'class' => 'view',
+        ]);
+        $t .= tHtmlTags::renderClosedTag('img', [
+            'src' => $model->getImageUrl(),
+        ]);
+        $t .= tHtmlTags::endTag();
+
+        $t .= tHtmlTags::endTag();
+
+        return $t;
+    }
+
+    private function renderOpenButton(Image $model): string
+    {
+        return tHTML::inputLink($model->getImageUrl(), 'o', [
+            'class' => ['html-icon-button', 'icon-image-view', 'tImage'],
+            'title' => 'Open',
+            'target' => '_blank',
+        ]);
+    }
+
+    private function renderInsertButton(Image $model): string
+    {
+        return tHTML::inputActionButton('insert', 'v', [], [
+            'class' => ['html-icon-button', 'icon-image-insert', 'insert-tag'],
+            'title' => 'Insert',
+            'data-tag' => 'thumb',
+//            'data-field' => ucfirst($this->model_name).'[description]',
+//            'data-value' => $this->getInsertTagUrl(self::IMAGE_SIZE_FULL),
+        ]);
+    }
+
+    private function renderDeleteButton(Image $model, string $route): string
+    {
+        $htmlData = tHtmlForm::generateElementData([
+            'section',
+            $route,
+            'delete',
+        ], RequestBuilder::METHOD_POST);
+
+        $hiddenData = $this->getHiddenData(RequestBuilder::METHOD_DELETE, $model);
+
+        return tHTML::inputActionButton('delete', 'x', $htmlData, [
+            'class' => ['html-icon-button', 'icon-image-delete'],
+            'title' => 'Delete',
+            'data-params' => tHtmlForm::generateDataParams($hiddenData, true),
+        ]);
+    }
+
+
+    public function renderViewField(): string
+    {
+        $t = $this->renderFieldHeader();
+
+        $t .= $this->renderJustView($this->model);
+
         $t .= self::renderFieldFooter();
 
         return $t;
+    }
+    public function renderEditField(): string
+    {
+        $t = $this->renderFieldHeader();
+        $t .= $this->renderEditFieldBody();
+        $t .= $this->renderFieldFooter();
+
+        return $t;
+    }
+
+    /**
+     * Дополнительные действия для подстановки модели
+     */
+    public function prepareInputModel(): void
+    {
+        if ($this->typeLink == UnitActive::LINK_HAS_ONE_TO_MANY) {
+            $this->modelType = Image::TYPE_SCREEN;
+
+            //Создаём модель для вводных параметров
+            $this->model = new Image();
+            $this->model->model_name = $this->parentModel->getModelNameLower();
+            $this->model->model_id = $this->parentModel->id;
+            $this->model->model_attr = $this->attr;
+            $this->model->type = Image::TYPE_SCREEN;
+        } else {
+            $this->modelType = Image::TYPE_IMAGE;
+        }
     }
 }

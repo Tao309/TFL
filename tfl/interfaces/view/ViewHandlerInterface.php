@@ -15,4 +15,9 @@ interface ViewHandlerInterface
      * @return string
      */
     public function renderEditField(): string;
+
+    /**
+     * Подготавливаем входящую модель. Дополнительные действия для подстановки модели
+     */
+    public function prepareInputModel(): void;
 }

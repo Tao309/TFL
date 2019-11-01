@@ -7,6 +7,7 @@ use app\models\Page;
 use app\models\User;
 use tfl\units\Unit;
 use tfl\units\UnitActive;
+use tfl\utils\tDebug;
 use tfl\utils\tString;
 
 trait UnitActiveBuilder
@@ -95,18 +96,16 @@ trait UnitActiveBuilder
                         break;
                 }
 
-//                $modelClassName = 'app\models\\'.ucfirst($request['model']['name']);
-//                $modelClass = $modelClassName::class;
+                if ($this->isNewModel()) {
+                    /**
+                     * @var UnitActive $modelClass
+                     */
+                    //@todo Сделать одним запросом все получения, в будущем или после сейва подставлять всё
+                    $this->$attr = $modelClass::getById($this->{$attr . '_id'});
+                }
+
             } else {
                 $modelClass = $data['model'];
-            }
-
-            if ($this->isNewModel()) {
-                /**
-                 * @var UnitActive $modelClassName
-                 */
-                //@todo Сделать одним запросом все получения, в будущем или после сейва подставлять всё
-//                $this->$attr = $modelClass::getById($id);
             }
         }
     }
@@ -182,11 +181,10 @@ trait UnitActiveBuilder
                 }
 
                 if ($data['link'] == static::LINK_HAS_ONE_TO_MANY) {
-                    $model->$attr = function ($rowData, $attr, $model, $data) {
-                        foreach ($rowData['relations'][$attr] as $index => $row) {
-                            yield $this->setRelationOneModel($model, $data, $attr, $row);
-                        }
-                    };
+                    $model->$attr = [];
+                    foreach ($rowData['relations'][$attr] as $index => $row) {
+                        $model->$attr[] = $this->setRelationOneModel($model, $data, $attr, $row);
+                    }
                 } else if ($data['link'] == static::LINK_HAS_ONE_TO_ONE) {
                     $model->$attr = $this->setRelationOneModel($model, $data, $attr, $rowData['relations'][$attr]);
                 }

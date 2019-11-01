@@ -27,7 +27,7 @@ class EditView extends TemplateBuilder
                 'type' => static::VIEW_TYPE_TEXTAREA,
                 'limit' => 1000,
             ],
-            'screen' => [
+            'screens' => [
                 'type' => static::VIEW_TYPE_MODEL,
                 'model' => Image::class,
             ],

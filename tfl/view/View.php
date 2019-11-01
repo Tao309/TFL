@@ -54,13 +54,13 @@ class View
     {
         //@todo Поправь для Option
         foreach ($this->dependModel->unitData()['relations'] as $attr => $data) {
-
             if ($data['model'] == Image::class) {
-                $this->viewHandlers[$attr] = new ImageViewHandler($attr,
-                    $this->tplBuilder->geViewType(), $this->dependModel);
+                $this->viewHandlers[$attr] = new ImageViewHandler($this->dependModel, $attr,
+                    $this->tplBuilder->geViewType());
             } else {
-                $this->viewHandlers[$attr] = new ViewHandler($attr,
-                    $this->tplBuilder->geViewType(), $this->dependModel);
+                //@todo добавить общий класс для моделей
+//                $this->viewHandlers[$attr] = new ViewHandler($attr,
+//                    $this->tplBuilder->geViewType(), $this->dependModel);
             }
         }
     }

@@ -11,60 +11,52 @@ use tfl\view\View;
  * Class ViewHandler
  * @package tfl\handlers\view
  *
- * @property UnitActive $parentModel
- * @property UnitActive $model
- * @property string $attr
- * @property string $viewType
+ * @property UnitActive $parentModel Родительская модель
+ * @property UnitActive $model Текущая модель, для неё отображаем вид
+ * @property UnitActive[] $models Текущие модели, для них отображаем вид
+ * @property string $attr Атрибут, по которому дочерняя модель отображается
+ * @property string $viewType Тип показа: edit, details
+ * @property string $typeLink Тип связи дочерней модели
  */
-class ViewHandler implements ViewHandlerInterface
+abstract class ViewHandler implements ViewHandlerInterface
 {
     protected $parentModel;
     protected $model;
+    protected $models = [];
     protected $attr;
     protected $viewType;
+    protected $typeLink;
 
-    public function __construct($attr, $viewType, UnitActive $parentModel = null, UnitActive $model = null)
+    public function __construct(UnitActive $parentModel, $attr, $viewType)
     {
         $this->attr = $attr;
         $this->viewType = $viewType;
 
-        if ($parentModel && !$model) {
+//        if ($parentModel) {
             $this->parentModel = $parentModel;
+        $relationData = $parentModel->getUnitDataRelation($this->attr);
+
+        $this->typeLink = $relationData['link'];
 
             if ($parentModel->hasAttribute($attr)) {
-                $this->model = $parentModel->$attr;
-            } else {
-                $modelClassName = $parentModel->getUnitData()['relations'][$this->attr]['model'];
-                $this->model = new $modelClassName;
-
-                if ($modelClassName === Image::class) {
-                    $this->prepareNewImageModel();
+                if ($this->typeLink == UnitActive::LINK_HAS_ONE_TO_MANY) {
+                    $this->models = $parentModel->$attr;
+                } else {
+                    $this->model = $parentModel->$attr;
                 }
+            } else {
+//                $modelClassName = $relationData['model'];
+//                $this->model = new $modelClassName;
+//
+//                $this->prepareInputModel();
             }
-        }
-        if ($model) {
-            $this->model = $model;
-        }
+//        }
+//        elseif ($model) {
+//            $this->model = $model;
+//        }
+
+        $this->prepareInputModel();
     }
-
-    /**
-     * Дополнительные действия для подстановки модели \app\models\Image
-     * @todo перенести в image
-     */
-    private function prepareNewImageModel(): void
-    {
-        $linkType = $this->parentModel->getUnitData()['relations'][$this->attr]['link'];
-        if ($linkType == UnitActive::LINK_HAS_ONE_TO_ONE) {
-            $this->model->type = Image::TYPE_IMAGE;
-        } else if ($linkType == UnitActive::LINK_HAS_ONE_TO_MANY) {
-            $this->model->type = Image::TYPE_SCREEN;
-        }
-
-        $this->model->model_name = $this->parentModel->getModelNameLower();
-        $this->model->model_id = $this->parentModel->id;
-        $this->model->model_attr = $this->attr;
-    }
-
 
     /**
      * Общий метод, который распредляется в зависимости от $viewType
@@ -74,18 +66,10 @@ class ViewHandler implements ViewHandlerInterface
     {
         if ($this->viewType == View::TYPE_VIEW_EDIT) {
             return $this->renderEditField();
+        } elseif ($this->viewType == View::TYPE_VIEW_DETAILS) {
+            return $this->renderViewField();
         }
 
-        return $this->renderViewField();
-    }
-
-    public function renderViewField(): string
-    {
-        return 'renderViewField';
-    }
-
-    public function renderEditField(): string
-    {
-        return 'renderEditField';
+        return '';
     }
 }

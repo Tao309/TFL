@@ -130,6 +130,16 @@ abstract class Unit
         return $this->modelUnitData;
     }
 
+    public function getUnitDataRelation(string $attr): array
+    {
+        return $this->getUnitData()['relations'][$attr] ?? [];
+    }
+
+    public function getUnitDataRule(string $attr): array
+    {
+        return $this->getUnitData()['rules'][$attr] ?? [];
+    }
+
     /**
      * Включаем возможность прямого сохранения через directSave()
      */
@@ -175,7 +185,13 @@ abstract class Unit
         return [
             'id' => $this->id,
             'name' => $this->getModelNameLower(),
+            'element_id' => $this->getHtmlElementId(),
         ];
+    }
+
+    public function getHtmlElementId()
+    {
+        return 'model-' . $this->getModelNameLower() . '-' . $this->id;
     }
 
     /**

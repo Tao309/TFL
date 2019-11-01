@@ -3,6 +3,7 @@
 namespace tfl\builders;
 
 use tfl\interfaces\InitControllerBuilderInterface;
+use tfl\utils\tString;
 
 /**
  * Class InitControllerBuilder
@@ -91,9 +92,28 @@ class InitControllerBuilder implements InitControllerBuilderInterface
         $fullClassName = 'app\\controllers\\' . $className;
         $modelController = new $fullClassName($this);
 
-        echo $modelController->$route();
+        echo $modelController->$route(...$this->getInputArgs());
     }
 
+    /**
+     * Выводим массив аргументов, передаваемых в строке
+     * @return array
+     */
+    private function getInputArgs(): array
+    {
+        $values = [];
+        if (isset($_GET) && !empty($_GET)) {
+            $values = array_values(array_map(function ($value) {
+                if (is_int($value)) {
+                    return tString::checkNum($value);
+                }
+
+                return tString::checkString($value);
+            }, $_GET));
+        }
+
+        return $values;
+    }
     private function getClassName(string $name): string
     {
         $className = $name;
