@@ -5,7 +5,7 @@ namespace app\views\models\Page;
 use app\models\Image;
 use tfl\builders\TemplateBuilder;
 
-class EditView extends TemplateBuilder
+class DetailsView extends TemplateBuilder
 {
     public function viewTitle(): string
     {

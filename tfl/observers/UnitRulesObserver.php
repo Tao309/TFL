@@ -12,6 +12,7 @@ namespace tfl\observers;
  * * secretField    - поле скрывать при показе, отображать при редактировании
  * * default        - значение по умолчанию при создании
  * * file           - данные используются через $_FILES
+ * * bbTags         - использовать бб-тэги для вставки в поле
  */
 trait UnitRulesObserver
 {

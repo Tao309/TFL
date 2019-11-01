@@ -133,7 +133,7 @@ trait ResourceObserver
         $metaValues['copyright'] = \TFL::source()->getOptionValue(UnitOption::NAME_CORE_SEO, 'metaCopyright');
 
         $metaValues['viewport'] = $this->getViewPortValue();
-        $metaValues['imageurl'] = '';
+        $metaValues['imageurl'] = ROOT . 'images/page_image.png';
 
         return $metaValues;
     }

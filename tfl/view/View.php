@@ -52,15 +52,10 @@ class View
 
     private function initViewHandlers()
     {
-        //@todo Поправь для Option
         foreach ($this->dependModel->unitData()['relations'] as $attr => $data) {
             if ($data['model'] == Image::class) {
                 $this->viewHandlers[$attr] = new ImageViewHandler($this->dependModel, $attr,
                     $this->tplBuilder->geViewType());
-            } else {
-                //@todo добавить общий класс для моделей
-//                $this->viewHandlers[$attr] = new ViewHandler($attr,
-//                    $this->tplBuilder->geViewType(), $this->dependModel);
             }
         }
     }

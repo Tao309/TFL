@@ -2,12 +2,8 @@
 
 namespace tfl\observers\models;
 
-use app\models\Image;
-use tfl\builders\RequestBuilder;
-use tfl\handlers\ImageUploadHandler;
-use tfl\units\UnitActive;
+use tfl\handlers\upload\ImageUploadHandler;
 use tfl\utils\tFile;
-use tfl\utils\tString;
 
 trait ImageObserver
 {
@@ -36,7 +32,9 @@ trait ImageObserver
 
     protected function afterSave(): bool
     {
-        $uploader = new ImageUploadHandler($this);
+        $sizeData = ImageUploadHandler::getSizeDataByModelAttr($this->model, $this->model_attr);
+
+        $uploader = new ImageUploadHandler($this, $sizeData);
         unset($this->fileData);
         if (!$uploader->upload()) {
             $this->addSaveError('create', $uploader->getErrorText());

@@ -190,7 +190,9 @@ class UnitOption extends Unit implements UnitInterface, UnitOptionInterface
                 'content',
             ],
             'rules' => [
-            ]
+            ],
+            'relations' => [
+            ],
         ];
     }
 

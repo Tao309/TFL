@@ -4,10 +4,12 @@ namespace tfl\view;
 
 use tfl\builders\RequestBuilder;
 use tfl\builders\TemplateBuilder;
+use tfl\handlers\html\BbTags;
 use tfl\units\UnitOption;
 use tfl\utils\tHTML;
 use tfl\utils\tHtmlForm;
 use tfl\utils\tHtmlTags;
+use tfl\utils\tString;
 
 class ViewUnit extends View
 {
@@ -112,7 +114,14 @@ class ViewUnit extends View
 
                 switch ($data['type']) {
                     case TemplateBuilder::VIEW_TYPE_TEXTAREA:
-                        $t .= tHTML::inputTextarea($inputName, $defaultValue, $limit, $options);
+                        if (isset($data['bbTags']) && $data['bbTags']) {
+                            //Добавляем строку с бб-тэгами
+                            $bbTags = new BbTags($this->dependModel, $attr);
+                            $t .= $bbTags->render();
+                        }
+
+                        $t .= tHTML::inputTextarea($inputName, tString::fromDbToTextarea($defaultValue),
+                            $limit, $options);
                         break;
                     case TemplateBuilder::VIEW_TYPE_CHECKBOX:
                         $t .= tHTML::inputCheckbox($inputName, $defaultValue);
@@ -131,6 +140,9 @@ class ViewUnit extends View
             } else {
                 //DetailsView
                 switch ($data['type']) {
+                    case TemplateBuilder::VIEW_TYPE_TEXTAREA:
+                        $t .= BbTags::replaceTags($defaultValue);
+                        break;
                     case TemplateBuilder::VIEW_TYPE_SELECT:
                         $t .= $data['values'][$defaultValue] ?? null;
                         break;

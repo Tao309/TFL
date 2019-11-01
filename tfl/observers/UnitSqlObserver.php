@@ -47,12 +47,18 @@ trait UnitSqlObserver
             }
 
             $attrs[] = $attr = mb_strtolower($attr);
-            $values[] = $this->$attr;
+
+            $value = $this->$attr;
+
+            if (isset($rules[$attr]) && $rules[$attr]['type'] == static::RULE_TYPE_DESCRIPTION) {
+                tString::fromTextareaToDb($value);
+            }
+
+            $values[] = $value;
         }
 
         foreach ($this->getUnitData()['relations'] as $attr => $data) {
             if ($data['type'] == static::RULE_TYPE_MODEL) {
-
                 if ($data['model'] == UnitActive::class) {
                     $attr = mb_strtolower($attr);
 

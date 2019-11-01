@@ -87,7 +87,7 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
             ]);
         }
 
-        $t = tHtmlTags::startTag('div', [
+        $t .= tHtmlTags::startTag('div', [
             'class' => [
                 'file-action',
             ]
@@ -138,7 +138,7 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
     }
     private function renderOpenButton(Image $model): string
     {
-        return tHTML::inputLink($model->getImageUrl(), 'o', [
+        return tHTML::inputLink($model->getImageUrl(Image::NAME_SIZE_FULL), 'o', [
             'class' => ['html-icon-button', 'icon-image-view', 'tImage'],
             'title' => 'Open',
             'target' => '_blank',
@@ -149,9 +149,10 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
         return tHTML::inputActionButton('insert', 'v', [], [
             'class' => ['html-icon-button', 'icon-image-insert', 'insert-tag'],
             'title' => 'Insert',
+
             'data-tag' => 'thumb',
-//            'data-field' => ucfirst($this->model_name).'[description]',
-//            'data-value' => $this->getInsertTagUrl(self::IMAGE_SIZE_FULL),
+            'data-field' => $this->parentModel->getModelName() . '[description]',
+            'data-value' => $model->getImageUrl(Image::NAME_SIZE_FULL, true),
         ]);
     }
     private function renderDeleteButton(Image $model, string $route): string

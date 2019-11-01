@@ -80,14 +80,11 @@ class tString
      * @param $text
      * @return mixed
      */
-    public static function fromDbTextarea($text)
+    public static function fromDbToTextarea(&$text)
     {
         $bb = array(PAGE_EOL);
         $tag = array('<br/>');
         $text = str_ireplace($tag, $bb, $text);
-
-        //$text = str_replace(PAGE_BR, PAGE_EOL, $text);
-        //$text = str_replace("<br>", PAGE_EOL, $text);
 
         return $text;
     }
@@ -98,22 +95,11 @@ class tString
      * @param $text
      * @return string|string[]|null
      */
-    private static function toDbTextarea($text)
+    public static function fromTextareaToDb(&$text)
     {
-        //$bb = array('\r\n','\n','\r');
-        //$text = str_replace($bb, PAGE_BR, $text);
-
-        /*
-        $text = str_replace('\n', PAGE_BR, $text);
-        $text = str_replace('\r', PAGE_BR, $text);
-        $text = str_replace('\r\n', PAGE_BR, $text);
-        */
-
         $text = preg_replace('!\\r\\n!si', PAGE_BR, $text);
         $text = preg_replace('!\\n!si', PAGE_BR, $text);
         $text = preg_replace('!\\r!si', PAGE_BR, $text);
-
-        return $text;
     }
 
     /**

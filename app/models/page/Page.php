@@ -15,6 +15,11 @@ use tfl\units\UnitActive;
  */
 class Page extends UnitActive
 {
+    public function __toString()
+    {
+        return $this->title;
+    }
+
     public function unitData(): array
     {
         return [

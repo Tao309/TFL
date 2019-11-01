@@ -1,8 +1,10 @@
 <?php
 
-namespace tfl\handlers;
+namespace tfl\handlers\upload;
 
 use app\models\Image;
+use tfl\units\Unit;
+use tfl\units\UnitActive;
 use tfl\utils\tFile;
 use tfl\utils\tString;
 
@@ -24,11 +26,6 @@ class ImageUploadHandler extends UploadHandler
     const FILE_NAME_NO_FOTO = 'nofoto';
     const FILE_NAME_NO_IMAGE = 'noimage';
     const FILE_NAME_DEFAULT_AVATAR = 'default_avatar';
-
-    const FILE_EXT_PNG = 'png';
-    const FILE_EXT_JPG = 'jpg';
-    const FILE_EXT_JPEG = 'jpeg';
-    const FILE_EXT_GIF = 'gif';
 
     private $file;
     private $fileData;
@@ -118,7 +115,47 @@ class ImageUploadHandler extends UploadHandler
         return $type;
     }
 
-    public function __construct(Image $model)
+    /**
+     * Получаем массив параметров из родительской модели для обрезки изображения
+     * @param UnitActive $model
+     * @param string $attr
+     * @return array
+     */
+    public static function getSizeDataByModelAttr(UnitActive $model, string $attr)
+    {
+        $data = [];
+        if (!isset($model->unitData()['relations'][$attr])
+            || !isset($model->unitData()['relations'][$attr]['data'])) {
+            return [];
+        }
+
+        $params = $model->unitData()['relations'][$attr]['data'];
+        if (count($params) == 3) {
+            $hasError = false;
+            foreach ($params as $index => $values) {
+                if (isset($values[0]) && isset($values[1])) {
+                    if (!is_int($values[0]) || !is_int($values[1])) {
+                        $hasError = true;
+                        break;
+                    }
+
+                    $data[$index] = [$values[0], $values[1]];
+                } else {
+                    $hasError = true;
+                    break;
+                }
+            }
+
+            if (!$hasError) {
+                $keys = [Image::NAME_SIZE_MINI, Image::NAME_SIZE_NORMAL, Image::NAME_SIZE_FULL];
+                $data = array_combine($keys, $data);
+            }
+        }
+
+        return $data;
+    }
+
+    public function __construct(Image $model, array $sizeData = [])
     {
         $this->fileData = $model->fileData;
         $this->model_name = $model->model_name;
@@ -127,15 +164,24 @@ class ImageUploadHandler extends UploadHandler
         $this->id = $model->id;
 
         $this->setImageData();
-        $this->setSizeData();
+        $this->setSizeData($sizeData);
     }
 
-    public function setSizeData(array $data = [])
+    public function setSizeData(array $sizeData = [])
     {
         $this->sizeData = [
-            Image::NAME_SIZE_MINI => [$data[Image::NAME_SIZE_MINI][0] ?? 40, $data[Image::NAME_SIZE_MINI][1] ?? 40],
-            Image::NAME_SIZE_NORMAL => [$data[Image::NAME_SIZE_NORMAL][0] ?? 150, $data[Image::NAME_SIZE_NORMAL][1] ?? 150],
-            Image::NAME_SIZE_FULL => [$data[Image::NAME_SIZE_FULL][0] ?? 360, $data[Image::NAME_SIZE_FULL][1] ?? 360],
+            Image::NAME_SIZE_MINI => [
+                $sizeData[Image::NAME_SIZE_MINI][0] ?? 40,
+                $sizeData[Image::NAME_SIZE_MINI][1] ?? 40
+            ],
+            Image::NAME_SIZE_NORMAL => [
+                $sizeData[Image::NAME_SIZE_NORMAL][0] ?? 150,
+                $sizeData[Image::NAME_SIZE_NORMAL][1] ?? 150
+            ],
+            Image::NAME_SIZE_FULL => [
+                $sizeData[Image::NAME_SIZE_FULL][0] ?? 360,
+                $sizeData[Image::NAME_SIZE_FULL][1] ?? 360
+            ],
         ];
     }
 

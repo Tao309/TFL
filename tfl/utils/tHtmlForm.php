@@ -117,12 +117,6 @@ class tHtmlForm
 
         if (is_array($elements)) {
             $form .= '<ul class="html-element-ul">';
-
-            $elements[] = [
-                'type' => 'hidden',
-                'value' => $method,
-            ];
-
             $form .= self::renderElements($elements);
             $form .= '</ul>';
         } else {
