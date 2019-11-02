@@ -13,6 +13,7 @@ trait DbObserver
     private $_rightJoin;
     private $_innerJoin;
     private $_where;
+    private $_order;
     private $_limit;
 
     private $init = false;
@@ -46,6 +47,7 @@ trait DbObserver
         'rightJoin',
         'innerJoin',
         'where',
+        'order',
         'limit',
     ];
 
@@ -130,6 +132,14 @@ trait DbObserver
     public function andWhere($input, $args = [])
     {
         return $this->where($input, $args, true);
+    }
+
+    public function order($value, $type = 'ASC')
+    {
+        $this->_order = 'ORDER BY ' . $value;
+        $this->_order .= ($type == 'ASC') ? ' ' . $type : ' DESC';
+
+        return $this;
     }
 
     public function limit(int $offset, int $limit)

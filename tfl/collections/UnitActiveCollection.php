@@ -2,6 +2,7 @@
 
 namespace tfl\collections;
 
+use app\models\Page;
 use tfl\interfaces\UnitCollectionInterface;
 use tfl\units\Unit;
 use tfl\units\UnitActive;
@@ -88,9 +89,9 @@ class UnitActiveCollection extends UnitCollection implements UnitCollectionInter
             'skipRelations' => !$this->withRelations,
             'offset' => $this->getQueryOffset(),
             'perPage' => $this->getQueryLimit(),
+            'order' => 'id',
+            'orderType' => 'DESC',
         ]);
-
-//        tDebug::printData($rows);
 
         return $this->rows = $rows;
     }
@@ -100,10 +101,21 @@ class UnitActiveCollection extends UnitCollection implements UnitCollectionInter
         return $this->getQueryRows();
     }
 
-    public function getModels(): array
+    public function getModels(): \Iterator
     {
-        return array_map(function ($rowData) {
-            return $this->dependModel->createFinalModel($this->dependModel, $rowData, true);
-        }, $this->getQueryRows());
+        $className = $this->dependModel->getClassName();
+
+        foreach ($this->getQueryRows() as $rowData) {
+            /**
+             * @var UnitActive $model
+             */
+            $model = new $className;
+            yield $model->createFinalModel($model, $rowData, true);
+        }
+
+
+//        return array_map(function ($rowData) {
+//            return $this->dependModel->createFinalModel($this->dependModel, $rowData, true);
+//        }, $this->getQueryRows());
     }
 }

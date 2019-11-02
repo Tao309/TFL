@@ -83,6 +83,7 @@ class ViewList extends View
                 'view-tbody',
             ]
         ]);
+
         $t .= $this->viewRows($collection->getModels());
         $t .= tHtmlTags::endTag('div');
 
@@ -95,49 +96,38 @@ class ViewList extends View
      * @param $rows array|Unit[]
      * @return string
      */
-    private function viewRows($rows): string
+    private function viewRows(\Iterator $models): string
     {
         $t = '';
 
-        $isModel = (isset($rows[0]) && $rows[0] instanceof UnitActive);
-
-        foreach ($rows as $row) {
+        foreach ($models as $model) {
             $t .= tHtmlTags::startTag('div', [
                 'class' => [
                     'view-row',
                 ],
-                'id' => $isModel ? $row->getHtmlElementId() : '',
+                'id' => $model->getHtmlElementId(),
             ]);
 
-            if ($isModel) {
-                $t .= $this->viewColumn('id', $row->id);
-            }
+            $t .= $this->viewColumn('id', $model->id);
 
             foreach ($this->columns as $index => $attr) {
-                if ($isModel) {
-                    $value = $row->$attr ?? '---';
+                $value = $model->$attr ?? '---';
 
-                    if ($index == 0) {
-                        $value = tHTML::inputLink($row->getEditUrl(), $value);
-                    }
-
-                } else {
-                    $value = $row[$attr] ?? '---';
+                if ($index == 0) {
+                    $value = tHTML::inputLink($model->getEditUrl(), $value);
                 }
 
                 $t .= $this->viewColumn($attr, $value);
             }
 
-            if ($isModel) {
-                $t .= $this->viewColumn('createddatetime', tString::getDatetime($row->createdDateTime, 'd.m.Y H:i'));
-                $t .= $this->viewColumn('lastchangedatetime', tString::getDatetime($row->lastChangeDateTime, 'd.m.Y H:i'));
+            $t .= $this->viewColumn('createddatetime', tString::getDatetime($model->createdDateTime, 'd.m.Y H:i'));
+            $t .= $this->viewColumn('lastchangedatetime', tString::getDatetime($model->lastChangeDateTime, 'd.m.Y H:i'));
 
-                //Добавлять даныне о владельце и изменении
-                $t .= $this->viewOwnerColumn($row);
+            //Добавлять даныне о владельце и изменении
+            $t .= $this->viewOwnerColumn($model);
 
-                //Добавить действия
-                $t .= $this->viewActionColumn($row);
-            }
+            //Добавить действия
+            $t .= $this->viewActionColumn($model);
 
             $t .= tHtmlTags::endTag('div');
         }
@@ -192,7 +182,7 @@ class ViewList extends View
         if (tAccess::canDelete($model)) {
             $htmlData = tHtmlForm::generateElementData([
                 'section',
-                'page/' . $model->id,
+                $model->getModelName() . '/' . $model->id,
                 DbBuilder::TYPE_DELETE,
             ], RequestBuilder::METHOD_POST);
 

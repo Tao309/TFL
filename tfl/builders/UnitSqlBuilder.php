@@ -36,6 +36,8 @@ trait UnitSqlBuilder
         $offset = isset($option['offset']) ? tString::checkNum($option['offset']) : 0;
         //@todo addDefault perPage for all
         $perPage = isset($option['perPage']) ? tString::checkNum($option['perPage']) : 30;
+        $order = isset($option['order']) ? tString::checkString($option['order']) : null;
+        $orderType = isset($option['orderType']) ? tString::checkString($option['orderType']) : null;
 
         if (in_array(['id', 'password', 'name', 'unitcollection'], array_keys($queryData))) {
             return null;
@@ -64,6 +66,10 @@ trait UnitSqlBuilder
         }
 
         if ($many) {
+            if ($order) {
+                $command->order($order, $orderType);
+            }
+
             $command->limit($offset, $perPage);
 
             $rows = $command->findAll();

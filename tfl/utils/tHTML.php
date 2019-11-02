@@ -90,13 +90,13 @@ class tHTML
 
     public static function inputActionButton($name, $value, $elementData = null, array $options = [])
     {
-        if (isset($options['class'])) {
+        if (isset($options['class']) && !isset($options['type'])) {
             $options['class'][] = 'http-request-button';
         }
 
         $input = '<button';
         $input .= ' name="' . $name . '"';
-        $input .= ' type="button"';
+        $input .= ' type="' . ($options['type'] ?? 'button') . '"';
         $input .= self::decodeOptions($options);
         if ($elementData) {
             $input .= "" . $elementData;
@@ -106,6 +106,13 @@ class tHTML
         $input .= '</button>';
 
         return $input;
+    }
+
+    public static function inputSubmitButton($name, $value, array $options = [])
+    {
+        $options['class'] = ['html-element', 'html-button'];
+        $options['type'] = 'submit';
+        return self::inputActionButton($name, $value, null, $options);
     }
 
     private static $checkBoxNumber = 0;

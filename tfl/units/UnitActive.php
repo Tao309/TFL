@@ -18,6 +18,7 @@ use tfl\utils\tResponse;
  * @property \DateTime $createdDateTime
  * @property \DateTime $lastChangeDateTime
  * @property User $owner
+ * @property bool $nullModel нулевая модель, без значений
  */
 abstract class UnitActive extends Unit implements UnitInterface
 {
@@ -26,6 +27,34 @@ abstract class UnitActive extends Unit implements UnitInterface
     const LINK_HAS_ONE_TO_ONE = 'oneToOne';
     const LINK_HAS_ONE_TO_MANY = 'oneToMany';
     const LINK_HAS_MANY_TO_MANY = 'manyToMany';
+
+    public function __construct($nullModel = false)
+    {
+        parent::__construct();
+
+        if ($nullModel) {
+            $this->initNullModel();
+        }
+    }
+
+    private function initNullModel()
+    {
+        $this->nullModel = true;
+
+        $this->id = 0;
+
+        foreach ($this->unitData()['details'] as $attr) {
+            $this->$attr = null;
+        }
+        foreach ($this->unitData()['relations'] as $attr => $data) {
+            $this->$attr = null;
+        }
+    }
+
+    public function getClassName()
+    {
+        return static::class;
+    }
 
     protected function beforeFind(): void
     {
@@ -153,5 +182,10 @@ abstract class UnitActive extends Unit implements UnitInterface
     public function getEditUrl(): string
     {
         return ROOT . 'admin/section/' . $this->getModelNameLower() . '/' . $this->id . '/edit';
+    }
+
+    public function getAddUrl()
+    {
+        return ROOT . 'admin/section/' . $this->getModelNameLower() . '/add';
     }
 }

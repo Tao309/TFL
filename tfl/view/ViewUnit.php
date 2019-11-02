@@ -2,10 +2,12 @@
 
 namespace tfl\view;
 
+use tfl\builders\DbBuilder;
 use tfl\builders\RequestBuilder;
 use tfl\builders\TemplateBuilder;
 use tfl\handlers\html\BbTags;
 use tfl\units\UnitOption;
+use tfl\utils\tAccess;
 use tfl\utils\tHTML;
 use tfl\utils\tHtmlForm;
 use tfl\utils\tHtmlTags;
@@ -41,9 +43,10 @@ class ViewUnit extends View
             $elements .= $this->viewRow($attr, $data);
         }
 
-        if ($this->tplBuilder->geViewType() == static::TYPE_VIEW_EDIT) {
+        if (in_array($this->tplBuilder->geViewType(), [static::TYPE_VIEW_ADD, static::TYPE_VIEW_EDIT])) {
             $elements .= $this->viewActionRow();
 
+            $method = RequestBuilder::METHOD_PUT;
             if ($this->dependModel instanceof UnitOption) {
                 $data = [
                     $this->tplBuilder->getRouteDirectionLink(),
@@ -51,14 +54,23 @@ class ViewUnit extends View
                     lcfirst($this->dependModel->getModelName())
                 ];
             } else {
-                $data = [
-                    $this->tplBuilder->getRouteDirectionLink(),
-                    $this->dependModel->getModelNameLower() . '/' . $this->dependModel->id,
-                    static::TYPE_VIEW_SAVE
-                ];
+                if ($this->tplBuilder->geViewType() == static::TYPE_VIEW_ADD) {
+                    $data = [
+                        $this->tplBuilder->getRouteDirectionLink(),
+                        $this->dependModel->getModelNameLower(),
+                        static::TYPE_VIEW_CREATE
+                    ];
+                    $method = RequestBuilder::METHOD_POST;
+                } else {
+                    $data = [
+                        $this->tplBuilder->getRouteDirectionLink(),
+                        $this->dependModel->getModelNameLower() . '/' . $this->dependModel->id,
+                        static::TYPE_VIEW_SAVE
+                    ];
+                }
             }
 
-            $t .= tHtmlForm::simpleForm($data, $elements, [], RequestBuilder::METHOD_PUT);
+            $t .= tHtmlForm::simpleForm($data, $elements, [], $method);
         } else {
             $t .= $elements;
         }
@@ -106,7 +118,8 @@ class ViewUnit extends View
             ]);
 
 
-            if ($this->tplBuilder->geViewType() == self::TYPE_VIEW_EDIT) {
+            if (in_array($this->tplBuilder->geViewType(), [self::TYPE_VIEW_ADD, self::TYPE_VIEW_EDIT])) {
+                //AddView
                 //EditView
                 $limit = $data['limit'] ?? null;
 
@@ -180,9 +193,6 @@ class ViewUnit extends View
         $viewType = $this->tplBuilder->geViewType();
 
         if (in_array($viewType, [View::TYPE_VIEW_EDIT, View::TYPE_VIEW_ADD])) {
-            $buttonTitle = 'Save';
-            $showButton = true;
-            if ($viewType == View::TYPE_VIEW_ADD) $buttonTitle = 'Add';
 
             $t .= tHtmlTags::startTag('div', [
                 'class' => [
@@ -195,9 +205,35 @@ class ViewUnit extends View
                 'class' => 'view-td-action'
             ]);
 
-            if ($showButton) {
-                $t .= '<button class="html-element html-button" type="submit">' . $buttonTitle . '</button>';
-            }
+            if ($viewType == View::TYPE_VIEW_ADD) {
+                //AddView
+                if (tAccess::canAdd($this->dependModel)) {
+                    $t .= tHTML::inputSubmitButton('submit', 'Add');
+                }
+            } else {
+                //EditView
+                if (tAccess::canEdit($this->dependModel)) {
+                    $t .= tHTML::inputSubmitButton('submit', 'Save');
+                }
+
+                if (tAccess::canDelete($this->dependModel)) {
+                    $htmlData = tHtmlForm::generateElementData([
+                        'section',
+                        $this->dependModel->getModelName() . '/' . $this->dependModel->id,
+                        DbBuilder::TYPE_DELETE,
+                    ], RequestBuilder::METHOD_POST);
+
+                    $t .= tHTML::inputActionButton('Delete', 'Delete', $htmlData, [
+                        'class' => [
+                            'html-element',
+                            'html-button',
+                            'html-button-delete',
+                        ],
+                        'title' => 'Delete',
+                        'data-params' => tHtmlForm::generateDataParams($this->dependModel->getHiddenActionData(DbBuilder::TYPE_DELETE), true),
+                    ]);
+                }
+
 
 //            if($viewType == ViewList::TYPE_VIEW_EDIT)
 //            {
@@ -211,6 +247,8 @@ class ViewUnit extends View
 ////                $t .= ' '.tHTML::generateDataParams(['id' => $this->dependModel->id]);
 //                $t .= '>Delete</button>';
 //            }
+            }
+
 
             $t .= tHtmlTags::endTag('div');
             $t .= tHtmlTags::endTag('div');

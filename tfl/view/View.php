@@ -8,6 +8,8 @@ use tfl\handlers\view\ImageViewHandler;
 use tfl\interfaces\view\ViewHandlerInterface;
 use tfl\units\Unit;
 use tfl\units\UnitActive;
+use tfl\utils\tAccess;
+use tfl\utils\tHTML;
 use tfl\utils\tHtmlTags;
 
 /**
@@ -26,6 +28,7 @@ class View
     const TYPE_VIEW_DELETE = 'delete';
     const TYPE_VIEW_ADD = 'add';
     const TYPE_VIEW_LIST = 'list';
+    const TYPE_VIEW_CREATE = 'create';
 
     /**
      * @var $tplBuilder TemplateBuilder
@@ -105,6 +108,17 @@ class View
         $t = tHtmlTags::startTag('div', [
             'class' => 'section-option-buttons'
         ]);
+
+        if (tAccess::canAdd($this->dependModel)) {
+            $t .= tHTML::inputLink($this->dependModel->getAddUrl(), 'Add', [
+                'class' => [
+                    'html-button',
+                    'html-button-add',
+                ],
+                'title' => 'Add',
+            ]);
+        }
+
 
         $t .= tHtmlTags::endTag();
         return $t;

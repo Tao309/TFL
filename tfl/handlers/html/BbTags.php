@@ -21,7 +21,7 @@ final class BbTags
         'q', 'blockquote', 'spoiler', 'p',
     ];
 
-    public static function replaceTags(string $value = '')
+    public static function replaceTags(string $value = null)
     {
         if (!$value) {
             return '';
