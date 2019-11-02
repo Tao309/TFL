@@ -121,8 +121,10 @@ class ControllerBuilder implements ControllerInterface
         $this->section->addAssignVars($vars);
     }
 
-    protected function checkAccess(UnitActive $model, string $type): void
+    protected function checkAccess(string $type, UnitActive $model = null): void
     {
+        $this->checkModelOrRedirect($model);
+
         $hasAccess = true;
         switch ($type) {
             case DbBuilder::TYPE_INSERT:
@@ -157,10 +159,24 @@ class ControllerBuilder implements ControllerInterface
 
     public function redirect($url = null): void
     {
-        if (!$url) $url = ROOT;
-        //@todo Добавить в админке переброс
+        if (!$url) {
+            $url = ROOT;
+
+            if ($this->routeDirection == InitControllerBuilder::ROUTE_ADMIN_DIRECTION) {
+                $url .= $this->routeDirection . '/';
+            }
+        }
 
         header('Location: ' . $url);
         exit;
+    }
+
+    protected function checkModelOrRedirect(UnitActive $model = null)
+    {
+        if (!$model) {
+            $this->redirect();
+        }
+
+        return;
     }
 }

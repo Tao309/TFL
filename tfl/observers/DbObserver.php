@@ -65,6 +65,7 @@ trait DbObserver
     public function addSelect($input)
     {
         if (empty($this->_select)) {
+            //@todo Улучшить
             die('Select fields required for query');
         }
 

@@ -202,7 +202,7 @@ class ViewList extends View
         }
         if (tAccess::canDelete($model)) {
             $htmlData = tHtmlForm::generateElementData([
-                'section',
+                $this->tplBuilder->getRouteDirectionLink(),
                 $model->getModelName() . '/' . $model->id,
                 DbBuilder::TYPE_DELETE,
             ], RequestBuilder::METHOD_POST);

@@ -42,10 +42,13 @@ class tHTML
         }
 
         if (isset($options['class'])) {
-            $options['class'] .= ' html-element-text';
+            if (!is_array($options['class'])) {
+                $options['class'] = [$options['class']];
+            }
         } else {
-            $options['class'] = 'html-element-text';
+            $options['class'] = [];
         }
+        $options['class'][] = ' html-element-text';
 
         $input .= self::decodeOptions($options);
 
@@ -75,10 +78,19 @@ class tHTML
                                          string $limit = null,
                                          array $options = [])
     {
+        if (isset($options['class'])) {
+            if (!is_array($options['class'])) {
+                $options['class'] = [$options['class']];
+            }
+        } else {
+            $options['class'] = [];
+        }
+        $options['class'][] = 'html-element-textarea';
+
         $t = tHtmlTags::startTag('textarea', [
             'name' => $name,
             'id' => $name,
-            'class' => 'html-element-textarea',
+            'class' => $options['class'],
         ]);
 
         $t .= $value;

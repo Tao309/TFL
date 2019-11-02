@@ -22,6 +22,11 @@ class ViewUnit extends View
         $this->initViewHandlers();
     }
 
+    protected function prepareViewLoad()
+    {
+        return;
+    }
+
     protected function viewBody(): string
     {
         $t = tHtmlTags::startTag('div', [
@@ -126,10 +131,15 @@ class ViewUnit extends View
                 $inputName = $this->dependModel->getModelName() . '[' . $attr . ']';
 
                 $options = [];
-                if (isset($data['disabled'])) $options['disabled'] = true;
+                if (isset($data['disabled'])) {
+                    $options['disabled'] = true;
+                }
                 if (isset($data['readonly'])) {
                     $defaultValue = $data['value'] ?? $defaultValue;
                     $options['readonly'] = true;
+                }
+                if (isset($data['required']) && $data['required']) {
+                    $options['class'] = ['element-required'];
                 }
 
                 switch ($data['type']) {
@@ -218,7 +228,7 @@ class ViewUnit extends View
 
                 if (tAccess::canDelete($this->dependModel)) {
                     $htmlData = tHtmlForm::generateElementData([
-                        'section',
+                        $this->tplBuilder->getRouteDirectionLink(),
                         $this->dependModel->getModelName() . '/' . $this->dependModel->id,
                         DbBuilder::TYPE_DELETE,
                     ], RequestBuilder::METHOD_POST);

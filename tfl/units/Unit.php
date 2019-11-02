@@ -157,11 +157,17 @@ abstract class Unit
         return implode(PAGE_BR, $this->saveErrors);
     }
 
+    public function getSaveErrorsElements()
+    {
+        return array_map(function ($key) {
+            return $this->getModelName() . '[' . $key . ']';
+        }, array_keys($this->saveErrors));
+    }
+
     protected function addDeleteError(string $name, string $message): void
     {
         $this->deleteErrors[$name] = $message;
     }
-
     public function getDeleteErrors(): string
     {
         return implode(PAGE_BR, $this->deleteErrors);
@@ -180,10 +186,10 @@ abstract class Unit
      * Добавление данных в tResponse при ответе
      * @return array
      */
-    public function getResponse(string $actionType): array
+    public function getResponse(): array
     {
         return [
-            'id' => $this->id,
+            'id' => $this->id ?? 0,
             'name' => $this->getModelNameLower(),
             'element_id' => $this->getHtmlElementId(),
         ];
@@ -191,7 +197,7 @@ abstract class Unit
 
     public function getHtmlElementId()
     {
-        return 'model-' . $this->getModelNameLower() . '-' . $this->id;
+        return 'model-' . $this->getModelNameLower() . '-' . ($this->id ?? 0);
     }
 
     /**
@@ -221,10 +227,10 @@ abstract class Unit
                     if ($this->save()) {
                         tResponse::resultSuccess([tString::RESPONSE_OK, $action], true, true, $this);
                     } else {
-                        tResponse::resultError($this->getSaveErrors(), true);
+                        tResponse::resultError($this->getSaveErrors(), true, true, $this);
                     }
                 } else {
-                    tResponse::resultError($this->getLoadDataErrors(), true);
+                    tResponse::resultError($this->getLoadDataErrors(), true, true, $this);
                 }
             }
 
@@ -242,7 +248,7 @@ abstract class Unit
                 if ($this->delete()) {
                     tResponse::resultSuccess([tString::RESPONSE_OK, DbBuilder::TYPE_DELETE], true, true, $this);
                 } else {
-                    tResponse::resultError($this->getDeleteErrors(), true);
+                    tResponse::resultError($this->getDeleteErrors(), true, true, $this);
                 }
             }
 

@@ -49,7 +49,7 @@ abstract class View
         $this->tplBuilder = $tplBuilder;
         $this->dependModel = $tplBuilder->getDependModel();
 
-        $this->prepareView();
+        $this->prepareViewLoad();
     }
 
     abstract protected function prepareViewLoad();

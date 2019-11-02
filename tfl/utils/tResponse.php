@@ -45,8 +45,12 @@ class tResponse
             'action' => DbBuilder::TYPE_ERROR,
         ];
 
-        if ($model && $addResponse = $model->getResponse()) {
-            $data['model'] = $addResponse;
+        if ($model) {
+            if ($addResponse = $model->getResponse()) {
+                $data['model'] = $addResponse;
+            }
+
+            $data['requiredFields'] = $model->getSaveErrorsElements();
         }
 
         if ($json) {
