@@ -3,6 +3,7 @@
 namespace tfl\observers;
 
 use tfl\units\UnitActive;
+use tfl\utils\tAccess;
 
 trait UnitObserver
 {
@@ -19,6 +20,19 @@ trait UnitObserver
 
     protected function beforeSave(): bool
     {
+        if ($this->isNewModel()) {
+            if (!tAccess::canAdd($this)) {
+                $this->addSaveError('access', 'You do not have access to create');
+                return false;
+            }
+        } else {
+            if (!tAccess::canEdit($this)) {
+                $this->addSaveError('access', 'You do not have access to edit');
+                return false;
+            }
+        }
+
+
         if (!empty($this->loadDataErrors)) {
             return false;
         }
@@ -38,7 +52,12 @@ trait UnitObserver
     protected function beforeDelete(): bool
     {
         if (!$this instanceof UnitActive) {
-            $this->addSaveError('model', 'Can not delete this type model');
+            $this->addDeleteError('model', 'Can not delete this type model');
+            return false;
+        }
+
+        if (!tAccess::canDelete($this)) {
+            $this->addDeleteError('access', 'You do not have access to delete');
             return false;
         }
 
