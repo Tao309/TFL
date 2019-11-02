@@ -145,7 +145,7 @@ class DbBuilder
         return $rows;
     }
 
-    private function foundRows()
+    protected function foundRows()
     {
         $query = 'SELECT FOUND_ROWS() AS count';
         return $this->find($query)['count'];

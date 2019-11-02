@@ -19,6 +19,15 @@ trait UnitSqlBuilder
     private $linkType;
 
     /**
+     * Получаем общее количество моделей
+     * @return int
+     */
+    public function getCount()
+    {
+        //@todo В будщем внести исправления при работе с WHERE в разделах при фильтрации
+        return \TFL::source()->db->from($this->getTableName())->getCount();
+    }
+    /**
      * @param array $queryData
      * @param array $option Настройки для запроса
      * @return array
@@ -43,6 +52,8 @@ trait UnitSqlBuilder
             return null;
         }
 
+        $isCollection = in_array('unitcollection', array_keys($queryData));
+
         $this->setDefaultLinkType();
 
         $tableName = $this->getTableName();
@@ -51,7 +62,7 @@ trait UnitSqlBuilder
             ->select(implode(',', $this->getModelColumnAttrs($tableName)))
             ->from($tableName);
 
-        if (!in_array('unitcollection', array_keys($queryData))) {
+        if (!$isCollection) {
             $this->setQueryFromInputData($command, $queryData, $many);
         }
 

@@ -208,4 +208,13 @@ class tHTML
 
         return $input;
     }
+
+    public static function addParamsToLink($link, $options = [])
+    {
+        if (!empty($options)) {
+            $link .= '&' . http_build_query($options);
+        }
+
+        return $link;
+    }
 }

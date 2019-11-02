@@ -240,6 +240,12 @@ trait DbObserver
         }
     }
 
+    public function getCount()
+    {
+        $this->select('COUNT(*) as count');
+        return $this->find()['count'];
+    }
+
     //@todo Добавить защиту
     public function getSqlRow()
     {

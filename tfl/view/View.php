@@ -20,7 +20,7 @@ use tfl\utils\tHtmlTags;
  * @property UnitActive $dependModel
  * @property ViewHandlerInterface[] $viewHandlers
  */
-class View
+abstract class View
 {
     const TYPE_VIEW_DETAILS = 'details';
     const TYPE_VIEW_EDIT = 'edit';
@@ -52,10 +52,7 @@ class View
         $this->prepareView();
     }
 
-    protected function prepareView()
-    {
-        return true;
-    }
+    abstract protected function prepareViewLoad();
 
     protected function initViewHandlers()
     {
@@ -77,7 +74,7 @@ class View
         $t = $this->viewHeader();
 
         if ($this->tplBuilder->geViewType() == View::TYPE_VIEW_LIST) {
-            $t .= $this->headerButtons();
+            $t .= $this->renderHeaderButtons();
         }
 
         $t .= tHtmlTags::startTag('div', [
@@ -103,7 +100,13 @@ class View
         return $t;
     }
 
-    private function headerButtons()
+    private function viewFooter(): string
+    {
+        $t = '';
+        return $t;
+    }
+
+    private function renderHeaderButtons()
     {
         $t = tHtmlTags::startTag('div', [
             'class' => 'section-option-buttons'
@@ -122,12 +125,6 @@ class View
 
         $t .= tHtmlTags::endTag();
         return $t;
-    }
-
-    private function viewFooter(): string
-    {
-        //@todo Вывод кнопок сохранения
-        return '';
     }
 
 

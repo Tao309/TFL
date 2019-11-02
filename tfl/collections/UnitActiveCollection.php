@@ -27,7 +27,6 @@ use tfl\utils\tDebug;
  * @property bool $withOwner
  * @property bool $withRelations
  *
- * @property array $rows
  */
 class UnitActiveCollection extends UnitCollection implements UnitCollectionInterface
 {
@@ -94,6 +93,15 @@ class UnitActiveCollection extends UnitCollection implements UnitCollectionInter
         ]);
 
         return $this->rows = $rows;
+    }
+
+    public function getAllCount()
+    {
+        if (!is_null($this->allCount)) {
+            return $this->allCount;
+        }
+
+        return $this->allCount = $this->dependModel->getCount();
     }
 
     public function getRows(): array

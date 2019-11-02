@@ -25,22 +25,6 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
 {
     private $modelType;
 
-    private function getHiddenData(string $method, Image $model): array
-    {
-        $data = [
-            'Image[model][name]' => $model->model_name,
-            'Image[model][id]' => $model->model_id,
-            'Image[model][attr]' => $model->model_attr,
-            'Image[type]' => $model->type,
-            tHtmlForm::NAME_METHOD => $method,
-        ];
-
-        if ($method == RequestBuilder::METHOD_DELETE) {
-            $data['Image[id]'] = $model->id;
-        }
-
-        return $data;
-    }
     private function renderFieldHeader(): string
     {
         $t = tHtmlTags::startTag('div', [

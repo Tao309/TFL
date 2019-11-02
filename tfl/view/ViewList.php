@@ -19,19 +19,36 @@ use tfl\utils\tString;
  * @package tfl\view
  *
  * @property array $columns
+ * @property string $link
+ * @property int $offset
  * @property int $perPage
+ * @property int $currentPage
  */
 class ViewList extends View
 {
     private $columns;
+    private $link;
+    private $offset;
     private $perPage;
+    private $currentPage;
 
-    protected function prepareView()
+    protected function prepareViewLoad(): void
     {
         $columns = $this->tplBuilder->viewData()['columns'];
         $this->columns = array_map('strtolower', $columns);
 
         $this->perPage = $this->tplBuilder->viewData()['perPage'] ?? 30;
+
+        $currentPage = \TFL::source()->request->getRequestValue('get', 'page');
+        $this->currentPage = is_numeric($currentPage) ? tString::checkNum($currentPage) : 1;
+
+        if ($this->currentPage > 1) {
+            $this->offset = (($this->currentPage - 1) * $this->perPage);
+        } else {
+            $this->offset = 0;
+        }
+
+        $this->link = ROOT . 'admin/section/' . $this->dependModel->getModelNameLower();
     }
 
     private function viewHeaderRow(string $attr, $title = null): string
@@ -75,6 +92,7 @@ class ViewList extends View
         $t .= tHtmlTags::endTag('div');
 
         $collection = new UnitActiveCollection($this->dependModel);
+        $collection->setOffset($this->offset);
         $collection->setPerPage($this->perPage);
         $collection->withOwner();
 
@@ -85,9 +103,12 @@ class ViewList extends View
         ]);
 
         $t .= $this->viewRows($collection->getModels());
-        $t .= tHtmlTags::endTag('div');
 
-        $t .= tHtmlTags::endTag('div');
+        $t .= tHtmlTags::endTag();
+
+        $t .= tHtmlTags::endTag();
+
+        $t .= $this->renderPages($collection);
 
         return $t;
     }
@@ -199,6 +220,41 @@ class ViewList extends View
 
         return $this->viewColumn('actions', $t);
 
+    }
+
+    private function renderPages(UnitActiveCollection $collection): string
+    {
+        $count = $collection->getAllCount();
+
+        $countPages = ceil($count / $this->perPage);
+        if ($countPages <= 1) {
+            return '';
+        }
+
+        $t = tHtmlTags::startTag('div', [
+            'class' => 'section-pages',
+        ]);
+
+        for ($i = 1; $i <= $countPages; $i++) {
+            $options = [
+                'class' => ['one-page'],
+            ];
+            if ($i == $this->currentPage) {
+                $options['class'][] = 'current-page';
+            }
+
+            $opt = [];
+            if ($i > 1) {
+                $opt = ['page' => $i];
+            }
+            $currentLink = tHTML::addParamsToLink($this->link, $opt);
+
+            $t .= tHTML::inputLink($currentLink, $i, $options);
+        }
+
+        $t .= tHtmlTags::endTag('div');
+
+        return $t;
     }
 
 }
