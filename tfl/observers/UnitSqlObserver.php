@@ -129,9 +129,4 @@ trait UnitSqlObserver
 
         return true;
     }
-
-    protected function deleteModelRelations()
-    {
-        return true;
-    }
 }

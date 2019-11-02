@@ -121,6 +121,11 @@ class ControllerBuilder implements ControllerInterface
         $this->section->addAssignVars($vars);
     }
 
+    /**
+     * Проверяем доступ к моделе
+     * @param string $type
+     * @param UnitActive|null $model
+     */
     protected function checkAccess(string $type, UnitActive $model = null): void
     {
         $this->checkModelOrRedirect($model);
@@ -171,7 +176,11 @@ class ControllerBuilder implements ControllerInterface
         exit;
     }
 
-    protected function checkModelOrRedirect(UnitActive $model = null)
+    /**
+     * Если модель не существует, перенаправляем
+     * @param UnitActive|null $model
+     */
+    private function checkModelOrRedirect(UnitActive $model = null)
     {
         if (!$model) {
             $this->redirect();

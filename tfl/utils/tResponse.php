@@ -46,7 +46,7 @@ class tResponse
         ];
 
         if ($model) {
-            if ($addResponse = $model->getResponse()) {
+            if ($addResponse = $model->getResponse($data['action'])) {
                 $data['model'] = $addResponse;
             }
 

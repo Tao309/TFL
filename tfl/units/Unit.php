@@ -186,7 +186,7 @@ abstract class Unit
      * Добавление данных в tResponse при ответе
      * @return array
      */
-    public function getResponse(): array
+    public function getResponse(string $actionType): array
     {
         return [
             'id' => $this->id ?? 0,

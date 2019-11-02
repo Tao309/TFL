@@ -19,6 +19,7 @@ use tfl\utils\tResponse;
  * @property \DateTime $lastChangeDateTime
  * @property User $owner
  * @property bool $nullModel нулевая модель, без значений
+ * @property bool $isDependModel Зависимая модель, существует только внутри другой модели
  */
 abstract class UnitActive extends Unit implements UnitInterface
 {
@@ -28,14 +29,7 @@ abstract class UnitActive extends Unit implements UnitInterface
     const LINK_HAS_ONE_TO_MANY = 'oneToMany';
     const LINK_HAS_MANY_TO_MANY = 'manyToMany';
 
-    public function __construct($nullModel = false)
-    {
-        parent::__construct();
-
-        if ($nullModel) {
-            $this->initNullModel();
-        }
-    }
+    protected $isDependModel = false;
 
     private function initNullModel()
     {
@@ -51,15 +45,33 @@ abstract class UnitActive extends Unit implements UnitInterface
         }
     }
 
+    protected function beforeFind(): void
+    {
+        parent::beforeFind();
+        $this->setModelUnitData();
+    }
+
+    public function __construct($nullModel = false)
+    {
+        parent::__construct();
+
+        if ($nullModel) {
+            $this->initNullModel();
+        }
+    }
+
     public function getClassName()
     {
         return static::class;
     }
 
-    protected function beforeFind(): void
+    /**
+     * Завивисимая лм модель. Нужно удалять её, при  удалении родительской модели
+     * @return bool
+     */
+    public function isDependModel()
     {
-        parent::beforeFind();
-        $this->setModelUnitData();
+        return $this->isDependModel;
     }
 
     public static function getById(int $id)
