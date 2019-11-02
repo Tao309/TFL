@@ -44,7 +44,7 @@ trait UnitRulesObserver
         }
 
         $this->ruleAttr = $attr;
-        $this->ruleValueAttr = $this->$attr;
+        $this->ruleValueAttr = $this->$attr ?? null;
         $this->ruleData = $this->getUnitData()['rules'][$attr];
 
         if (isset($this->ruleData['secretField'])) {

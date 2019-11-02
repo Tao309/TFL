@@ -101,9 +101,8 @@ class InitControllerBuilder implements InitControllerBuilderInterface
      */
     private function getInputArgs(): array
     {
-        $values = [];
         if (isset($_GET) && !empty($_GET)) {
-            $values = array_values(array_map(function ($value) {
+            return array_values(array_map(function ($value) {
                 if (is_int($value)) {
                     return tString::checkNum($value);
                 }
@@ -112,7 +111,7 @@ class InitControllerBuilder implements InitControllerBuilderInterface
             }, $_GET));
         }
 
-        return $values;
+        return [];
     }
     private function getClassName(string $name): string
     {

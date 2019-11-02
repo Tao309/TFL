@@ -13,19 +13,9 @@ class UnitCollection
     /**
      * @var $attributes array
      */
-    protected $attributes;
+    protected $attributes = [];
     /**
      * @var $rows array
      */
     protected $rows;
-
-    protected function setQueryOffset(): int
-    {
-        return 0;
-    }
-
-    protected function setQueryLimit(): int
-    {
-        return 20;
-    }
 }

@@ -5,7 +5,6 @@ namespace tfl\view;
 use app\models\Image;
 use tfl\builders\TemplateBuilder;
 use tfl\handlers\view\ImageViewHandler;
-use tfl\handlers\view\ViewHandler;
 use tfl\interfaces\view\ViewHandlerInterface;
 use tfl\units\Unit;
 use tfl\units\UnitActive;
@@ -47,10 +46,15 @@ class View
         $this->tplBuilder = $tplBuilder;
         $this->dependModel = $tplBuilder->getDependModel();
 
-        $this->initViewHandlers();
+        $this->prepareView();
     }
 
-    private function initViewHandlers()
+    protected function prepareView()
+    {
+        return true;
+    }
+
+    protected function initViewHandlers()
     {
         foreach ($this->dependModel->unitData()['relations'] as $attr => $data) {
             if ($data['model'] == Image::class) {
@@ -68,7 +72,17 @@ class View
     public function render(): string
     {
         $t = $this->viewHeader();
+
+        if ($this->tplBuilder->geViewType() == View::TYPE_VIEW_LIST) {
+            $t .= $this->headerButtons();
+        }
+
+        $t .= tHtmlTags::startTag('div', [
+            'class' => 'section-' . $this->tplBuilder->geViewType(),
+        ]);
         $t .= $this->viewBody();
+        $t .= tHtmlTags::endTag('div');
+
         $t .= $this->viewFooter();
 
         return $t;
@@ -82,7 +96,17 @@ class View
         $t .= tHtmlTags::render('div', $this->tplBuilder->viewTitle(), [
             'class' => 'header'
         ]);
-        $t .= tHtmlTags::endTag('div');
+        $t .= tHtmlTags::endTag();
+        return $t;
+    }
+
+    private function headerButtons()
+    {
+        $t = tHtmlTags::startTag('div', [
+            'class' => 'section-option-buttons'
+        ]);
+
+        $t .= tHtmlTags::endTag();
         return $t;
     }
 

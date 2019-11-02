@@ -5,20 +5,14 @@ namespace tfl\interfaces;
 interface UnitCollectionInterface
 {
     /**
-     * Подстановка выводящих полей
-     * @param array $attrs
-     */
-    public function setAttributes(array $attrs = []): void;
-
-    /**
      * Вывод offset при формировании запроса
      */
-    public function setQueryOffset(): int;
+    public function getQueryOffset(): int;
 
     /**
      * Вывод limit при формировании запроса
      */
-    public function setQueryLimit(): int;
+    public function getQueryLimit(): int;
 
     /**
      * Получаем список моделей

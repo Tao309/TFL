@@ -6,7 +6,9 @@ use tfl\interfaces\ControllerInterface;
 use tfl\interfaces\InitControllerBuilderInterface;
 use tfl\observers\ControllerBuilderObserver;
 use tfl\units\Unit;
+use tfl\units\UnitActive;
 use tfl\units\UnitOption;
+use tfl\utils\tAccess;
 
 /**
  * 'section/page/'          => sectionList (GET)
@@ -14,7 +16,7 @@ use tfl\units\UnitOption;
  * 'section/page/create/    => sectionCreate (POST)
  * 'section/page/2/         => sectionDetails (GET)
  * 'section/page/2/edit'    => sectionEdit (GET)
- * 'section/page/2/         => sectionSave (PUT)
+ * 'section/page/2/save     => sectionSave (PUT)
  * 'section/page/2/delete'  => sectionDelete (DELETE)
  */
 /**
@@ -119,6 +121,30 @@ class ControllerBuilder implements ControllerInterface
         $this->section->addAssignVars($vars);
     }
 
+    protected function checkAccess(UnitActive $model, string $type): void
+    {
+        $hasAccess = true;
+        switch ($type) {
+            case DbBuilder::TYPE_INSERT:
+                $hasAccess = tAccess::canAdd($model);
+                break;
+            case DbBuilder::TYPE_UPDATE:
+            case DbBuilder::TYPE_SAVE:
+                $hasAccess = tAccess::canEdit($model);
+                break;
+            case DbBuilder::TYPE_DELETE:
+                $hasAccess = tAccess::canDelete($model);
+                break;
+            case DbBuilder::TYPE_VIEW:
+                $hasAccess = tAccess::canView($model);
+                break;
+        }
+
+        if (!$hasAccess) {
+            $this->redirect();
+        }
+    }
+
     public function addComputeVars(array $vars = []): void
     {
         $this->section->addComputeVars($vars);
@@ -132,6 +158,7 @@ class ControllerBuilder implements ControllerInterface
     public function redirect($url = null): void
     {
         if (!$url) $url = ROOT;
+        //@todo Добавить в админке переброс
 
         header('Location: ' . $url);
         exit;

@@ -13,6 +13,13 @@ use tfl\utils\tString;
 
 class ViewUnit extends View
 {
+    public function __construct(TemplateBuilder $tplBuilder)
+    {
+        parent::__construct($tplBuilder);
+
+        $this->initViewHandlers();
+    }
+
     protected function viewBody(): string
     {
         $t = tHtmlTags::startTag('div', [

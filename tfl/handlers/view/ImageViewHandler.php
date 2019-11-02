@@ -4,6 +4,7 @@ namespace tfl\handlers\view;
 
 use app\models\Image;
 use app\models\User;
+use tfl\builders\DbBuilder;
 use tfl\builders\RequestBuilder;
 use tfl\interfaces\view\ViewHandlerInterface;
 use tfl\units\UnitActive;
@@ -99,8 +100,8 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
         ], RequestBuilder::METHOD_POST, [
             'class' => ['http-request-upload']
         ]);
-        $hiddenData = $this->getHiddenData(RequestBuilder::METHOD_POST, $this->model);
-        $htmlData .= tHtmlForm::generateDataParams($hiddenData);
+
+        $htmlData .= tHtmlForm::generateDataParams($this->model->getHiddenActionData(DbBuilder::TYPE_INSERT));
 
         $inputFile = tHtmlTags::renderClosedTag('input', [
             'type' => 'file',
@@ -160,10 +161,10 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
         $htmlData = tHtmlForm::generateElementData([
             'section',
             $route,
-            'delete',
+            DbBuilder::TYPE_DELETE,
         ], RequestBuilder::METHOD_POST);
 
-        $hiddenData = $this->getHiddenData(RequestBuilder::METHOD_DELETE, $model);
+        $hiddenData = $model->getHiddenActionData(DbBuilder::TYPE_DELETE);
 
         return tHTML::inputActionButton('delete', 'x', $htmlData, [
             'class' => ['html-icon-button', 'icon-image-delete'],

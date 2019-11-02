@@ -137,8 +137,8 @@ trait UnitActiveBuilder
         $rowData = $this->rowDataForCreateFinalModel;
 
         $model->id = $rowData['id'];
-        $model->createdDateTime = $rowData['createddatetime'];
-        $model->lastChangeDateTime = $rowData['lastchangedatetime'];
+        $model->createdDateTime = $rowData['createddatetime'] ?? null;
+        $model->lastChangeDateTime = $rowData['lastchangedatetime'] ?? null;
 
         $rules = $model->getUnitData()['rules'];
 

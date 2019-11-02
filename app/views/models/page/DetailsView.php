@@ -9,7 +9,7 @@ class DetailsView extends TemplateBuilder
 {
     public function viewTitle(): string
     {
-        return 'Page Edit';
+        return 'Page Details';
     }
 
     public function viewData(): array

@@ -20,19 +20,27 @@ trait UnitSqlBuilder
 
     /**
      * @param array $queryData
-     * @param bool $many Вывод множества значений
+     * @param array $option Настройки для запроса
      * @return array
      */
-    public function prepareRowData(array $queryData = [], $many = false)
+    public function prepareRowData(array $queryData = [], $option = [])
     {
         //@todo Add Exception
         if (empty($queryData)) {
             return null;
         }
 
-        if (in_array(['id', 'password', 'name'], array_keys($queryData))) {
+        $many = $option['many'] ?? false;
+        $skipOwner = $option['skipOwner'] ?? false;
+        $skipRelations = $option['skipRelations'] ?? false;
+        $offset = isset($option['offset']) ? tString::checkNum($option['offset']) : 0;
+        //@todo addDefault perPage for all
+        $perPage = isset($option['perPage']) ? tString::checkNum($option['perPage']) : 30;
+
+        if (in_array(['id', 'password', 'name', 'unitcollection'], array_keys($queryData))) {
             return null;
         }
+
         $this->setDefaultLinkType();
 
         $tableName = $this->getTableName();
@@ -40,6 +48,57 @@ trait UnitSqlBuilder
         $command = \TFL::source()->db
             ->select(implode(',', $this->getModelColumnAttrs($tableName)))
             ->from($tableName);
+
+        if (!in_array('unitcollection', array_keys($queryData))) {
+            $this->setQueryFromInputData($command, $queryData, $many);
+        }
+
+        if ($this instanceof UnitActive) {
+            $this->addUnitQuery($command, $tableName);
+            if (!$skipOwner) {
+                $this->addOwnerQuery($command);
+            }
+            if (!$skipRelations) {
+                $this->addRelationsQuery($command);
+            }
+        }
+
+        if ($many) {
+            $command->limit($offset, $perPage);
+
+            $rows = $command->findAll();
+
+            if (empty($rows)) {
+                return [];
+            }
+
+            $rows = array_map(function ($row) {
+                $this->assignRowData($row);
+                $this->assignRelationsData($row);
+
+                return $row;
+            }, $rows);
+
+            return $rows;
+        } else {
+            $row = $command->find();
+
+            if (empty($row)) {
+                return null;
+            }
+
+            $this->assignRowData($row);
+            if (!$skipRelations) {
+                $this->assignRelationsData($row);
+            }
+
+            return $row;
+        }
+    }
+
+    private function setQueryFromInputData(DbBuilder $command, $queryData, $many)
+    {
+        $tableName = $this->getTableName();
 
         foreach ($queryData as $name => $value) {
             if ($many && $name == 'id' && is_array($value)) {
@@ -100,40 +159,6 @@ trait UnitSqlBuilder
                     'value' => $value,
                 ]);
             }
-        }
-
-        if ($this instanceof UnitActive) {
-            $this->addUnitQuery($command, $tableName);
-            $this->addOwnerQuery($command);
-            $this->addRelationsQuery($command);
-        }
-
-        if ($many) {
-            $rows = $command->findAll();
-
-            if (empty($rows)) {
-                return [];
-            }
-
-            $rows = array_map(function ($row) {
-                $this->assignRowData($row);
-                $this->assignRelationsData($row);
-
-                return $row;
-            }, $rows);
-
-            return $rows;
-        } else {
-            $row = $command->find();
-
-            if (empty($row)) {
-                return null;
-            }
-
-            $this->assignRowData($row);
-            $this->assignRelationsData($row);
-
-            return $row;
         }
     }
 
@@ -298,9 +323,13 @@ trait UnitSqlBuilder
         }
     }
 
-    private function setNewLinkType(string $linkType): void
+    private function setNewLinkType(string $linkType = null): void
     {
-        $this->linkType = $linkType;
+        if ($linkType) {
+            $this->setDefaultLinkType();
+        } else {
+            $this->linkType = $linkType;
+        }
     }
 
     private function setDefaultLinkType(): void

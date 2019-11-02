@@ -50,11 +50,12 @@ class tString
         if (!$value) {
             return null;
         }
-        $date = new \DateTime($value);
 
         if (strtotime($value) <= 0) {
             return null;
         }
+
+        $date = new \DateTime($value);
 
         return $date->format('Y-m-d H:i:s');
     }

@@ -2,10 +2,13 @@
 
 namespace tfl\units;
 
+use app\models\Image;
 use app\models\User;
 use tfl\interfaces\UnitInterface;
-use tfl\builders\{RequestBuilder, UnitActiveBuilder, UnitActiveSqlBuilder};
+use tfl\builders\{DbBuilder, RequestBuilder, UnitActiveBuilder, UnitActiveSqlBuilder};
+use tfl\utils\tAccess;
 use tfl\utils\tDebug;
+use tfl\utils\tHtmlForm;
 use tfl\utils\tResponse;
 
 /**
@@ -64,7 +67,7 @@ abstract class UnitActive extends Unit implements UnitInterface
         return $model;
     }
 
-    public function getByIds(array $ids)
+    public static function getByIds(array $ids)
     {
         /**
          * @var $model UnitActive
@@ -72,7 +75,7 @@ abstract class UnitActive extends Unit implements UnitInterface
         $modelName = self::getCurrentModel();
         $model = new $modelName;
 
-        $rowDatas = $model->prepareRowData(['id' => $ids], true);
+        $rowDatas = $model->prepareRowData(['id' => $ids], ['many' => true]);
 
         $models = [];
 
@@ -104,8 +107,51 @@ abstract class UnitActive extends Unit implements UnitInterface
         return true;
     }
 
+    public function getHiddenActionData(string $type): array
+    {
+        $data = [];
+
+        $modelName = $this->getModelName();
+
+        if ($this instanceof Image) {
+            $data[$modelName . '[type]'] = $this->type;
+            $data[$modelName . '[model][name]'] = $this->model_name;
+            $data[$modelName . '[model][id]'] = $this->model_id;
+            $data[$modelName . '[model][attr]'] = $this->model_attr;
+        }
+
+        switch ($type) {
+            case DbBuilder::TYPE_INSERT:
+                $data[tHtmlForm::NAME_METHOD] = RequestBuilder::METHOD_POST;
+                break;
+            case DbBuilder::TYPE_UPDATE:
+            case DbBuilder::TYPE_SAVE:
+                $data[tHtmlForm::NAME_METHOD] = RequestBuilder::METHOD_PUT;
+                break;
+            case DbBuilder::TYPE_DELETE:
+                $data[$modelName . '[id]'] = $this->id;
+                $data[tHtmlForm::NAME_METHOD] = RequestBuilder::METHOD_DELETE;
+                break;
+            case DbBuilder::TYPE_VIEW:
+                $data[tHtmlForm::NAME_METHOD] = RequestBuilder::METHOD_GET;
+                break;
+        }
+
+        return $data;
+    }
+
     public function getSeoValues(): array
     {
         return [];
+    }
+
+    public function getUrl(): string
+    {
+        return ROOT . 'section/' . $this->getModelNameLower() . '/' . $this->id;
+    }
+
+    public function getEditUrl(): string
+    {
+        return ROOT . 'admin/section/' . $this->getModelNameLower() . '/' . $this->id . '/edit';
     }
 }

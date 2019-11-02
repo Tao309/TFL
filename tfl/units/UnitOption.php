@@ -120,7 +120,7 @@ class UnitOption extends Unit implements UnitInterface, UnitOptionInterface
         $modelName = self::getCurrentModel();
         $model = new $modelName;
 
-        $rowDatas = $model->prepareRowData(['name' => $names], true);
+        $rowDatas = $model->prepareRowData(['name' => $names], ['many' => true]);
 
         $models = [];
 

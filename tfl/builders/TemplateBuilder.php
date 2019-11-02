@@ -64,7 +64,6 @@ abstract class TemplateBuilder
      */
     private $sectionBuilder;
 
-//    public function __construct(UnitInterface $model, string $view = View::TYPE_VIEW_DETAILS)
     public function __construct(SectionBuilder $sectionBuilder)
     {
         $this->sectionBuilder = $sectionBuilder;

@@ -104,9 +104,10 @@ class ImageUploadHandler extends UploadHandler
      * @param $type
      * @return string
      */
-    public static function getExtType($type)
+    public static function getExtType($mimeType)
     {
-        $type = end(explode('/', $type));
+        $names = explode('/', $mimeType);
+        $type = end($names);
 
         if (in_array($type, [self::FILE_EXT_JPEG, self::FILE_EXT_JPG])) {
             $type = self::FILE_EXT_JPG;

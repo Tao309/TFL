@@ -48,7 +48,7 @@ trait UnitSqlObserver
 
             $attrs[] = $attr = mb_strtolower($attr);
 
-            $value = $this->$attr;
+            $value = $this->$attr ?? null;
 
             if (isset($rules[$attr]) && $rules[$attr]['type'] == static::RULE_TYPE_DESCRIPTION) {
                 tString::fromTextareaToDb($value);
