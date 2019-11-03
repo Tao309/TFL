@@ -6,7 +6,6 @@ use app\models\Image;
 use app\models\User;
 use tfl\interfaces\UnitInterface;
 use tfl\builders\{DbBuilder, RequestBuilder, UnitActiveBuilder, UnitActiveSqlBuilder};
-use tfl\utils\tAccess;
 use tfl\utils\tDebug;
 use tfl\utils\tHtmlForm;
 use tfl\utils\tResponse;
@@ -29,21 +28,8 @@ abstract class UnitActive extends Unit implements UnitInterface
     const LINK_HAS_ONE_TO_MANY = 'oneToMany';
     const LINK_HAS_MANY_TO_MANY = 'manyToMany';
 
+    private $nullModel = false;
     protected $isDependModel = false;
-
-    private function initNullModel()
-    {
-        $this->nullModel = true;
-
-        $this->id = 0;
-
-        foreach ($this->unitData()['details'] as $attr) {
-            $this->$attr = null;
-        }
-        foreach ($this->unitData()['relations'] as $attr => $data) {
-            $this->$attr = null;
-        }
-    }
 
     protected function beforeFind(): void
     {
@@ -51,13 +37,34 @@ abstract class UnitActive extends Unit implements UnitInterface
         $this->setModelUnitData();
     }
 
-    public function __construct($nullModel = false)
+    public function __construct($emptyModel = false)
     {
         parent::__construct();
 
-        if ($nullModel) {
-            $this->initNullModel();
+        if ($emptyModel) {
+            $this->id = 0;
         }
+    }
+
+    public static function createNullOwnerModel()
+    {
+        /**
+         * @var UnitActive $model
+         */
+        $className = static::class;
+
+        $model = new $className;
+
+        $model->nullModel = true;
+
+        $rowData = $model->prepareRowData(['nullmodel' => true]);
+
+        return $model->createFinalModel($model, $rowData, true);
+    }
+
+    public function isNulOwnerModel()
+    {
+        return $this->nullModel;
     }
 
     public function getClassName()
@@ -142,7 +149,13 @@ abstract class UnitActive extends Unit implements UnitInterface
          * @var array $data
          */
         $this->setAttrsFromRequestData($data);
-        $this->setRelationsFromRequestData($data);
+
+        if ($this->isNewModel() && !$this->isDependModel()) {
+            $this->setRelationsForNewModelFromRequestData($data);
+        } else {
+            $this->setRelationsFromRequestData($data);
+        }
+
         $this->setAttrsFromFilesData();
 
         return true;

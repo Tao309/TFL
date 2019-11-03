@@ -37,6 +37,7 @@ trait UnitRepository
             return false;
         }
 
+        //Тут подставляется id к текущей моделе
         if (!$this->saveModelAttrs()) {
             return false;
         }
@@ -52,7 +53,9 @@ trait UnitRepository
             }
         }
 
-        $this->afterSave();
+        if (!$this->afterSave()) {
+            return false;
+        }
 
         return true;
     }

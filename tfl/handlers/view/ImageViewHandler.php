@@ -78,7 +78,7 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
             ]
         ]);
         $htmlData = tHtmlForm::generateElementData([
-            'section',
+            'admin/section',
             'image',
             'create',
         ], RequestBuilder::METHOD_POST, [
@@ -143,7 +143,7 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
     private function renderDeleteButton(Image $model, string $route): string
     {
         $htmlData = tHtmlForm::generateElementData([
-            'section',
+            'admin/section',
             $route,
             DbBuilder::TYPE_DELETE,
         ], RequestBuilder::METHOD_POST);
@@ -196,10 +196,22 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
                 }
             }
 
-            return '';
+            if ($model->type == Image::TYPE_IMAGE) {
+                return '';
+            }
         }
 
-        $t = tHtmlTags::startTag('div', [
+        $t = '';
+
+        if ($this->viewType == View::TYPE_VIEW_ADD) {
+            $parentModelInputName = $this->parentModel->getModelName() . '[' . $model->model_attr . ']';
+            if ($model->type == Image::TYPE_SCREEN) {
+                $parentModelInputName .= '[]';
+            }
+            $t .= tHTML::inputHidden($parentModelInputName, $model->id);
+        }
+
+        $t .= tHtmlTags::startTag('div', [
             'class' => [
                 'one-image',
             ]
@@ -212,7 +224,7 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
 
             $route = 'image';
 
-            if ($this->viewType == View::TYPE_VIEW_EDIT) {
+            if ($this->viewType == View::TYPE_VIEW_EDIT || $this->viewType == View::TYPE_VIEW_ADD) {
                 $route .= '/' . $model->id;
             }
 
@@ -258,6 +270,11 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
     {
         if ($this->typeLink == UnitActive::LINK_HAS_ONE_TO_MANY) {
             $this->modelType = Image::TYPE_SCREEN;
+
+            //Обратная сортировка изображений
+            if (!empty($this->models)) {
+                $this->models = array_reverse($this->models);
+            }
 
             $this->initNullImageModel();
         } else {

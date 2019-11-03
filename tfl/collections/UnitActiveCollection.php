@@ -82,13 +82,13 @@ class UnitActiveCollection extends UnitCollection implements UnitCollectionInter
             return $this->rows;
         }
 
-        $rows = $this->dependModel->prepareRowData(['unitcollection'], [
+        $rows = $this->dependModel->prepareRowData(['unitcollection' => true], [
             'many' => true,
             'skipOwner' => !$this->withOwner,
             'skipRelations' => !$this->withRelations,
             'offset' => $this->getQueryOffset(),
             'perPage' => $this->getQueryLimit(),
-            'order' => 'id',
+            'order' => $this->dependModel->getTableName() . '.id',
             'orderType' => 'DESC',
         ]);
 

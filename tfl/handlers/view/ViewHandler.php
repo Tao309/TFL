@@ -33,7 +33,7 @@ abstract class ViewHandler implements ViewHandlerInterface
         $this->viewType = $viewType;
         $this->parentModel = $parentModel;
 
-        $relationData = $parentModel->getUnitDataRelation($this->attr);
+        $relationData = $parentModel->getUnitDataRelationByAttr($this->attr);
         $this->typeLink = $relationData['link'];
 
         if ($parentModel->hasAttribute($attr)) {
@@ -53,7 +53,7 @@ abstract class ViewHandler implements ViewHandlerInterface
      */
     public function renderRowField(): string
     {
-        if ($this->viewType == View::TYPE_VIEW_EDIT) {
+        if ($this->viewType == View::TYPE_VIEW_EDIT || $this->viewType == View::TYPE_VIEW_ADD) {
             return $this->renderEditField();
         } elseif ($this->viewType == View::TYPE_VIEW_DETAILS) {
             return $this->renderViewField();

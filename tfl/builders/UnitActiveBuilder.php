@@ -47,6 +47,27 @@ trait UnitActiveBuilder
         }
     }
 
+    protected function setRelationsForNewModelFromRequestData(array $request): void
+    {
+        foreach ($this->getUnitDataRelations() as $attr => $data) {
+            if (!isset($request[$attr])) {
+                continue;
+            }
+
+            if ($data['link'] == self::LINK_HAS_ONE_TO_MANY) {
+                $this->$attr = [];
+
+                foreach ($request[$attr] as $index => $value) {
+                    $this->$attr[] = tString::checkValue($value);
+                }
+            } else if ($data['link'] == self::LINK_HAS_ONE_TO_ONE) {
+                $value = tString::checkValue($request[$attr]);
+
+                $this->$attr = $value;
+            }
+        }
+    }
+
     /**
      * Распределяем данные из request по relations модели
      * @param array $request
@@ -101,9 +122,14 @@ trait UnitActiveBuilder
                      * @var UnitActive $modelClass
                      */
                     //@todo Сделать одним запросом все получения
-                    $this->$attr = $modelClass::getById($this->{$attr . '_id'});
+                    if ($this->{$attr . '_id'} > 0) {
+                        $this->$attr = $modelClass::getById($this->{$attr . '_id'});
+                    } else {
+                        //Загрузка изображения при создании страницы, новости
+                        $this->$attr = new $modelClass(true);
+//                        $this->$attr = $modelClass::createNullOwnerModel();
+                    }
                 }
-
             } else {
                 $modelClass = $data['model'];
             }
@@ -136,7 +162,12 @@ trait UnitActiveBuilder
     {
         $rowData = $this->rowDataForCreateFinalModel;
 
-        $model->id = $rowData['id'];
+        if ($model->isNulOwnerModel()) {
+            $model->id = 0;
+        } else {
+            $model->id = $rowData['id'];
+        }
+
         $model->createdDateTime = $rowData['createddatetime'] ?? null;
         $model->lastChangeDateTime = $rowData['lastchangedatetime'] ?? null;
 
@@ -164,6 +195,10 @@ trait UnitActiveBuilder
 
     private function setOwner(Unit $model)
     {
+        if ($this->isNulOwnerModel()) {
+            return;
+        }
+
         $owner = new User();
         $owner->createFinalModel($owner, $this->rowDataForCreateFinalModel['owner']);
 

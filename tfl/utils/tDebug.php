@@ -21,7 +21,7 @@ class tDebug
      */
     public static function startDebug()
     {
-        define('debug', true);
+        define('DEBUG', true);
     }
 
     /**
@@ -30,9 +30,8 @@ class tDebug
      */
     public static function printDebug($data)
     {
-        if (defined('debug')) {
+        if (defined('DEBUG')) {
             self::printData($data);
-            exit;
         }
     }
 }

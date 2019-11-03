@@ -87,6 +87,7 @@ function error_handler($level, $message, $file, $line, $context, $class = '')
 
     $t = tHtmlTags::startTag('div', [
         'class' => $class,
+        'id' => 'errorHandler',
     ]);
     $t .= tHtmlTags::startTag('div');
     $t .= tHtmlTags::render('span', $type, ['class' => 'title']);

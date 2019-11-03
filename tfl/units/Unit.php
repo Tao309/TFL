@@ -19,6 +19,10 @@ use tfl\utils\tString;
  * @package tfl\units
  *
  * @property int $id
+ * @property string $modelName
+ * @property string $modelNameLower
+ * @property array $modelUnitData
+ * @property bool $isWasNewModel
  */
 abstract class Unit
 {
@@ -45,6 +49,10 @@ abstract class Unit
      * @var $modelUnitData array|null
      */
     private $modelUnitData;
+    /**
+     * @var bool $isWasNewModel Модели были ли изначально новая
+     */
+    private $isWasNewModel;
 
     /**
      * Возможность прямого сохранения
@@ -81,6 +89,16 @@ abstract class Unit
     protected function isNewModel()
     {
         return !isset($this->id) || !$this->id || $this->id <= 0;
+    }
+
+    protected function setIsWasNewModel(): void
+    {
+        $this->isWasNewModel = true;
+    }
+
+    protected function isWasNewModel()
+    {
+        return $this->isWasNewModel;
     }
 
     public function getLabel($attr)
@@ -130,7 +148,12 @@ abstract class Unit
         return $this->modelUnitData;
     }
 
-    public function getUnitDataRelation(string $attr): array
+    public function getUnitDataRelations(): array
+    {
+        return $this->getUnitData()['relations'];
+    }
+
+    public function getUnitDataRelationByAttr(string $attr): array
     {
         return $this->getUnitData()['relations'][$attr] ?? [];
     }

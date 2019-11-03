@@ -13,6 +13,7 @@ trait DbObserver
     private $_rightJoin;
     private $_innerJoin;
     private $_where;
+    private $_group;
     private $_order;
     private $_limit;
 
@@ -47,6 +48,7 @@ trait DbObserver
         'rightJoin',
         'innerJoin',
         'where',
+        'group',
         'order',
         'limit',
     ];
@@ -81,39 +83,46 @@ trait DbObserver
         return $this;
     }
 
-    public function innerJoin($input, $cond)
+    private function join($type, $table, $cond)
     {
-        $this->_innerJoin .= 'INNER JOIN ' . $input . ' ON (' . $cond . ')';
-        $this->_innerJoin .= PAGE_EOL;
-        return $this;
-    }
-
-    public function leftJoin($input, array $cond)
-    {
-        $this->_leftJoin .= 'LEFT JOIN ' . $input . ' ON (' . PAGE_EOL;
+        $t = mb_strtoupper($type) . ' JOIN ' . $table . ' ON (' . PAGE_EOL;
 
         $where = [];
         foreach ($cond as $name => $value) {
             $where[] = $name . ' = ' . $value;
         }
 
-        $this->_leftJoin .= implode(' AND ', $where) . PAGE_EOL;
-        $this->_leftJoin .= ')' . PAGE_EOL;
+        $t .= implode(' AND ', $where) . PAGE_EOL;
+        $t .= ')' . PAGE_EOL;
+
+        return $t;
+    }
+
+    public function innerJoin($input, $cond)
+    {
+        $this->_innerJoin .= $this->join('inner', $input, $cond);
+
+        return $this;
+    }
+    public function leftJoin($input, array $cond)
+    {
+        $this->_leftJoin .= $this->join('left', $input, $cond);
+
         return $this;
     }
 
     public function rightJoin($input, $cond)
     {
-        $this->_leftJoin .= 'RIGHT JOIN ' . $input . ' ON (' . $cond . ')';
-        $this->_leftJoin .= PAGE_EOL;
+        $this->_rightJoin .= $this->join('right', $input, $cond);
+
         return $this;
     }
 
-    public function where($input, $args = [], $add = false)
+    public function where($input, $args = [], $add = false, $or = false)
     {
         if ($args) {
             foreach ($args as $index => $arg) {
-                //@todo добавить check_sql
+                $arg = tString::checkValue($arg);
                 if (is_string($arg)) {
                     $arg = '"' . $arg . '"';
                 }
@@ -121,7 +130,9 @@ trait DbObserver
             }
         }
 
-        if ($add && !empty($this->_where)) {
+        if ($or && !empty($this->_where)) {
+            $this->_where .= ' OR (' . $input . ')';
+        } else if ($add && !empty($this->_where)) {
             $this->_where .= ' AND (' . $input . ')';
         } else {
             $this->_where = 'WHERE (' . $input . ')';
@@ -135,6 +146,11 @@ trait DbObserver
         return $this->where($input, $args, true);
     }
 
+    public function orWhere($input, $args = [])
+    {
+        return $this->where($input, $args, false, true);
+    }
+
     public function order($value, $type = 'ASC')
     {
         $this->_order = 'ORDER BY ' . $value;
@@ -146,6 +162,17 @@ trait DbObserver
     public function limit(int $offset, int $limit)
     {
         $this->_limit = 'LIMIT ' . $offset . ',' . $limit;
+
+        return $this;
+    }
+
+    public function group($value)
+    {
+        if (empty($this->_group)) {
+            $this->_group = 'GROUP BY ' . $value;
+        } else {
+            $this->_group .= ' AND  ' . $value;
+        }
 
         return $this;
     }
@@ -183,8 +210,20 @@ trait DbObserver
 
         $where = [];
         foreach ($condition as $condName => $condValue) {
-            $condValue = is_int($condValue) ? (int)$condValue : tString::checkString($condValue, true);
-            $where[] = $table . '.' . $condName . ' = ' . $condValue;
+            if (is_array($condValue)) {
+                if (empty($condValue)) {
+                    continue;
+                }
+
+                $ids = [];
+                foreach ($condValue as $id) {
+                    $ids[] = tString::checkValue($id);
+                }
+                $where[] = $table . '.' . $condName . ' IN (' . implode(',', $ids) . ')';
+            } else {
+                $condValue = is_int($condValue) ? (int)$condValue : tString::checkString($condValue, true);
+                $where[] = $table . '.' . $condName . ' = ' . $condValue;
+            }
         }
         $query .= 'WHERE ' . implode(' AND ', $where);
 
@@ -248,9 +287,13 @@ trait DbObserver
     }
 
     //@todo Добавить защиту
-    public function getSqlRow()
+    protected function getSqlRow()
     {
-        return $this->getText();
+        $text = $this->getText();
+
+        $this->restoreInit();
+
+        return $text;
     }
 
     public function getText()
@@ -263,8 +306,6 @@ trait DbObserver
                 $return .= $this->$attr_name . PAGE_EOL;
             }
         }
-
-        $this->restoreInit();
 
         return $return;
     }

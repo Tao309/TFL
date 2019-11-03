@@ -243,22 +243,7 @@ class ViewUnit extends View
                         'data-params' => tHtmlForm::generateDataParams($this->dependModel->getHiddenActionData(DbBuilder::TYPE_DELETE), true),
                     ]);
                 }
-
-
-//            if($viewType == ViewList::TYPE_VIEW_EDIT)
-//            {
-//                $t .= '<button class="html-element html-button html-button-delete http-request-button" type="button" ';
-//                $t .= ' '.tHtmlForm::generateElementData([
-//                        "admin/section",
-//                        $this->dependModel->getModelNameLower(),
-//                        DbBuilder::TYPE_DELETE
-//                    ], 'POST');
-//
-////                $t .= ' '.tHTML::generateDataParams(['id' => $this->dependModel->id]);
-//                $t .= '>Delete</button>';
-//            }
             }
-
 
             $t .= tHtmlTags::endTag('div');
             $t .= tHtmlTags::endTag('div');

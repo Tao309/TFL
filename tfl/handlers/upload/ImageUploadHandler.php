@@ -72,9 +72,16 @@ class ImageUploadHandler extends UploadHandler
         $minScale = min([$widthScale, $heightScale]);
         $maxScale = max([$widthScale, $heightScale]);
 
+        $src_x = ($origParams[0] / 2) - (($needParams[0] * $minScale) / 2);
+        $src_y = ($origParams[1] / 2) - (($needParams[1] * $minScale) / 2);
+
         return [
-            tString::checkNum($origParams[0] / $maxScale),
-            tString::checkNum($origParams[1] / $maxScale),
+//            tString::checkNum($origParams[0] / $maxScale),
+//            tString::checkNum($origParams[1] / $maxScale),
+            tString::checkNum($needParams[0] * $minScale),
+            tString::checkNum($needParams[1] * $minScale),
+            $src_x,
+            $src_y,
         ];
     }
 
@@ -215,7 +222,7 @@ class ImageUploadHandler extends UploadHandler
     {
         if (
             empty($this->fileData) || empty($this->model_name)
-            || empty($this->model_id) || empty($this->model_attr) || empty($this->id)
+            || empty($this->model_attr) || empty($this->id)
         ) {
             $this->addErrorText('Required fields: file, model name and id and attr');
             return false;
@@ -280,22 +287,22 @@ class ImageUploadHandler extends UploadHandler
             return false;
         }
 
-        $image = $this->imageCreateFrom();
-
-        if (!$image) {
+        if (!$image = $this->imageCreateFrom()) {
             return false;
         }
 
         $dirPath = WEB_PATH . '/upload/' . $this->model_name . '/' . $this->model_attr . '/';
         $this->checkDirExists($dirPath);
         $zPath = zROOT . $dirPath;
+        $currentTime = time();
 
         foreach ($this->getDataSizes() as $sizeType => $dataSize) {
             $path = $zPath . $sizeType . '/';
 
-            list($width, $height) = self::getCropParams([$dataSize[0], $dataSize[1]],
+            list($width, $height, $src_x, $src_y) = self::getCropParams([$dataSize[0], $dataSize[1]],
                 [$this->file['width'], $this->file['height']]);
-            $this->fileName = $this->id . '_' . time() . '.' . $this->file['extension'];
+
+            $this->fileName = $this->id . '_' . $currentTime . '.' . $this->file['extension'];
 
             $imageTemp = imagecreatetruecolor($width, $height);
 

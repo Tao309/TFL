@@ -23,6 +23,14 @@ class tString
         return @unserialize($value);
     }
 
+    public static function checkValue($value)
+    {
+        if (is_numeric($value)) {
+            return self::checkNum($value);
+        }
+
+        return self::checkString($value);
+    }
     public static function checkString($value, $sql = false)
     {
         //@todo Добавить защитцу

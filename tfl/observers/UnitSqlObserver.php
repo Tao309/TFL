@@ -2,10 +2,12 @@
 
 namespace tfl\observers;
 
+use app\models\Image;
 use app\models\User;
 use tfl\units\Unit;
 use tfl\units\UnitActive;
 use tfl\units\UnitOption;
+use tfl\utils\tDebug;
 use tfl\utils\tString;
 
 trait UnitSqlObserver
@@ -26,6 +28,7 @@ trait UnitSqlObserver
             $id = \TFL::source()->db->getLastInsertId();
 
             $this->id = $id;
+            $this->setIsWasNewModel();
         } else {
             \TFL::source()->db->update($this->getTableName(), array_combine($attrs, $values), [
                 'id' => $this->id,
@@ -70,7 +73,6 @@ trait UnitSqlObserver
                     $attrs[] = $attr_name;
                     $values[] = $this->$attr_name;
 
-
                     $attr_attr = $attr . '_attr';
                     $attrs[] = $attr_attr;
                     $values[] = $this->$attr_attr;
@@ -108,6 +110,39 @@ trait UnitSqlObserver
 
     protected function saveModelRelations(): bool
     {
+        if ($this->isWasNewModel()) {
+            $update = [];
+            foreach ($this->getUnitDataRelations() as $attr => $data) {
+                if ($data['model'] == Image::class && $this->hasAttribute($attr)) {
+                    if (!isset($update[$data['model']])) {
+                        $update[$data['model']] = [];
+                    }
+
+                    if ($data['link'] == UnitActive::LINK_HAS_ONE_TO_MANY) {
+                        foreach ($this->$attr as $id) {
+                            $update[$data['model']][] = $id;
+                        }
+                    } else if ($data['link'] == UnitActive::LINK_HAS_ONE_TO_ONE) {
+                        $update[$data['model']][] = $this->$attr;
+                    }
+                }
+            }
+
+            //Обновление только для изображений
+            foreach ($update as $modelName => $ids) {
+                /**
+                 * @var UnitActive $model ;
+                 */
+                $model = new $modelName;
+
+                \TFL::source()->db->update($model->getTableName(), [
+                    'model_id' => $this->id,
+                ], [
+                    'id' => $ids,
+                ]);
+            }
+        }
+
         return true;
     }
 

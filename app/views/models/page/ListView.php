@@ -17,7 +17,7 @@ class ListView extends TemplateBuilder
             'columns' => [
                 'title',
             ],
-            'perPage' => 30,
+            'perPage' => 12,
         ];
     }
 }
