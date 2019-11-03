@@ -4,6 +4,7 @@ namespace tfl\observers;
 
 use app\models\Page;
 use tfl\builders\DbBuilder;
+use tfl\builders\InitControllerBuilder;
 use tfl\builders\RequestBuilder;
 use tfl\units\Unit;
 use tfl\units\UnitActive;
@@ -59,6 +60,12 @@ trait ControllerBuilderObserver
                     break;
             }
         } else {
+            $defaultRoute = InitControllerBuilder::DEFAULT_ROUTE;
+            if ($defaultRoute == $this->getSectionRouteType() && $defaultRoute == $this->getSectionRoute()) {
+                //Главную страницу не проверяем
+                return;
+            }
+
             //Просмотр вида через метод GET
             switch ($this->getSectionRouteType()) {
                 case 'index'://Список
