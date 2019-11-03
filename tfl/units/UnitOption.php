@@ -149,7 +149,7 @@ class UnitOption extends Unit implements UnitInterface, UnitOptionInterface
      *      'optionName2' => 'optionValue2',
      * ]
      */
-    private function getOptionData(array $data): array
+    private function getOptionData(array $data, $decode = false): array
     {
         $optionArray = [];
 
@@ -159,15 +159,15 @@ class UnitOption extends Unit implements UnitInterface, UnitOptionInterface
                 continue;
             }
 
-            $optionArray[$index] = tString::checkValue(($data[$index]) ?? $row['value'] ?? null);
+            if (isset($data[$index])) {
+                $optionArray[$index] = ($decode) ? tString::decodeValue($data[$index]) : tString::encodeValue($data[$index]);
+            } else {
+                $optionArray[$index] = $row['value'] ?? null;
+            }
+
         }
 
         return $optionArray;
-    }
-
-    public function getOptionDataForTmpSave()
-    {
-        return $this->getOptionData($this->option);
     }
 
     public function getOptionDataForView()
@@ -225,6 +225,11 @@ class UnitOption extends Unit implements UnitInterface, UnitOptionInterface
         return $this->option[$attr] ?? null;
     }
 
+    public function getFileName()
+    {
+        return $this->getOptionCodeName();
+    }
+
     /**
      * Массив с ключами, описанием и значениями полей для подмены в beforeSave
      * @return array
@@ -232,13 +237,8 @@ class UnitOption extends Unit implements UnitInterface, UnitOptionInterface
     private function getJustOptionsList()
     {
         return array_map(function ($row) {
-            return tString::checkValue($row);
+            return tString::encodeValue($row);
         }, $this->option);
-    }
-
-    public function getFileName()
-    {
-        return $this->getOptionCodeName();
     }
 
     public function createFinalModel(Unit $model, array $rowData)
@@ -246,14 +246,13 @@ class UnitOption extends Unit implements UnitInterface, UnitOptionInterface
         $model->title = $this->getOptionTitle();
         $this->id = $rowData['id'];
 
-        if (empty($rowData['content'])) {
+        if (empty(trim($rowData['content']))) {
             $rowData['content'] = [];
         } else {
             $rowData['content'] = tString::unserialize($rowData['content']);
         }
-//        print_r($rowData['content']);exit;
 
-        $this->option = $this->getOptionData($rowData['content']);
+        $this->option = $this->getOptionData($rowData['content'], true);
 
         $this->afterFind();
 

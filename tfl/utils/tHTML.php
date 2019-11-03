@@ -37,7 +37,7 @@ class tHTML
     {
         $input = '<input type="text" value="' . $value . '" name="' . $name . '"';
         if ($limit) {
-            $limit = tString::checkNum($limit);
+            $limit = tString::encodeNum($limit);
             $input .= ' maxlength="' . $limit . '"';
         }
 

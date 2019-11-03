@@ -84,7 +84,7 @@ class RequestBuilder
         $data = $this->getRequestData(mb_strtolower($method));
 
         if (isset($data[$nameValue])) {
-            return tString::checkString($data[$nameValue]);
+            return tString::encodeString($data[$nameValue]);
         }
 
         return null;

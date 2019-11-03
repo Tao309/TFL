@@ -35,6 +35,7 @@ trait UnitSqlObserver
             if ($this instanceof UnitOption) {
                 $excludeCheck[] = 'content';
             }
+
             \TFL::source()->db->update($this->getTableName(), array_combine($attrs, $values), [
                 'id' => $this->id,
             ], $excludeCheck);

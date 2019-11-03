@@ -11,7 +11,7 @@ class tString
 
     public static function serialize($value = null)
     {
-        return serialize($value);
+        return base64_encode(serialize($value));
     }
 
     public static function unserialize($value = null)
@@ -20,30 +20,36 @@ class tString
             return null;
         }
 
-        return @unserialize($value);
+        return @unserialize(base64_decode($value));
     }
 
-    public static function checkValue($value)
+    public static function encodeValue($value)
     {
         if (is_numeric($value)) {
-            return self::checkNum($value);
+            return self::encodeNum($value);
         }
 
-        return self::checkString($value);
+        return self::encodeString($value);
     }
-    public static function checkString($value, $sql = false)
+
+    public static function encodeString($value, $sql = false)
     {
         //@todo Добавить защитцу
         if (is_array($value)) {
             return $value;
         }
 
-        return htmlspecialchars(trim($value), ENT_QUOTES);
+        return htmlentities(trim($value), ENT_QUOTES);
     }
 
-    public static function checkNum($value, $sql = false)
+    public static function encodeNum($value, $sql = false)
     {
         return (int)$value;
+    }
+
+    public static function decodeValue(string $value)
+    {
+        return html_entity_decode($value, ENT_QUOTES);
     }
 
     public static function getCurentDate()

@@ -25,7 +25,7 @@ trait UnitActiveBuilder
                 continue;
             }
 
-            $this->$attr = tString::checkString($request[$attr]);
+            $this->$attr = tString::encodeString($request[$attr]);
         }
     }
 
@@ -58,10 +58,10 @@ trait UnitActiveBuilder
                 $this->$attr = [];
 
                 foreach ($request[$attr] as $index => $value) {
-                    $this->$attr[] = tString::checkValue($value);
+                    $this->$attr[] = tString::encodeValue($value);
                 }
             } else if ($data['link'] == self::LINK_HAS_ONE_TO_ONE) {
-                $value = tString::checkValue($request[$attr]);
+                $value = tString::encodeValue($request[$attr]);
 
                 $this->$attr = $value;
             }
@@ -91,9 +91,9 @@ trait UnitActiveBuilder
                     }
 
                     if ($attrName == 'id') {
-                        $attrValue = tString::checkNum($request[$attr][$attrName]);
+                        $attrValue = tString::encodeNum($request[$attr][$attrName]);
                     } else {
-                        $attrValue = tString::checkString($request[$attr][$attrName]);
+                        $attrValue = tString::encodeString($request[$attr][$attrName]);
                     }
 
                     $this->{$attr . '_' . $attrName} = $attrValue;

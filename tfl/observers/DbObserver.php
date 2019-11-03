@@ -122,7 +122,7 @@ trait DbObserver
     {
         if ($args) {
             foreach ($args as $index => $arg) {
-                $arg = tString::checkValue($arg);
+                $arg = tString::encodeValue($arg);
                 if (is_string($arg)) {
                     $arg = '"' . $arg . '"';
                 }
@@ -217,11 +217,10 @@ trait DbObserver
 
                 $ids = [];
                 foreach ($condValue as $id) {
-                    $ids[] = tString::checkValue($id);
+                    $ids[] = tString::encodeValue($id);
                 }
                 $where[] = $table . '.' . $condName . ' IN (' . implode(',', $ids) . ')';
             } else {
-                $condValue = is_numeric($condValue) ? (int)$condValue : '"' . tString::checkString($condValue, true) . '"';
                 $where[] = $table . '.' . $condName . ' = ' . $condValue;
             }
         }
@@ -236,7 +235,7 @@ trait DbObserver
 
         $where = [];
         foreach ($condition as $condName => $condValue) {
-            $condValue = is_int($condValue) ? (int)$condValue : '"' . tString::checkString($condValue, true) . '"';
+            $condValue = is_int($condValue) ? (int)$condValue : '"' . tString::encodeString($condValue, true) . '"';
             $where[] = $table . '.' . $condName . ' = ' . $condValue;
         }
         $query .= 'WHERE ' . implode(' AND ', $where);
@@ -253,7 +252,7 @@ trait DbObserver
             if (!empty($excludeCheck) && in_array($index, $excludeCheck)) {
                 $value = is_numeric($value) ? (int)$value : "'" . $value . "'";
             } else {
-                $value = is_numeric($value) ? (int)$value : "'" . tString::checkString($value, true) . "'";
+                $value = is_numeric($value) ? (int)$value : "'" . tString::encodeString($value, true) . "'";
             }
 
             $values[] = $value;

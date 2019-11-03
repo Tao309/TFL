@@ -40,7 +40,7 @@ class ViewList extends View
         $this->perPage = $this->tplBuilder->viewData()['perPage'] ?? 30;
 
         $currentPage = \TFL::source()->request->getRequestValue('get', 'page');
-        $this->currentPage = is_numeric($currentPage) ? tString::checkNum($currentPage) : 1;
+        $this->currentPage = is_numeric($currentPage) ? tString::encodeNum($currentPage) : 1;
 
         if ($this->currentPage > 1) {
             $this->offset = (($this->currentPage - 1) * $this->perPage);

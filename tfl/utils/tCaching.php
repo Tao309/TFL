@@ -20,7 +20,7 @@ class tCaching
 
             tFile::removeIfExists(self::FILE_OPTION_PATH . $file);
 
-            tFile::writeFile(self::FILE_OPTION_PATH, $file, $model->getOptionDataForTmpSave(), true);
+            tFile::writeFile(self::FILE_OPTION_PATH, $file, $model->option, true);
         }
     }
 

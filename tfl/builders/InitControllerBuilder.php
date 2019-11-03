@@ -104,10 +104,10 @@ class InitControllerBuilder implements InitControllerBuilderInterface
         if (isset($_GET) && !empty($_GET)) {
             return array_values(array_map(function ($value) {
                 if (is_int($value)) {
-                    return tString::checkNum($value);
+                    return tString::encodeNum($value);
                 }
 
-                return tString::checkString($value);
+                return tString::encodeString($value);
             }, $_GET));
         }
 

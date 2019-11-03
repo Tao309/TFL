@@ -34,11 +34,11 @@ trait UnitActiveSqlBuilder
         $many = $option['many'] ?? false;
         $skipOwner = $option['skipOwner'] ?? false;
         $skipRelations = $option['skipRelations'] ?? false;
-        $offset = isset($option['offset']) ? tString::checkNum($option['offset']) : 0;
+        $offset = isset($option['offset']) ? tString::encodeNum($option['offset']) : 0;
         //@todo addDefault perPage for all
-        $perPage = isset($option['perPage']) ? tString::checkNum($option['perPage']) : 30;
-        $order = isset($option['order']) ? tString::checkString($option['order']) : null;
-        $orderType = isset($option['orderType']) ? tString::checkString($option['orderType']) : null;
+        $perPage = isset($option['perPage']) ? tString::encodeNum($option['perPage']) : 30;
+        $order = isset($option['order']) ? tString::encodeString($option['order']) : null;
+        $orderType = isset($option['orderType']) ? tString::encodeString($option['orderType']) : null;
 
         if (in_array(['id', 'password', 'name', 'unitcollection', 'nullmodel'], array_keys($queryData))) {
             return null;

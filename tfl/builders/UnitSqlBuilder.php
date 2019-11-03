@@ -174,7 +174,7 @@ trait UnitSqlBuilder
         foreach ($queryData as $name => $value) {
             if ($many && $name == 'id' && is_array($value)) {
                 $ids = array_map(function ($id) {
-                    return tString::checkNum($id);
+                    return tString::encodeNum($id);
                 }, $value);
                 $query = $tableName . '.' . $name . ' IN (' . implode(',', $ids) . ')';
 

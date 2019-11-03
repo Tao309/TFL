@@ -78,8 +78,8 @@ class ImageUploadHandler extends UploadHandler
         return [
 //            tString::checkNum($origParams[0] / $maxScale),
 //            tString::checkNum($origParams[1] / $maxScale),
-            tString::checkNum($needParams[0] * $minScale),
-            tString::checkNum($needParams[1] * $minScale),
+            tString::encodeNum($needParams[0] * $minScale),
+            tString::encodeNum($needParams[1] * $minScale),
             $src_x,
             $src_y,
         ];
