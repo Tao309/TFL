@@ -197,9 +197,9 @@ trait DbObserver
         return $this->insertRow($query);
     }
 
-    public function update(string $table, array $sliceValues, array $condition)
+    public function update(string $table, array $sliceValues, array $condition, array $excludeCheck = [])
     {
-        list($names, $values) = $this->getSliceValues($sliceValues);
+        list($names, $values) = $this->getSliceValues($sliceValues, $excludeCheck);
 
         $query = 'UPDATE ' . $table . ' SET' . PAGE_EOL;
         $upd = [];
@@ -221,7 +221,7 @@ trait DbObserver
                 }
                 $where[] = $table . '.' . $condName . ' IN (' . implode(',', $ids) . ')';
             } else {
-                $condValue = is_int($condValue) ? (int)$condValue : tString::checkString($condValue, true);
+                $condValue = is_numeric($condValue) ? (int)$condValue : '"' . tString::checkString($condValue, true) . '"';
                 $where[] = $table . '.' . $condName . ' = ' . $condValue;
             }
         }
@@ -244,12 +244,19 @@ trait DbObserver
         return $this->deleteRow($query);
     }
 
-    private function getSliceValues(array $sliceValues)
+    private function getSliceValues(array $sliceValues, array $excludeCheck = [])
     {
         $names = $values = [];
         foreach ($sliceValues as $index => $value) {
             $names[] = $index;
-            $values[] = is_int($value) ? (int)$value : '"' . tString::checkString($value, true) . '"';
+
+            if (!empty($excludeCheck) && in_array($index, $excludeCheck)) {
+                $value = is_numeric($value) ? (int)$value : "'" . $value . "'";
+            } else {
+                $value = is_numeric($value) ? (int)$value : "'" . tString::checkString($value, true) . "'";
+            }
+
+            $values[] = $value;
         }
         return [$names, $values];
     }

@@ -4,6 +4,7 @@ namespace tfl\units;
 
 use tfl\builders\RequestBuilder;
 use tfl\builders\TemplateBuilder;
+use tfl\builders\UnitOptionSqlBuilder;
 use tfl\interfaces\UnitInterface;
 use tfl\interfaces\UnitOptionInterface;
 use tfl\utils\tCaching;
@@ -26,6 +27,8 @@ use tfl\utils\tString;
  */
 class UnitOption extends Unit implements UnitInterface, UnitOptionInterface
 {
+    use UnitOptionSqlBuilder;
+
     const NAME_CORE_SYSTEM = 'core.system';
     const NAME_CORE_SEO = 'core.seo';
     const NAME_CORE_CMS = 'core.cms';
@@ -155,7 +158,8 @@ class UnitOption extends Unit implements UnitInterface, UnitOptionInterface
             if (isset($row['type']) && $row['type'] == TemplateBuilder::VIEW_TYPE_HEADER) {
                 continue;
             }
-            $optionArray[$index] = tString::checkString((isset($data[$index])) ? $data[$index] : $row['value']);
+
+            $optionArray[$index] = tString::checkValue(($data[$index]) ?? $row['value'] ?? null);
         }
 
         return $optionArray;
@@ -222,13 +226,13 @@ class UnitOption extends Unit implements UnitInterface, UnitOptionInterface
     }
 
     /**
-     * Массив с ключами, описанием и значениями полей
+     * Массив с ключами, описанием и значениями полей для подмены в beforeSave
      * @return array
      */
-    public function getJustOptionsList()
+    private function getJustOptionsList()
     {
         return array_map(function ($row) {
-            return $row;
+            return tString::checkValue($row);
         }, $this->option);
     }
 
@@ -242,8 +246,13 @@ class UnitOption extends Unit implements UnitInterface, UnitOptionInterface
         $model->title = $this->getOptionTitle();
         $this->id = $rowData['id'];
 
-        $rowData['content'] = !empty($rowData['content']) ? tString::unserialize($rowData['content']) : [];
-        if (empty($rowData['content'])) $rowData['content'] = [];
+        if (empty($rowData['content'])) {
+            $rowData['content'] = [];
+        } else {
+            $rowData['content'] = tString::unserialize($rowData['content']);
+        }
+//        print_r($rowData['content']);exit;
+
         $this->option = $this->getOptionData($rowData['content']);
 
         $this->afterFind();
@@ -270,5 +279,10 @@ class UnitOption extends Unit implements UnitInterface, UnitOptionInterface
         $this->option = $option;
 
         return true;
+    }
+
+    public function getHiddenActionData(string $type): array
+    {
+        return [];
     }
 }

@@ -16,7 +16,7 @@ class tString
 
     public static function unserialize($value = null)
     {
-        if (!$value) {
+        if (empty($value)) {
             return null;
         }
 
@@ -38,7 +38,7 @@ class tString
             return $value;
         }
 
-        return trim($value);
+        return htmlspecialchars(trim($value), ENT_QUOTES);
     }
 
     public static function checkNum($value, $sql = false)

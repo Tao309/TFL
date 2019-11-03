@@ -3,7 +3,9 @@
 namespace tfl\utils;
 
 use app\models\User;
+use tfl\units\Unit;
 use tfl\units\UnitActive;
+use tfl\units\UnitOption;
 
 class tAccess
 {
@@ -12,7 +14,7 @@ class tAccess
         return \TFL::source()->session->currentUser();
     }
 
-    private static function isOwner(UnitActive $model): bool
+    private static function isOwner(Unit $model): bool
     {
         if (!$user = self::isAuth()) {
             return false;
@@ -54,18 +56,22 @@ class tAccess
         return self::hasAccessByStatus(User::STATUS_PUBLISHER);
     }
 
-    public static function canView(UnitActive $model): bool
+    public static function canView(Unit $model): bool
     {
         return true;
     }
 
-    public static function canEdit(UnitActive $model): bool
+    public static function canEdit(Unit $model): bool
     {
         if (!$user = self::isAuth()) {
             return false;
         }
 
         if ($model instanceof User) {
+            return self::hasAccessByStatus(User::STATUS_ADMIN);
+        }
+
+        if ($model instanceof UnitOption) {
             return self::hasAccessByStatus(User::STATUS_ADMIN);
         }
 
@@ -80,9 +86,13 @@ class tAccess
         return true;
     }
 
-    public static function canDelete(UnitActive $model): bool
+    public static function canDelete(Unit $model): bool
     {
         if (!$user = self::isAuth()) {
+            return false;
+        }
+
+        if ($model instanceof UnitOption) {
             return false;
         }
 

@@ -42,7 +42,7 @@ trait UnitRepository
             return false;
         }
 
-        if (!$this instanceof UnitOption) {
+        if ($this instanceof UnitActive) {
             if (!$this->saveModelUnit()) {
                 return false;
             }

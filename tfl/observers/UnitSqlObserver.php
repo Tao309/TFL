@@ -30,9 +30,14 @@ trait UnitSqlObserver
             $this->id = $id;
             $this->setIsWasNewModel();
         } else {
+            $excludeCheck = [];
+
+            if ($this instanceof UnitOption) {
+                $excludeCheck[] = 'content';
+            }
             \TFL::source()->db->update($this->getTableName(), array_combine($attrs, $values), [
                 'id' => $this->id,
-            ]);
+            ], $excludeCheck);
         }
 
         return true;

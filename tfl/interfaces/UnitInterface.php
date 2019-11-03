@@ -23,4 +23,6 @@ interface UnitInterface
     public function attemptLoadData();
 
     public function getSeoValues(): array;
+
+    public function getHiddenActionData(string $type): array;
 }
