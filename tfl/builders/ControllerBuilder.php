@@ -13,9 +13,10 @@ use tfl\utils\tAccess;
 /**
  * 'section/page/'          => sectionList (GET)
  * 'section/page/add/       => sectionAdd (GET)
- * 'section/page/create/    => sectionCreate (POST)
  * 'section/page/2/         => sectionDetails (GET)
  * 'section/page/2/edit'    => sectionEdit (GET)
+ *
+ * 'section/page/create/    => sectionCreate (POST)
  * 'section/page/2/save     => sectionSave (PUT)
  * 'section/page/2/delete'  => sectionDelete (DELETE)
  */
@@ -23,10 +24,13 @@ use tfl\utils\tAccess;
  * Class ControllerBuilder
  * @package tfl\builders
  *
- * @property SectionBuilder section;
- * @property string sectionRoute;
- * @property string sectionRouteType;
- * @property string routeDirection;
+ * @property SectionBuilder $section;
+ * @property string $sectionRoute;
+ * @property string $sectionRouteType;
+ * @property string $routeDirection;
+ *
+ * @property UnitActive $model;
+ * @property bool $enableREST;
  */
 class ControllerBuilder implements ControllerInterface
 {
@@ -37,6 +41,17 @@ class ControllerBuilder implements ControllerInterface
     private $sectionRoute;
     private $sectionRouteType;
     private $routeDirection;
+    /**
+     * Включение доступа ControllerBuilderObserver->checkRequireRequest()
+     * @var bool
+     */
+    protected $enableREST = false;
+
+    /**
+     * Получаемая модель при запросе edit, view
+     * @var UnitActive
+     */
+    protected $model;
 
     /**
      * Доступ только через ajax запрос
@@ -93,6 +108,8 @@ class ControllerBuilder implements ControllerInterface
 
     protected function beforeAction(): void
     {
+        $this->checkRequireRequest();
+
         $this->checkJustAjaxRequest();
         $this->checkAuthOrNotRequire();
         $this->checkMethodAuthRequire();

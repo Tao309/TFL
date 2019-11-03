@@ -33,6 +33,11 @@ class RequestBuilder
         return $this->method === self::METHOD_POST;
     }
 
+    public function isGetRequest(): bool
+    {
+        return $this->method === self::METHOD_GET;
+    }
+
     /**
      * @param string|null $forceMethod
      * @return bool
