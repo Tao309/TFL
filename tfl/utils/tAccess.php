@@ -67,15 +67,15 @@ class tAccess
             return false;
         }
 
-        if ($model instanceof User) {
-            return self::hasAccessByStatus(User::STATUS_ADMIN);
-        }
-
-        if ($model instanceof UnitOption) {
+        if ($model instanceof User || $model instanceof UnitOption) {
             return self::hasAccessByStatus(User::STATUS_ADMIN);
         }
 
         if (!self::canView($model)) {
+            return false;
+        }
+
+        if (!self::hasAccessByStatus(User::STATUS_PUBLISHER)) {
             return false;
         }
 
