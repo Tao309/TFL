@@ -51,37 +51,125 @@ class ImageUploadHandler extends UploadHandler
      * @var array
      */
     private $sizeData = [];
+    /*
+     * Настройки для ручной обрезки при выборе с модального окна
+     * @var array
+     */
+    private $manualCropData = [];
 
     /**
-     * вычисление параметров сторон при обрезке
-     * @param $needParams
-     * @param $origParams
+     * Стандартная обрезка. Оставляет соотношение сторон оригинала
+     * @param array $needParams
+     * @param array $origParams
+     */
+    private static function standardCrop(array $needParams, array $origParams): array
+    {
+        list($finalWidth, $finalHeight) = $needParams;
+
+        if (($origParams[0] > $needParams[0]) || ($origParams[1] > $needParams[1])) {
+            $ratio_orig = $origParams[0] / $origParams[1];
+            if ($needParams[0] / $needParams[1] > $ratio_orig) {
+                $finalWidth = $needParams[1] * $ratio_orig;
+            } else {
+                $finalHeight = $needParams[0] / $ratio_orig;
+            }
+        } else {
+            list($finalWidth, $finalHeight) = $origParams;
+        }
+
+        return [$finalWidth, $finalHeight, $origParams[0], $origParams[1], 0, 0];
+    }
+
+    /**
+     * Обрезает до нужных размеров сторон
+     * @param array $needParams
+     * @param array $origParams
      * @return array
      */
-    private static function getCropParams(array $needParams, array $origParams): array
+    private static function advancedCrop(array $needParams, array $origParams): array
     {
         $widthScale = ($origParams[0] / $needParams[0]);
         $heightScale = ($origParams[1] / $needParams[1]);
 
-        //Проверка сторон need
-
-        //Проверка сторон оригинала
-
-        //Сравнение длин и высот
-
         $minScale = min([$widthScale, $heightScale]);
-        $maxScale = max([$widthScale, $heightScale]);
+//        $maxScale = max([$widthScale, $heightScale]);
 
         $src_x = ($origParams[0] / 2) - (($needParams[0] * $minScale) / 2);
         $src_y = ($origParams[1] / 2) - (($needParams[1] * $minScale) / 2);
 
+        return [$needParams[0], $needParams[1],
+            ($needParams[0] * $minScale), ($needParams[1] * $minScale),
+            $src_x, $src_y];
+    }
+
+    /**
+     * Ручная обрезка по выбранным параметрам в модальном окне
+     * @param array $needParams
+     * @param array $origParams
+     * @param array $cropData
+     */
+    private static function manualCrop(array $needParams, array $origParams, array $cropData)
+    {
+        $src_x = $src_y = 0;
+        list($finalWidth, $finalHeight) = $needParams;
+        list($origWidth, $origHeight) = $origParams;
+
+        $cropScale = $cropData['cropScale'] ?? 1;
+        $cropLeft = $cropData['cropLeft'] ?? 0;
+        $cropTop = $cropData['cropTop'] ?? 0;
+        $cropWidth = $cropData['cropWidth'] ?? $needParams[0];
+        $cropHeight = $cropData['cropHeight'] ?? $needParams[1];
+
+        if ($origParams[0] >= ($cropWidth * $cropScale) && $origParams[1] >= ($cropHeight * $cropScale)) {
+            $src_x = ($cropLeft / $cropScale);
+            $src_y = ($cropTop / $cropScale);
+
+            if ($cropScale == 1) {
+
+            } else {
+                if ($origParams[0] < ($cropWidth * $cropScale)) {
+                    $finalWidth = $origParams[0];
+                    $finalHeight = $cropHeight;
+                } else if ($origParams[1] < ($cropHeight * $cropScale)) {
+                    $finalWidth = $cropWidth;
+                    $finalHeight = $origParams[1];
+                }
+            }
+
+            $origWidth = ($cropWidth / $cropScale);
+            $origHeight = ($cropHeight / $cropScale);
+        }
+
+        return [$finalWidth, $finalHeight, $origWidth, $origHeight, $src_x, $src_y];
+    }
+
+    /**
+     * Вычисление параметров при обрезке
+     * @param array $needParams
+     * @param array $origParams
+     * @param bool $manualCrop Ручная обрезка, при выборе с модального кона
+     * @return array
+     */
+    private static function getCropParams(array $needParams, array $origParams, array $cropData = []): array
+    {
+//        list($finalWidth, $finalHeight,
+//            $origWidth, $origHeight,
+//            $src_x, $src_y) = self::standardCrop($needParams, $origParams);
+
+        list($finalWidth, $finalHeight,
+            $origWidth, $origHeight,
+            $src_x, $src_y) = self::advancedCrop($needParams, $origParams);
+
+        if (!empty($cropData)) {
+            list($finalWidth, $finalHeight,
+                $origWidth, $origHeight,
+                $src_x, $src_y) = self::manualCrop($needParams, $origParams, $cropData);
+        }
+
         return [
-//            tString::checkNum($origParams[0] / $maxScale),
-//            tString::checkNum($origParams[1] / $maxScale),
-            tString::encodeNum($needParams[0] * $minScale),
-            tString::encodeNum($needParams[1] * $minScale),
-            $src_x,
-            $src_y,
+            $finalWidth, $finalHeight,
+            $origWidth, $origHeight,
+            $src_x, $src_y,
         ];
     }
 
@@ -163,7 +251,7 @@ class ImageUploadHandler extends UploadHandler
         return $data;
     }
 
-    public function __construct(Image $model, array $sizeData = [])
+    public function __construct(Image $model, array $sizeData = [], array $manualCropData = [])
     {
         $this->fileData = $model->fileData;
         $this->model_name = $model->model_name;
@@ -173,9 +261,24 @@ class ImageUploadHandler extends UploadHandler
 
         $this->setImageData();
         $this->setSizeData($sizeData);
+        $this->setManualCropData($manualCropData);
     }
 
-    public function setSizeData(array $sizeData = [])
+    private function setImageData()
+    {
+        list($width, $height) = tFile::getimagesize($this->fileData['tmp_name']);
+
+        $this->file = [
+            'filename' => preg_replace('!(.*?)\.(.*?)$!si', '$1', $this->fileData['name']),
+            'extension' => self::getExtType($this->fileData['type']),
+            'size' => $this->fileData['size'],
+            'tempFile' => $this->fileData['tmp_name'],
+            'width' => $width,
+            'height' => $height,
+        ];
+    }
+
+    private function setSizeData(array $sizeData = [])
     {
         $this->sizeData = [
             Image::NAME_SIZE_MINI => [
@@ -193,18 +296,14 @@ class ImageUploadHandler extends UploadHandler
         ];
     }
 
-    private function setImageData()
+    private function setManualCropData($manualCropData)
     {
-        list($width, $height) = tFile::getimagesize($this->fileData['tmp_name']);
+        $this->manualCropData = $manualCropData;
+    }
 
-        $this->file = [
-            'filename' => preg_replace('!(.*?)\.(.*?)$!si', '$1', $this->fileData['name']),
-            'extension' => self::getExtType($this->fileData['type']),
-            'size' => $this->fileData['size'],
-            'tempFile' => $this->fileData['tmp_name'],
-            'width' => $width,
-            'height' => $height,
-        ];
+    protected function getManualCropData()
+    {
+        return $this->manualCropData;
     }
 
     //@todo Поставить в interface addErrorText, getErrorText
@@ -299,8 +398,8 @@ class ImageUploadHandler extends UploadHandler
         foreach ($this->getDataSizes() as $sizeType => $dataSize) {
             $path = $zPath . $sizeType . '/';
 
-            list($width, $height, $src_x, $src_y) = self::getCropParams([$dataSize[0], $dataSize[1]],
-                [$this->file['width'], $this->file['height']]);
+            list($width, $height, $origWidth, $origHeight, $src_x, $src_y) = self::getCropParams($dataSize,
+                [$this->file['width'], $this->file['height']], $this->getManualCropData());
 
             $this->fileName = $this->id . '_' . $currentTime . '.' . $this->file['extension'];
 
@@ -311,8 +410,7 @@ class ImageUploadHandler extends UploadHandler
                 imagesavealpha($imageTemp, true);
             }
 
-            imagecopyresampled($imageTemp, $image, 0, 0, 0, 0,
-                $width, $height, $this->file['width'], $this->file['height']);
+            imagecopyresampled($imageTemp, $image, 0, 0, $src_x, $src_y, $width, $height, $origWidth, $origHeight);
 
             switch ($this->file['extension']) {
                 case self::FILE_EXT_JPG:

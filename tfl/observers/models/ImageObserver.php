@@ -57,7 +57,10 @@ trait ImageObserver
                      self::NAME_SIZE_NORMAL,
                      self::NAME_SIZE_FULL,
                  ] as $nameSize) {
-            tFile::removeIfExists(zROOT . WEB_PATH . '/' . $this->getImagePath($nameSize));
+
+            if ($this->isLoaded()) {
+                tFile::removeIfExists(zROOT . WEB_PATH . '/' . $this->getImagePath($nameSize));
+            }
         }
 
         return parent::afterDelete();

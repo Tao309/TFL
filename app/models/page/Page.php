@@ -44,8 +44,8 @@ class Page extends UnitActive
                     'link' => static::LINK_HAS_ONE_TO_MANY,
                     'data' => [
                         [120, 120],
-                        [280, 280],
-                        [1400, 1400],
+                        [600, 600],
+                        [1200, 1200],
                     ]
                 ],
             ],
