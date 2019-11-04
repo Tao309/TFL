@@ -194,6 +194,8 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
                 if ($this->parentModel instanceof User) {
                     return $this->renderImageViewDetails($this->parentModel->getDefaultUserAvatar());
                 }
+
+                return $this->renderImageViewDetails($model->getImageUrl());
             }
 
             if ($model->type == Image::TYPE_IMAGE) {

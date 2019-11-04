@@ -28,10 +28,6 @@ class DetailsView extends TemplateBuilder
                 'limit' => 1000,
                 'bbTags' => true,
             ],
-            'screens' => [
-                'type' => static::VIEW_TYPE_MODEL,
-                'model' => Image::class,
-            ],
         ];
 
         return $data;
