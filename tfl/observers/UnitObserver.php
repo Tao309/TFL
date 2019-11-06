@@ -12,10 +12,9 @@ trait UnitObserver
         $this->setModelName();
     }
 
-    //@todo ввести везде
     protected function afterFind(): void
     {
-
+	    $this->keepOldValues();
     }
 
     protected function beforeSave(): bool
@@ -31,7 +30,6 @@ trait UnitObserver
                 return false;
             }
         }
-
 
         if (!empty($this->loadDataErrors)) {
             return false;

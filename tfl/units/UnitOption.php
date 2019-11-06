@@ -27,261 +27,264 @@ use tfl\utils\tString;
  */
 class UnitOption extends Unit implements UnitInterface, UnitOptionInterface
 {
-    use UnitOptionSqlBuilder;
+	use UnitOptionSqlBuilder;
 
-    const NAME_CORE_SYSTEM = 'core.system';
-    const NAME_CORE_SEO = 'core.seo';
-    const NAME_CORE_CMS = 'core.cms';
+	const NAME_CORE_SYSTEM = 'core.system';
+	const NAME_CORE_SEO = 'core.seo';
+	const NAME_CORE_CMS = 'core.cms';
 
-    const NAME_DESIGN_COLORS = 'design.colors';
+	const NAME_DESIGN_COLORS = 'design.colors';
 
-    private static $optionTitles = [
-        self::NAME_CORE_SYSTEM => 'System',
-        self::NAME_CORE_SEO => 'SEO',
-        self::NAME_CORE_CMS => 'CMS',
+	private static $optionTitles = [
+		self::NAME_CORE_SYSTEM => 'System',
+		self::NAME_CORE_SEO => 'SEO',
+		self::NAME_CORE_CMS => 'CMS',
 
-        self::NAME_DESIGN_COLORS => 'Design Colors',
-    ];
+		self::NAME_DESIGN_COLORS => 'Design Colors',
+	];
 
-    public function __construct()
-    {
-        parent::__construct();
+	public function __construct()
+	{
+		parent::__construct();
 
-        $this->setModelUnitData();
-    }
+		$this->setModelUnitData();
+	}
 
-    protected function beforeSave(): bool
-    {
-        $this->name = $this->title;
+	protected function beforeSave(): bool
+	{
+		$this->name = $this->title;
+		//Свой метод attemptLoadData записывает в $this->>option данные
+		$this->content = $this->getJustOptionsList();
 
-        $this->content = tString::serialize($this->getJustOptionsList());
+		return parent::beforeSave();
+	}
 
-        return parent::beforeSave();
-    }
+	/**
+	 * Получаем код-название настроек
+	 * @return string
+	 */
+	protected function getOptionCodeName(): string
+	{
+		return '';
+	}
 
-    /**
-     * Получаем код-название настроек
-     * @return string
-     */
-    protected function getOptionCodeName(): string
-    {
-        return '';
-    }
+	/**
+	 * Получаем список для отображения самих натсроек, по умолчанию
+	 * @return array
+	 */
+	protected function getOptionList(): array
+	{
+		return [];
+	}
 
-    /**
-     * Получаем список для отображения самих натсроек, по умолчанию
-     * @return array
-     */
-    protected function getOptionList(): array
-    {
-        return [];
-    }
+	protected function afterSave(): bool
+	{
+		//Пересоздать кэш файл настроек
+		tCaching::recreateUnitOptionFiles([$this]);
 
-    protected function afterSave(): bool
-    {
-        //Пересоздать кэш файл настроек
-        tCaching::recreateUnitOptionFiles([$this]);
+		return parent::afterSave();
+	}
 
-        return parent::afterSave();
-    }
+	public static function getOptionTitles()
+	{
+		return array_keys(self::$optionTitles);
+	}
 
-    public static function getOptionTitles()
-    {
-        return array_keys(self::$optionTitles);
-    }
+	public static function getOptionClassName($name)
+	{
+		if (isset(self::$optionTitles[$name])) {
+			$names = array_merge(['Option'], explode('.', $name));
+			$names = array_map('ucfirst', $names);
 
-    public static function getOptionClassName($name)
-    {
-        if (isset(self::$optionTitles[$name])) {
-            $names = array_merge(['Option'], explode('.', $name));
-            $names = array_map('ucfirst', $names);
+			return 'app\\models\\option\\' . implode('', $names);
+		}
 
-            return 'app\\models\\option\\' . implode('', $names);
-        }
+		die('Option <b>' . $name . '</b> Not found');
+	}
 
-        die('Option <b>' . $name . '</b> Not found');
-    }
+	public static function getByName(string $name): UnitOption
+	{
+		$className = self::getOptionClassName($name);
+		/**
+		 * @var UnitOption $model
+		 */
+		$model = new $className;
 
-    public static function getByName(string $name): UnitOption
-    {
-        $className = self::getOptionClassName($name);
-        /**
-         * @var UnitOption $model
-         */
-        $model = new $className;
+		$rowData = $model->prepareRowData(['name' => $name]);
 
-        $rowData = $model->prepareRowData(['name' => $name]);
+		return $model->createFinalModel($model, $rowData);
+	}
 
-        return $model->createFinalModel($model, $rowData);
-    }
+	public static function getByNames(array $names)
+	{
+		/**
+		 * @var UnitOption $model
+		 */
+		$modelName = self::getCurrentModel();
+		$model = new $modelName;
 
-    public static function getByNames(array $names)
-    {
-        /**
-         * @var UnitOption $model
-         */
-        $modelName = self::getCurrentModel();
-        $model = new $modelName;
+		$rowDatas = $model->prepareRowData(['name' => $names], ['many' => true]);
 
-        $rowDatas = $model->prepareRowData(['name' => $names], ['many' => true]);
+		$models = [];
 
-        $models = [];
+		if (!empty($rowDatas)) {
+			foreach ($rowDatas as $index => $rowData) {
+				$className = self::getOptionClassName($rowData['name']);
+				/**
+				 * @var UnitOption $model
+				 */
+				$model = new $className;
+				$models[] = $model->createFinalModel($model, $rowData);
+			}
+		}
 
-        if (!empty($rowDatas)) {
-            foreach ($rowDatas as $index => $rowData) {
-                $className = self::getOptionClassName($rowData['name']);
-                /**
-                 * @var UnitOption $model
-                 */
-                $model = new $className;
-                $models[] = $model->createFinalModel($model, $rowData);
-            }
-        }
+		return $models;
+	}
 
-        return $models;
-    }
+	/**
+	 * Подстановка структуры настроек и их значений
+	 * Структура выводимого массива:
+	 * [
+	 *      'optionName1' => 'optionValue1',
+	 *      'optionName2' => 'optionValue2',
+	 * ]
+	 */
+	private function getOptionData(array $data, $decode = false): array
+	{
+		$optionArray = [];
 
-    /**
-     * Подстановка структуры настроек и их значений
-     * Структура выводимого массива:
-     * [
-     *      'optionName1' => 'optionValue1',
-     *      'optionName2' => 'optionValue2',
-     * ]
-     */
-    private function getOptionData(array $data, $decode = false): array
-    {
-        $optionArray = [];
+		$optionList = $this->getOptionList();
+		foreach ($optionList as $index => $row) {
+			if (isset($row['type']) && $row['type'] == TemplateBuilder::VIEW_TYPE_HEADER) {
+				continue;
+			}
 
-        $optionList = $this->getOptionList();
-        foreach ($optionList as $index => $row) {
-            if (isset($row['type']) && $row['type'] == TemplateBuilder::VIEW_TYPE_HEADER) {
-                continue;
-            }
+			if (isset($data[$index])) {
+				$optionArray[$index] = ($decode) ? tString::decodeValue($data[$index]) : tString::encodeValue($data[$index]);
+			} else {
+				$optionArray[$index] = $row['value'] ?? null;
+			}
 
-            if (isset($data[$index])) {
-                $optionArray[$index] = ($decode) ? tString::decodeValue($data[$index]) : tString::encodeValue($data[$index]);
-            } else {
-                $optionArray[$index] = $row['value'] ?? null;
-            }
+		}
 
-        }
+		return $optionArray;
+	}
 
-        return $optionArray;
-    }
+	public function getOptionDataForView()
+	{
+		$option = $this->getOptionList();
+		foreach ($option as $indexName => $data) {
+			if (isset($this->option[$indexName])) {
+				$option[$indexName]['value'] = $this->option[$indexName];
+			}
+		}
 
-    public function getOptionDataForView()
-    {
-        $option = $this->getOptionList();
-        foreach ($option as $indexName => $data) {
-            if (isset($this->option[$indexName])) {
-                $option[$indexName]['value'] = $this->option[$indexName];
-            }
-        }
+		return $option;
+	}
 
-        return $option;
-    }
+	public function getTableName(): string
+	{
+		return static::DB_MODEL_PREFIX . '_option';
+	}
 
-    public function getTableName(): string
-    {
-        return static::DB_MODEL_PREFIX . '_option';
-    }
+	public function unitData(): array
+	{
+		return [
+			'details' => [
+				'content',
+			],
+			'relations' => [],
+			'rules' => [
+				'content' => [
+					'type' => static::RULE_TYPE_ARRAY,
+					'required' => true,
+				],
+			],
+		];
+	}
 
-    public function unitData(): array
-    {
-        return [
-            'details' => [
-                'content',
-            ],
-            'rules' => [
-            ],
-            'relations' => [
-            ],
-        ];
-    }
+	public function translatedLabels(): array
+	{
+		return [
+			'name' => 'Title',
+			'content' => 'Content options',
+		];
+	}
 
-    public function translatedLabels(): array
-    {
-        return [
-            'name' => 'Title',
-            'content' => 'Content options',
-        ];
-    }
+	public function getSeoValues(): array
+	{
+		return [
+			'title' => $this->getOptionTitle(),
+		];
+	}
 
-    public function getSeoValues(): array
-    {
-        return [
-            'title' => $this->getOptionTitle(),
-        ];
-    }
+	public function getOptionTitle(): string
+	{
+		return self::$optionTitles[$this->getOptionCodeName()] ?? 'Title not found';
+	}
 
-    public function getOptionTitle(): string
-    {
-        return self::$optionTitles[$this->getOptionCodeName()] ?? 'Title not found';
-    }
+	public function getOptionValue(string $attr)
+	{
+		return $this->option[$attr] ?? null;
+	}
 
-    public function getOptionValue(string $attr)
-    {
-        return $this->option[$attr] ?? null;
-    }
+	public function getFileName()
+	{
+		return $this->getOptionCodeName();
+	}
 
-    public function getFileName()
-    {
-        return $this->getOptionCodeName();
-    }
+	/**
+	 * Массив с ключами, описанием и значениями полей для подмены в beforeSave
+	 * @return array
+	 */
+	private function getJustOptionsList()
+	{
+		return array_map(function ($row) {
+			return tString::encodeValue($row);
+		}, $this->option);
+	}
 
-    /**
-     * Массив с ключами, описанием и значениями полей для подмены в beforeSave
-     * @return array
-     */
-    private function getJustOptionsList()
-    {
-        return array_map(function ($row) {
-            return tString::encodeValue($row);
-        }, $this->option);
-    }
+	public function createFinalModel(Unit $model, array $rowData)
+	{
+		$model->title = $this->getOptionTitle();
+		$this->id = $rowData['id'];
 
-    public function createFinalModel(Unit $model, array $rowData)
-    {
-        $model->title = $this->getOptionTitle();
-        $this->id = $rowData['id'];
+		if (empty(trim($rowData['content']))) {
+			$rowData['content'] = [];
+		} else {
+			$rowData['content'] = tString::unserialize($rowData['content']);
+		}
 
-        if (empty(trim($rowData['content']))) {
-            $rowData['content'] = [];
-        } else {
-            $rowData['content'] = tString::unserialize($rowData['content']);
-        }
+		$this->option = $this->getOptionData($rowData['content'], true);
 
-        $this->option = $this->getOptionData($rowData['content'], true);
+		$this->afterFind();
 
-        $this->afterFind();
+		return $model;
+	}
 
-        return $model;
-    }
+	public function attemptLoadData(): bool
+	{
+		$loadData = \TFL::source()->request->getRequestValue(RequestBuilder::METHOD_POST, $this->getModelName());
 
-    public function attemptLoadData(): bool
-    {
-        $loadData = \TFL::source()->request->getRequestValue(RequestBuilder::METHOD_POST, $this->getModelName());
+		if (empty($loadData)) {
+			$this->addLoadDataError('Request data is empty');
+			return false;
+		}
 
-        if (empty($loadData)) {
-            $this->addLoadDataError('Request data is empty');
-            return false;
-        }
+		$option = $this->getOptionData((array)$loadData);
 
-        $option = $this->getOptionData((array)$loadData);
+		if (empty($option)) {
+			$this->addLoadDataError('Loaded data is empty');
+			return false;
+		}
 
-        if (empty($option)) {
-            $this->addLoadDataError('Loaded data is empty');
-            return false;
-        }
+		$this->option = $option;
 
-        $this->option = $option;
+		return true;
+	}
 
-        return true;
-    }
-
-    public function getHiddenActionData(string $type): array
-    {
-        return [];
-    }
+	public function getHiddenActionData(string $type): array
+	{
+		return [];
+	}
 }

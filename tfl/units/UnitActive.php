@@ -201,12 +201,17 @@ abstract class UnitActive extends Unit implements UnitInterface
 
     public function getUrl(): string
     {
-        return ROOT . 'section/' . $this->getModelNameLower() . '/' . $this->id;
+	    return ROOT . 'section/' . $this->getModelNameLower() . WEB_SEP . $this->id;
+    }
+
+	public function getAdminUrl(): string
+	{
+		return ROOT . 'admin/section/' . $this->getModelNameLower() . WEB_SEP . $this->id;
     }
 
     public function getEditUrl(): string
     {
-        return ROOT . 'admin/section/' . $this->getModelNameLower() . '/' . $this->id . '/edit';
+	    return ROOT . 'admin/section/' . $this->getModelNameLower() . WEB_SEP . $this->id . '/edit';
     }
 
     public function getAddUrl()

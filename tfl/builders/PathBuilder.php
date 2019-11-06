@@ -15,7 +15,7 @@ class PathBuilder
             $root = $config['DOMEN'];
         }
 
-        define('ROOT', $config['HTTP'] . '://' . $root . '/');
+	    define('ROOT', $config['HTTP'] . '://' . $root . WEB_SEP);
 
 //        $zroot = rtrim($_SERVER['DOCUMENT_ROOT'], WEB_PATH);
 //        define('zROOT', $zroot);

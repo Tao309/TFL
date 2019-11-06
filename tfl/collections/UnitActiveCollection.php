@@ -84,7 +84,8 @@ class UnitActiveCollection extends UnitCollection implements UnitCollectionInter
 
         $rows = $this->dependModel->prepareRowData(['unitcollection' => true], [
             'many' => true,
-            'skipOwner' => !$this->withOwner,
+//            'skipOwner' => !$this->withOwner,
+	        'skipOwner' => false,
             'skipRelations' => !$this->withRelations,
             'offset' => $this->getQueryOffset(),
             'perPage' => $this->getQueryLimit(),
@@ -120,10 +121,5 @@ class UnitActiveCollection extends UnitCollection implements UnitCollectionInter
             $model = new $className;
             yield $model->createFinalModel($model, $rowData, true);
         }
-
-
-//        return array_map(function ($rowData) {
-//            return $this->dependModel->createFinalModel($this->dependModel, $rowData, true);
-//        }, $this->getQueryRows());
     }
 }

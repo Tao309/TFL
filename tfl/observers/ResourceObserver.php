@@ -52,7 +52,7 @@ trait ResourceObserver
         }
 
         foreach ($this->getResourceFiles($ext) as $groupName => $group) {
-            $resourceFile = zROOT . WEB_PATH . '/' . $ext . '/' . $groupName . '.' . $ext;
+	        $resourceFile = zROOT . WEB_PATH . DIR_SEP . $ext . DIR_SEP . $groupName . '.' . $ext;
 
             if (tFile::file_exists($resourceFile)) {
                 continue;
@@ -60,7 +60,7 @@ trait ResourceObserver
 
             ob_start();
             foreach ($group as $index => $fileName) {
-                $file = zROOT . 'resource/assets/' . $ext . '/' . $fileName . '.' . $ext;
+	            $file = zROOT . 'resource/assets/' . $ext . DIR_SEP . $fileName . '.' . $ext;
                 if (tFile::file_exists($file)) {
                     require_once $file;
                     echo PAGE_EOL;
@@ -105,8 +105,8 @@ trait ResourceObserver
 
         if ($type == self::TYPE_HEADER) {
             foreach (array_keys($this->getResourceFiles($ext)) as $fileName) {
-                $file = ROOT . $ext . '/' . $fileName . '.' . $ext;
-                $filemtime = tFile::filemtime(zROOT . WEB_PATH . '/' . $ext . '/' . $fileName . '.' . $ext);
+	            $file = ROOT . $ext . WEB_SEP . $fileName . '.' . $ext;
+	            $filemtime = tFile::filemtime(zROOT . WEB_PATH . DIR_SEP . $ext . DIR_SEP . $fileName . '.' . $ext);
 
                 $file .= '?t=' . $filemtime;
 

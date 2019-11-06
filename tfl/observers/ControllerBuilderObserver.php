@@ -9,6 +9,7 @@ use tfl\builders\RequestBuilder;
 use tfl\units\Unit;
 use tfl\units\UnitActive;
 use tfl\units\UnitOption;
+use tfl\utils\tDebug;
 use tfl\utils\tProtocolLoader;
 use tfl\view\View;
 
@@ -25,9 +26,13 @@ trait ControllerBuilderObserver
      */
     private function checkRequireRequest()
     {
+	    if (!$this->enableREST) {
+		    return;
+	    }
+
         $hasError = false;
 
-        $isAjaxRequest = $this->enableREST && in_array($this->getSectionRouteType(), [
+	    $isAjaxRequest = in_array($this->getSectionRouteType(), [
                 'create',
                 'save',
                 'delete',
@@ -65,6 +70,8 @@ trait ControllerBuilderObserver
                 //Главную страницу не проверяем
                 return;
             }
+
+	        tDebug::startDebug();
 
             //Просмотр вида через метод GET
             switch ($this->getSectionRouteType()) {

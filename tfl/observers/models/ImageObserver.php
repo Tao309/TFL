@@ -59,7 +59,7 @@ trait ImageObserver
                  ] as $nameSize) {
 
             if ($this->isLoaded()) {
-                tFile::removeIfExists(zROOT . WEB_PATH . '/' . $this->getImagePath($nameSize));
+	            tFile::removeIfExists(zROOT . WEB_PATH . DIR_SEP . $this->getImagePath($nameSize));
             }
         }
 

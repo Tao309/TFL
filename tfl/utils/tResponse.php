@@ -70,7 +70,7 @@ class tResponse
         return self::resultError('Model not found!', $echo);
     }
 
-    public static function modalWindow($title, $content, $classNames = [])
+	public static function modalWindow(string $title, string $content, array $classNames = [])
     {
         $data = [
             'headerTitle' => $title,

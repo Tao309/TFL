@@ -4,20 +4,33 @@ namespace tfl\interfaces\view;
 
 interface ViewHandlerInterface
 {
-    /**
-     * Отображение для просмотра
-     * @return string
-     */
-    public function renderViewField(): string;
+	/**
+	 * Отображение для просмотра одного элемента
+	 * @return string
+	 */
+	public function renderOneViewField(): string;
 
-    /**
-     * Отображение для редактирования
-     * @return string
-     */
-    public function renderEditField(): string;
+	/**
+	 * Отображение для просмотра несольких элементов
+	 * @return string
+	 */
+	public function renderManyViewFields(): string;
 
-    /**
-     * Подготавливаем входящую модель. Дополнительные действия для подстановки модели
-     */
-    public function prepareInputModel(): void;
+	/**
+	 * Отображение для редактирования одного элемента
+	 * @return string
+	 */
+	public function renderOneEditField(): string;
+
+	/**
+	 * Отображение для редактирования несольких элементов
+	 * @return string
+	 */
+	public function renderManyEditFields(): string;
+
+	/**
+	 * Подготавливаем входящую модель. Дополнительные действия для подстановки модели
+	 * @return void
+	 */
+	public function prepareInputModel(): void;
 }

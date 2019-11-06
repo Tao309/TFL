@@ -87,6 +87,11 @@ class User extends UnitActive
                         [280, 280],
                     ]
                 ],
+	            'role' => [
+		            'type' => self::RULE_TYPE_MODEL,
+		            'model' => Role::class,
+		            'link' => static::LINK_HAS_ONE_TO_ONE,
+	            ],
             ],
             'rules' => [
                 'login' => [

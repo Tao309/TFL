@@ -33,7 +33,7 @@ class tFile
     public static function checkDirExists(string $dir): bool
     {
         $dir = preg_replace("/^\/*|\/*$/", '', $dir);
-        $values = explode('/', $dir);
+	    $values = explode(DIR_SEP, $dir);
 
         //@todo Exception
         if (!count($values)) {
@@ -43,7 +43,7 @@ class tFile
         $dir = zROOT;
 
         foreach ($values as $index => $value) {
-            $dir .= $value . '/';
+	        $dir .= $value . DIR_SEP;
 
             self::createDir($dir);
         }
@@ -82,7 +82,7 @@ class tFile
 //        {
 //            if(!preg_match('!(.*?)/$!i', $path))
 //            {
-//                $path .= '/';
+//                $path .= DIR_SEP;
 //            }
 //            //@todo Проверка на zROOT в начале
 //

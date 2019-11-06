@@ -6,7 +6,7 @@ use app\models\Image;
 use app\models\User;
 use tfl\builders\TemplateBuilder;
 
-class AddView extends TemplateBuilder
+class AddAdminView extends TemplateBuilder
 {
     public function viewTitle(): string
     {

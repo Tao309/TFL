@@ -210,16 +210,27 @@ trait DbObserver
 
         $where = [];
         foreach ($condition as $condName => $condValue) {
+
             if (is_array($condValue)) {
-                if (empty($condValue)) {
+	            // ['id', 'IN', $data['ids']]
+	            if (empty($condValue) || count($condValue) < 2) {
                     continue;
                 }
 
+	            $nameColumn = $table . '.' . $condValue[0];
+	            $concatEqual = ' = ';
+	            $values = $condValue[1];
+	            if (isset($condValue[2])) {
+		            $concatEqual = ' ' . $condValue[1] . ' ';
+		            $values = $condValue[2];
+	            }
+
                 $ids = [];
-                foreach ($condValue as $id) {
+	            foreach ($values as $id) {
                     $ids[] = tString::encodeValue($id);
                 }
-                $where[] = $table . '.' . $condName . ' IN (' . implode(',', $ids) . ')';
+
+	            $where[] = $nameColumn . ' ' . $concatEqual . ' (' . implode(',', $ids) . ')';
             } else {
                 $where[] = $table . '.' . $condName . ' = ' . $condValue;
             }

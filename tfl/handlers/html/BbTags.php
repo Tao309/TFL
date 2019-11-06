@@ -37,14 +37,14 @@ final class BbTags
         $value = preg_replace('!\[size=(.*?)](.*?)\[/size]!msi', '<span style="font-size:$1%">$2</span>', $value);
 
         $value = preg_replace_callback("!\[thumb](.*?)\[/thumb]!msi", function ($matches) {
-            $pathNames = explode('/', $matches[1]);
+	        $pathNames = explode(WEB_SEP, $matches[1]);
 
-            $urlFull = ROOT . UploadHandler::SAVE_PATH . implode('/', $pathNames);
+	        $urlFull = ROOT . UploadHandler::SAVE_PATH . implode(WEB_SEP, $pathNames);
 
             $index = (count($pathNames) - 2);
 
             $pathNames[$index] = Image::NAME_SIZE_NORMAL;
-            $urlNormal = ROOT . UploadHandler::SAVE_PATH . implode('/', $pathNames);
+	        $urlNormal = ROOT . UploadHandler::SAVE_PATH . implode(WEB_SEP, $pathNames);
 
             $image = tHtmlTags::startTag('a', [
                 'href' => $urlFull,

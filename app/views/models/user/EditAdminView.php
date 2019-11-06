@@ -6,11 +6,11 @@ use app\models\Image;
 use app\models\User;
 use tfl\builders\TemplateBuilder;
 
-class DetailsView extends TemplateBuilder
+class EditAdminView extends TemplateBuilder
 {
     public function viewTitle(): string
     {
-        return 'User View';
+        return 'User Edit';
     }
 
     public function viewData(): array

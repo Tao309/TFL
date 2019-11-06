@@ -5,11 +5,11 @@ namespace app\views\models\Page;
 use app\models\Image;
 use tfl\builders\TemplateBuilder;
 
-class AddView extends TemplateBuilder
+class EditAdminView extends TemplateBuilder
 {
     public function viewTitle(): string
     {
-        return 'Page Add';
+        return 'Page Edit';
     }
 
     public function viewData(): array

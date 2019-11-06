@@ -4,6 +4,7 @@ namespace tfl\view;
 
 use app\models\Image;
 use tfl\builders\DbBuilder;
+use tfl\builders\InitControllerBuilder;
 use tfl\builders\RequestBuilder;
 use tfl\collections\UnitActiveCollection;
 use tfl\units\Unit;
@@ -181,7 +182,13 @@ class ViewList extends View
     {
         $t = '';
         if (tAccess::canView($model)) {
-            $t .= tHTML::inputLink($model->getUrl(), '', [
+	        $url = $model->getAdminUrl();
+
+	        if ($this->tplBuilder->getRouteDirection() != InitControllerBuilder::ROUTE_ADMIN_DIRECTION) {
+		        $url = $model->getUrl();
+	        }
+
+	        $t .= tHTML::inputLink($url, '', [
                 'class' => [
                     'html-icon-button',
                     'icon-open',
@@ -203,7 +210,7 @@ class ViewList extends View
         if (tAccess::canDelete($model)) {
             $htmlData = tHtmlForm::generateElementData([
                 $this->tplBuilder->getRouteDirectionLink(),
-                $model->getModelName() . '/' . $model->id,
+	            $model->getModelName() . DIR_SEP . $model->id,
                 DbBuilder::TYPE_DELETE,
             ], RequestBuilder::METHOD_POST);
 

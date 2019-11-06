@@ -73,7 +73,7 @@ class InitControllerBuilder implements InitControllerBuilderInterface
 
         $className = $this->getClassName(ucfirst($this->sectionRoute));
 
-        $file = $this->getPath() . mb_strtolower($this->sectionRoute) . '/' . $className . '.php';
+	    $file = $this->getPath() . mb_strtolower($this->sectionRoute) . DIR_SEP . $className . '.php';
         $route = self::PREFIX_SECTION . ucfirst($this->sectionRouteType);
 
         if (!file_exists($file)) {

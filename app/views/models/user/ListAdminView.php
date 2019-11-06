@@ -4,7 +4,7 @@ namespace app\views\models\User;
 
 use tfl\builders\TemplateBuilder;
 
-class ListView extends TemplateBuilder
+class ListAdminView extends TemplateBuilder
 {
     public function viewTitle(): string
     {

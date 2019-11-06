@@ -5,6 +5,7 @@ namespace tfl\view;
 use app\models\Image;
 use tfl\builders\TemplateBuilder;
 use tfl\handlers\view\ImageViewHandler;
+use tfl\handlers\view\UnitActiveViewHandler;
 use tfl\interfaces\view\ViewHandlerInterface;
 use tfl\units\Unit;
 use tfl\units\UnitActive;
@@ -22,110 +23,117 @@ use tfl\utils\tHtmlTags;
  */
 abstract class View
 {
-    const TYPE_VIEW_DETAILS = 'details';
-    const TYPE_VIEW_EDIT = 'edit';
-    const TYPE_VIEW_SAVE = 'save';//Только для route section ajax
-    const TYPE_VIEW_DELETE = 'delete';
-    const TYPE_VIEW_ADD = 'add';
-    const TYPE_VIEW_LIST = 'list';
-    const TYPE_VIEW_CREATE = 'create';
+	const TYPE_VIEW_DETAILS = 'details';
+	const TYPE_VIEW_EDIT = 'edit';
+	const TYPE_VIEW_SAVE = 'save';//Только для route section ajax
+	const TYPE_VIEW_DELETE = 'delete';
+	const TYPE_VIEW_ADD = 'add';
+	const TYPE_VIEW_LIST = 'list';
+	const TYPE_VIEW_CREATE = 'create';
 
-    /**
-     * @var $tplBuilder TemplateBuilder
-     */
-    protected $tplBuilder;
-    /**
-     * @var $dependModel Unit
-     */
-    protected $dependModel;
+	/**
+	 * @var $tplBuilder TemplateBuilder
+	 */
+	protected $tplBuilder;
+	/**
+	 * @var $dependModel Unit
+	 */
+	protected $dependModel;
 
-    /**
-     * @var array ViewHandlerInterface[]
-     */
-    protected $viewHandlers = [];
+	/**
+	 * @var array ViewHandlerInterface[]
+	 */
+	protected $viewHandlers = [];
 
-    public function __construct(TemplateBuilder $tplBuilder)
-    {
-        $this->tplBuilder = $tplBuilder;
-        $this->dependModel = $tplBuilder->getDependModel();
+	public function __construct(TemplateBuilder $tplBuilder)
+	{
+		$this->tplBuilder = $tplBuilder;
+		$this->dependModel = $tplBuilder->getDependModel();
 
-        $this->prepareViewLoad();
-    }
+		$this->prepareViewLoad();
+	}
 
-    abstract protected function prepareViewLoad();
+	abstract protected function prepareViewLoad();
 
-    protected function initViewHandlers()
-    {
-        foreach ($this->dependModel->unitData()['relations'] as $attr => $data) {
-            if ($data['model'] == Image::class) {
-                $this->viewHandlers[$attr] = new ImageViewHandler($this->dependModel, $attr,
-                    $this->tplBuilder->geViewType());
-            }
-        }
-    }
+	protected function initViewHandlers()
+	{
+		foreach ($this->dependModel->unitData()['relations'] as $attr => $data) {
+			if ($data['type'] == Unit::RULE_TYPE_MODEL) {
+				if ($data['model'] == Image::class) {
+					$viewHandler = new ImageViewHandler($this->dependModel, $attr,
+						$this->tplBuilder->geViewType());
+				} else {
+					$viewHandler = new UnitActiveViewHandler($this->dependModel, $attr,
+						$this->tplBuilder->geViewType());
+				}
 
-    protected function getViewHandler($attr)
-    {
-        return $this->viewHandlers[$attr];
-    }
+				$this->viewHandlers[$attr] = $viewHandler;
+			}
+		}
+	}
 
-    public function render(): string
-    {
-        $t = $this->viewHeader();
+	protected function getViewHandler($attr)
+	{
+		return $this->viewHandlers[$attr];
+	}
 
-        if ($this->tplBuilder->geViewType() == View::TYPE_VIEW_LIST) {
-            $t .= $this->renderHeaderButtons();
-        }
+	public function render(): string
+	{
+		$t = $this->viewHeader();
 
-        $t .= tHtmlTags::startTag('div', [
-            'class' => 'section-' . $this->tplBuilder->geViewType(),
-        ]);
-        $t .= $this->viewBody();
-        $t .= tHtmlTags::endTag('div');
+		if ($this->tplBuilder->geViewType() == View::TYPE_VIEW_LIST) {
+			$t .= $this->renderHeaderButtons();
+		}
 
-        $t .= $this->viewFooter();
+		$t .= tHtmlTags::startTag('div', [
+			'class' => 'section-' . $this->tplBuilder->geViewType(),
+		]);
+		$t .= $this->viewBody();
+		$t .= tHtmlTags::endTag('div');
 
-        return $t;
-    }
+		$t .= $this->viewFooter();
 
-    private function viewHeader(): string
-    {
-        $t = tHtmlTags::startTag('div', [
-            'class' => 'section-header'
-        ]);
-        $t .= tHtmlTags::render('div', $this->tplBuilder->viewTitle(), [
-            'class' => 'header'
-        ]);
-        $t .= tHtmlTags::endTag();
-        return $t;
-    }
+		return $t;
+	}
 
-    private function viewFooter(): string
-    {
-        $t = '';
-        return $t;
-    }
+	private function viewHeader(): string
+	{
+		$t = tHtmlTags::startTag('div', [
+			'class' => 'section-header'
+		]);
+		$t .= tHtmlTags::render('div', $this->tplBuilder->viewTitle(), [
+			'class' => 'header'
+		]);
+		$t .= tHtmlTags::endTag();
+		return $t;
+	}
 
-    private function renderHeaderButtons()
-    {
-        $t = tHtmlTags::startTag('div', [
-            'class' => 'section-option-buttons'
-        ]);
+	private function viewFooter(): string
+	{
+		$t = '';
+		return $t;
+	}
 
-        if (tAccess::canAdd($this->dependModel)) {
-            $t .= tHTML::inputLink($this->dependModel->getAddUrl(), 'Add', [
-                'class' => [
-                    'html-button',
-                    'html-button-add',
-                ],
-                'title' => 'Add',
-            ]);
-        }
+	private function renderHeaderButtons()
+	{
+		$t = tHtmlTags::startTag('div', [
+			'class' => 'section-option-buttons'
+		]);
+
+		if (tAccess::canAdd($this->dependModel)) {
+			$t .= tHTML::inputLink($this->dependModel->getAddUrl(), 'Add', [
+				'class' => [
+					'html-button',
+					'html-button-add',
+				],
+				'title' => 'Add',
+			]);
+		}
 
 
-        $t .= tHtmlTags::endTag();
-        return $t;
-    }
+		$t .= tHtmlTags::endTag();
+		return $t;
+	}
 
 
 }

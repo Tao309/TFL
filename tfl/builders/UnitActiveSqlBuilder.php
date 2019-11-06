@@ -5,293 +5,313 @@ namespace tfl\builders;
 use app\models\Image;
 use app\models\User;
 use tfl\units\UnitActive;
+use tfl\utils\tDebug;
 use tfl\utils\tString;
 
 trait UnitActiveSqlBuilder
 {
-    /**
-     * Получаем общее количество моделей
-     * @return int
-     */
-    public function getCount()
-    {
-        //@todo В будщем внести исправления при работе с WHERE в разделах при фильтрации
-        return \TFL::source()->db->from($this->getTableName())->getCount();
-    }
+	/**
+	 * Получаем общее количество моделей
+	 * @return int
+	 */
+	public function getCount()
+	{
+		//@todo В будщем внести исправления при работе с WHERE в разделах при фильтрации
+		return \TFL::source()->db->from($this->getTableName())->getCount();
+	}
 
-    /**
-     * @param array $queryData
-     * @param array $option Настройки для запроса
-     * @return array
-     */
-    public function prepareRowData(array $queryData = [], $option = [])
-    {
-        //@todo Add Exception
-        if (empty($queryData)) {
-            return null;
-        }
+	/**
+	 * @param array $queryData
+	 * @param array $option Настройки для запроса
+	 * @return array
+	 */
+	public function prepareRowData(array $queryData = [], $option = [])
+	{
+		//@todo Add Exception
+		if (empty($queryData)) {
+			return null;
+		}
 
-        $many = $option['many'] ?? false;
-        $skipOwner = $option['skipOwner'] ?? false;
-        $skipRelations = $option['skipRelations'] ?? false;
-        $offset = isset($option['offset']) ? tString::encodeNum($option['offset']) : 0;
-        //@todo addDefault perPage for all
-        $perPage = isset($option['perPage']) ? tString::encodeNum($option['perPage']) : 30;
-        $order = isset($option['order']) ? tString::encodeString($option['order']) : null;
-        $orderType = isset($option['orderType']) ? tString::encodeString($option['orderType']) : null;
+		$many = $option['many'] ?? false;
+		$skipOwner = $option['skipOwner'] ?? false;
+		$skipRelations = $option['skipRelations'] ?? false;
+		$offset = isset($option['offset']) ? tString::encodeNum($option['offset']) : 0;
+		//@todo addDefault perPage for all
+		$perPage = isset($option['perPage']) ? tString::encodeNum($option['perPage']) : 30;
+		$order = isset($option['order']) ? tString::encodeString($option['order']) : null;
+		$orderType = isset($option['orderType']) ? tString::encodeString($option['orderType']) : null;
 
-        if (in_array(['id', 'password', 'name', 'unitcollection', 'nullmodel'], array_keys($queryData))) {
-            return null;
-        }
+		if (in_array(['id', 'password', 'name', 'unitcollection', 'nullmodel'], array_keys($queryData))) {
+			return null;
+		}
 
-        $isCollection = isset($queryData['unitcollection']);
-        $isNullOwnerModel = isset($queryData['nullmodel']);
+		$isCollection = isset($queryData['unitcollection']);
+		$isNullOwnerModel = isset($queryData['nullmodel']);
 
-        $this->setDefaultLinkType();
+		$this->setDefaultLinkType();
 
-        $tableName = $this->getTableName();
+		$tableName = $this->getTableName();
 
-        $command = \TFL::source()->db;
+		$command = \TFL::source()->db;
 
-        if ($isNullOwnerModel) {
-            $this->setNulOwnerQueryFromInputData($command);
-        } else {
-            $command->select(implode(',', $this->getModelColumnAttrs($tableName)));
-            $command->from($tableName);
-        }
+		if ($isNullOwnerModel) {
+			$this->setNulOwnerQueryFromInputData($command);
+		} else {
+			$command->select(implode(',', $this->getModelColumnAttrs($tableName)));
+			$command->from($tableName);
+		}
 
-        if (!$isCollection && !$isNullOwnerModel) {
-            $this->setQueryFromInputData($command, $queryData, $many);
-        }
+		if (!$isCollection && !$isNullOwnerModel) {
+			$this->setQueryFromInputData($command, $queryData, $many);
+		}
 
-        $this->addUnitQuery($command, $tableName);
-        if (!$skipOwner) {
-            $this->addOwnerQuery($command);
-        }
+		$this->addUnitQuery($command, $tableName);
+		if (!$skipOwner) {
+			$this->addOwnerQuery($command);
+		}
 
-        if (!$skipRelations) {
-            $this->addRelationsQuery($command);
-        }
+		if (!$skipRelations) {
+			$this->addRelationsQuery($command);
+		}
 
-        if ($many) {
-            if ($order) {
-                $command->order($order, $orderType);
-            }
+		if ($many) {
+			if ($order) {
+				$command->order($order, $orderType);
+			}
 
-            $command->limit($offset, $perPage);
+			$command->limit($offset, $perPage);
 
-            $rows = $command->findAll();
+			$rows = $command->findAll();
 
-            if (empty($rows)) {
-                return [];
-            }
+			if (empty($rows)) {
+				return [];
+			}
 
-            $rows = array_map(function ($row) {
-                $this->assignRowData($row);
-                $this->assignRelationsData($row);
+			$rows = array_map(function ($row) {
+				$this->assignRowData($row);
+				$this->assignRelationsData($row);
 
-                return $row;
-            }, $rows);
+				return $row;
+			}, $rows);
 
-            return $rows;
-        } else {
+			return $rows;
+		} else {
 
 //            tDebug::printDebug($command->getText());
-            $row = $command->find();
+			$row = $command->find();
 
-            if (empty($row)) {
-                return null;
-            }
+			if (empty($row)) {
+				return null;
+			}
 
-            $this->assignRowData($row);
-            if (!$skipRelations) {
-                $this->assignRelationsData($row);
-            }
+			$this->assignRowData($row);
+			if (!$skipRelations) {
+				$this->assignRelationsData($row);
+			}
 
 //            tDebug::printDebug($row);
 
-            return $row;
-        }
-    }
+			return $row;
+		}
+	}
 
-    private function setNulOwnerQueryFromInputData(DbBuilder $command)
-    {
-        $command->select(static::DB_MODEL_PREFIX . '_user.id = 0');
-        $command->from(static::DB_MODEL_PREFIX . '_user');
-        $command->where(static::DB_MODEL_PREFIX . '_user.id = 1');
+	private function setNulOwnerQueryFromInputData(DbBuilder $command)
+	{
+		$command->select(static::DB_MODEL_PREFIX . '_user.id = 0');
+		$command->from(static::DB_MODEL_PREFIX . '_user');
+		$command->where(static::DB_MODEL_PREFIX . '_user.id = 1');
 
-    }
+	}
 
-    private function addUnitQuery(DbBuilder &$command, $userTableName, $tableName = null, $encase = false)
-    {
-        if ($this->isNulOwnerModel()) {
-            return;
-        }
+	private function addUnitQuery(DbBuilder &$command, $userTableName, $tableName = null, $encase = false)
+	{
+		if ($this->isNulOwnerModel()) {
+			return;
+		}
 
-        $selectTable = $tableName ?? 'unit';
-        $tableNameJoin = static::DB_TABLE_UNIT;
+		$selectTable = $tableName ?? 'unit';
+		$tableNameJoin = static::DB_TABLE_UNIT;
 
-        if ($encase) {
-            $selectTable = '`' . $tableName . '.' . static::DB_TABLE_UNIT . '`';
-            $tableNameJoin .= ' AS ' . $selectTable;
-        }
+		if ($encase) {
+			$selectTable = '`' . $tableName . '.' . static::DB_TABLE_UNIT . '`';
+			$tableNameJoin .= ' AS ' . $selectTable;
+		}
 
-        $attrs = [];
-        $availableAttrs = [
-            'createddatetime',
-            'lastchangedatetime',
-        ];
-        foreach ($availableAttrs as $availableAttr) {
-            $attrs[] = $this->concatAttr($availableAttr, $selectTable, $tableName, $encase);
-        }
+		$attrs = [];
+		$availableAttrs = [
+			'createddatetime',
+			'lastchangedatetime',
+		];
+		foreach ($availableAttrs as $availableAttr) {
+			$attrs[] = $this->concatAttr($availableAttr, $selectTable, $tableName, $encase);
+		}
 
-        $command->addSelect(implode(',', $attrs))
-            ->leftJoin($tableNameJoin, [
-                $selectTable . '.model_id' => $userTableName . '.id',
-                $selectTable . '.model_name' => '"' . $this->getModelNameLower() . '"'
-            ]);
-    }
+		$command->addSelect(implode(',', $attrs))
+			->leftJoin($tableNameJoin, [
+				$selectTable . '.model_id' => $userTableName . '.id',
+				$selectTable . '.model_name' => '"' . $this->getModelNameLower() . '"'
+			]);
+	}
 
-    private function addOwnerQuery(DbBuilder &$command, $aliasTable = null)
-    {
-        if ($this->isNulOwnerModel()) {
-            return;
-        }
+	private function addOwnerQuery(DbBuilder &$command, $aliasTable = null)
+	{
+		if ($this->isNulOwnerModel()) {
+			return;
+		}
 
-        $unitTableAlias = (!empty($aliasTable)) ? '`' . $aliasTable . '.unit`' : static::DB_TABLE_UNIT;
-        $aliasTable = (!empty($aliasTable)) ? $aliasTable . '.owner' : 'owner';
+		$unitTableAlias = (!empty($aliasTable)) ? '`' . $aliasTable . '.unit`' : static::DB_TABLE_UNIT;
+		$aliasTable = (!empty($aliasTable)) ? $aliasTable . '.owner' : 'owner';
 
-        $aliasTableEncase = "`" . $aliasTable . "`";
+		$aliasTableEncase = "`" . $aliasTable . "`";
 
-        //@todo исправить, добавить в переменную
-        $model = new User();
-        $model->setNewLinkType($this->linkType);
+		//@todo исправить, добавить в переменную
+		$model = new User();
+		$model->setNewLinkType($this->linkType);
 
-        $attrs = $model->getModelColumnAttrs($aliasTable, true);
+		$attrs = $model->getModelColumnAttrs($aliasTable, true);
 
-        $command->addSelect(implode(',', $attrs))
-            ->leftJoin("model_user AS " . $aliasTableEncase, [
-                $aliasTableEncase . '.id' => $unitTableAlias . '.owner_id'
-            ]);
+		$command->addSelect(implode(',', $attrs))
+			->leftJoin("model_user AS " . $aliasTableEncase, [
+				$aliasTableEncase . '.id' => $unitTableAlias . '.owner_id'
+			]);
 
-        $this->addUnitQuery($command, $aliasTableEncase, $aliasTable, true);
-    }
+		$this->addUnitQuery($command, $aliasTableEncase, $aliasTable, true);
+	}
 
-    private function addRelationsQuery(DbBuilder &$command)
-    {
-        foreach ($this->getUnitData()['relations'] as $relationKey => $relationData) {
+	private function addRelationsQuery(DbBuilder &$command)
+	{
+		foreach ($this->getUnitData()['relations'] as $relationKey => $relationData) {
 
-            $modelClass = $relationData['model'];
-            $aliasTable = 'relations.' . $relationKey;
-            $aliasTableEncase = "`" . $aliasTable . "`";
+			$modelClass = $relationData['model'];
+			$aliasTable = 'relations.' . $relationKey;
+			$aliasTableEncase = "`" . $aliasTable . "`";
 
-            if ($relationData['model'] != UnitActive::class) {
+			if ($relationData['model'] != UnitActive::class) {
 
-                /**
-                 * @var $model UnitActive
-                 */
-                $model = new $modelClass;
+				/**
+				 * @var $relationModel UnitActive
+				 */
+				$relationModel = new $modelClass;
 
-                $model->setNewLinkType($relationData['link']);
+				$relationModel->setNewLinkType($relationData['link']);
 
-                $attrs = $model->getModelColumnAttrs($aliasTable, true);
-                $relTableName = $model->getTableName();
+				$attrs = $relationModel->getModelColumnAttrs($aliasTable, true);
+				$relTableName = $relationModel->getTableName();
 
-                $command->addSelect(implode(',', $attrs));
+				$modelName = 'model';
+				$whereCond = [];
 
-                $modelName = 'model';
+				if ($relationModel->isDependModel()) {
+					$whereCond = [
+						$aliasTableEncase . '.' . $modelName . '_name' => '"' . $this->getModelNameLower() . '"',
+					];
 
-                $whereCond = [
-                    $aliasTableEncase . '.' . $modelName . '_name' => '"' . $this->getModelNameLower() . '"',
-                ];
+					$whereCond[$aliasTableEncase . '.' . $modelName . '_attr'] = '"' . $relationKey . '"';
+				}
 
-                if ($this->isNulOwnerModel()) {
-                    $whereCond[$aliasTableEncase . '.' . $modelName . '_id'] = '0';
-                    $command->orWhere('`' . $aliasTable . '.unit`.owner_id = :currentUserid
+				if ($this->isNulOwnerModel()) {
+					if ($relationModel->isDependModel()) {
+						$whereCond[$aliasTableEncase . '.' . $modelName . '_id'] = '0';
+
+						$command->orWhere('`' . $aliasTable . '.unit`.owner_id = :currentUserid
                     AND ' . $aliasTableEncase . '.id IS NOT NULL
                     ', [
-                        'currentUserid' => \TFL::source()->session->currentUser()->id,
-                    ]);
+							'currentUserid' => \TFL::source()->session->currentUser()->id,
+						]);
 
-                    $command->andWhere($aliasTableEncase . '.id IS NULL');
-                    $command->group($aliasTableEncase . '.id');
-                } else {
-                    $whereCond[$aliasTableEncase . '.' . $modelName . '_id'] = $this->getTableName() . '.id';
-                }
+						$command->andWhere($aliasTableEncase . '.id IS NULL');
+						$command->group($aliasTableEncase . '.id');
+					}
+				} else {
+					if ($relationModel->isDependModel()) {
+						$relAttrId = $aliasTableEncase . '.' . $modelName . '_id';
+						$currentModelId = $this->getTableName() . '.id';
+					} else {
+						if ($relationData['link'] == UnitActive::LINK_HAS_ONE_TO_MANY) {
+							$currentModelId = $this->getTableName() . '.id';
+							$relAttrId = $aliasTableEncase . '.' . $this->getModelNameLower() . '_id';
+						} else {
+							$relAttrId = $aliasTableEncase . '.id';
+							$currentModelId = $this->getTableName() . '.' . $relationKey . '_id';
+						}
+					}
 
-                if ($relationData['model'] === Image::class) {
-                    $whereCond[$aliasTableEncase . '.' . $modelName . '_attr'] = '"' . $relationKey . '"';
-                }
+					$whereCond[$relAttrId] = $currentModelId;
+				}
 
-                $command->leftJoin($relTableName . ' AS ' . $aliasTableEncase, $whereCond);
+				if (!empty($whereCond)) {
+					$command->addSelect(implode(',', $attrs));
 
-                $model->addUnitQuery($command, $aliasTableEncase, $aliasTable, true);
+					$command->leftJoin($relTableName . ' AS ' . $aliasTableEncase, $whereCond);
 
-                $model->addOwnerQuery($command, $aliasTable);
+					$relationModel->addUnitQuery($command, $aliasTableEncase, $aliasTable, true);
 
-                $model->setDefaultLinkType();
-            }
-        }
-    }
+					$relationModel->addOwnerQuery($command, $aliasTable);
+				}
 
-    /**
-     * Обработка relations link type = LINK_HAS_ONE_TO_MANY
-     * @param $row
-     */
-    private function assignRelationsData(&$row)
-    {
-        if (!isset($row['relations']) || empty($row['relations'])) {
-            return;
-        }
+				$relationModel->setDefaultLinkType();
+			}
+		}
+	}
 
-        foreach ($this->getUnitData()['relations'] as $key => $data) {
-            if ($data['link'] == UnitActive::LINK_HAS_ONE_TO_MANY && isset($row['relations'][$key])) {
-                $newArray = [];
+	/**
+	 * Обработка relations link type = LINK_HAS_ONE_TO_MANY
+	 * @param $row
+	 */
+	private function assignRelationsData(&$row)
+	{
+		if (!isset($row['relations']) || empty($row['relations'])) {
+			return;
+		}
 
-                $this->recurseRelationsData($newArray, $row['relations'][$key]);
+		foreach ($this->getUnitData()['relations'] as $key => $data) {
+			if ($data['link'] == UnitActive::LINK_HAS_ONE_TO_MANY && isset($row['relations'][$key])) {
+				$newArray = [];
 
-                $row['relations'][$key] = $newArray;
-            }
-        }
+				$this->recurseRelationsData($newArray, $row['relations'][$key]);
 
-    }
+				$row['relations'][$key] = $newArray;
+			}
+		}
 
-    /**
-     * Рекурсия для assignRelationsData
-     * @param $newArray
-     * @param $array
-     * @param null $mainIndex
-     */
-    private function recurseRelationsData(&$newArray, $array, $mainIndex = null)
-    {
-        foreach ($array as $index => $values) {
-            $issetIndex = $mainIndex ?? $index;
+	}
 
-            if (is_array($values)) {
-                $this->recurseRelationsData($newArray, $values, $issetIndex);
-            } else {
-                $arrayData = tString::relationStrToArray($values);
+	/**
+	 * Рекурсия для assignRelationsData
+	 * @param $newArray
+	 * @param $array
+	 * @param null $mainIndex
+	 */
+	private function recurseRelationsData(&$newArray, $array, $mainIndex = null)
+	{
+		foreach ($array as $index => $values) {
+			$issetIndex = $mainIndex ?? $index;
 
-                foreach ($arrayData as $indexValue => $value) {
-                    if ($mainIndex) {
-                        if (!isset($newArray[$indexValue][$mainIndex])) {
-                            $newArray[$indexValue][$mainIndex] = [];
-                        }
+			if (is_array($values)) {
+				$this->recurseRelationsData($newArray, $values, $issetIndex);
+			} else {
+				$arrayData = tString::relationStrToArray($values);
 
-                        if (!isset($newArray[$indexValue][$mainIndex][$index])) {
-                            $newArray[$indexValue][$mainIndex][$index] = $value;
-                        }
-                    } else {
-                        if (!isset($newArray[$indexValue])) {
-                            $newArray[$indexValue] = [];
-                        }
+				foreach ($arrayData as $indexValue => $value) {
+					if ($mainIndex) {
+						if (!isset($newArray[$indexValue][$mainIndex])) {
+							$newArray[$indexValue][$mainIndex] = [];
+						}
 
-                        if (!isset($newArray[$indexValue][$issetIndex])) {
-                            $newArray[$indexValue][$issetIndex] = $value;
-                        }
-                    }
-                }
-            }
-        }
-    }
+						if (!isset($newArray[$indexValue][$mainIndex][$index])) {
+							$newArray[$indexValue][$mainIndex][$index] = $value;
+						}
+					} else {
+						if (!isset($newArray[$indexValue])) {
+							$newArray[$indexValue] = [];
+						}
+
+						if (!isset($newArray[$indexValue][$issetIndex])) {
+							$newArray[$indexValue][$issetIndex] = $value;
+						}
+					}
+				}
+			}
+		}
+	}
 }

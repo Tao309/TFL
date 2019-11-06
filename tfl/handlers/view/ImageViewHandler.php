@@ -77,10 +77,9 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
                 'file-action',
             ]
         ]);
+
         $htmlData = tHtmlForm::generateElementData([
-            'admin/section',
-            'image',
-            'create',
+	        'admin/section', 'image', 'create',
         ], RequestBuilder::METHOD_POST, [
             'class' => ['http-request-upload']
         ]);
@@ -143,9 +142,7 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
     private function renderDeleteButton(Image $model, string $route): string
     {
         $htmlData = tHtmlForm::generateElementData([
-            'admin/section',
-            $route,
-            DbBuilder::TYPE_DELETE,
+	        'admin/section', $route, DbBuilder::TYPE_DELETE,
         ], RequestBuilder::METHOD_POST);
 
         $hiddenData = $model->getHiddenActionData(DbBuilder::TYPE_DELETE);
@@ -227,7 +224,7 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
             $route = 'image';
 
             if ($this->viewType == View::TYPE_VIEW_EDIT || $this->viewType == View::TYPE_VIEW_ADD) {
-                $route .= '/' . $model->id;
+	            $route .= WEB_SEP . $model->id;
             }
 
             $t .= $this->renderOpenButton($model);
@@ -247,7 +244,8 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
 
         return $t;
     }
-    public function renderViewField(): string
+
+	public function renderOneViewField(): string
     {
         $t = $this->renderFieldHeader();
 
@@ -257,7 +255,13 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
 
         return $t;
     }
-    public function renderEditField(): string
+
+	public function renderManyViewFields(): string
+	{
+		return $this->renderOneViewField();
+	}
+
+	public function renderOneEditField(): string
     {
         $t = $this->renderFieldHeader();
         $t .= $this->renderEditFieldBody();
@@ -265,18 +269,16 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
 
         return $t;
     }
-    /**
-     * Дополнительные действия для подстановки модели
-     */
+
+	public function renderManyEditFields(): string
+	{
+		return $this->renderOneEditField();
+	}
+
     public function prepareInputModel(): void
     {
         if ($this->typeLink == UnitActive::LINK_HAS_ONE_TO_MANY) {
             $this->modelType = Image::TYPE_SCREEN;
-
-            //Обратная сортировка изображений
-            if (!empty($this->models)) {
-                $this->models = array_reverse($this->models);
-            }
 
             $this->initNullImageModel();
         } else {

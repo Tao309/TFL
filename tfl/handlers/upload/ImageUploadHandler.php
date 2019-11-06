@@ -13,7 +13,7 @@ use tfl\utils\tString;
  * @package tfl\handlers
  *
  * @property array $file
- * @property resource $fileData
+ * @property array $fileData
  * @property int $model_id
  * @property string $model_name
  * @property string $model_attr
@@ -390,13 +390,13 @@ class ImageUploadHandler extends UploadHandler
             return false;
         }
 
-        $dirPath = WEB_PATH . '/upload/' . $this->model_name . '/' . $this->model_attr . '/';
+	    $dirPath = WEB_PATH . DIR_SEP . 'upload' . DIR_SEP . $this->model_name . DIR_SEP . $this->model_attr . DIR_SEP;
         $this->checkDirExists($dirPath);
         $zPath = zROOT . $dirPath;
         $currentTime = time();
 
         foreach ($this->getDataSizes() as $sizeType => $dataSize) {
-            $path = $zPath . $sizeType . '/';
+	        $path = $zPath . $sizeType . DIR_SEP;
 
             list($width, $height, $origWidth, $origHeight, $src_x, $src_y) = self::getCropParams($dataSize,
                 [$this->file['width'], $this->file['height']], $this->getManualCropData());

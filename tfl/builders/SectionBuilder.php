@@ -111,7 +111,7 @@ class SectionBuilder
 
     private function getPath(): string
     {
-        return zROOT . 'resource/templates/' . $this->getTemplateName() . '/';
+	    return zROOT . 'resource/templates/' . $this->getTemplateName() . DIR_SEP;
     }
 
     private function getCssFiles(): array
@@ -215,7 +215,11 @@ class SectionBuilder
                 $viewClassName = '\app\views\models\\' . $this->unitModel->getModelNameLower() . '\\';
             }
 
-            $viewClassName .= ucfirst($this->typeView) . 'View';
+	        $viewClassName .= ucfirst($this->typeView);
+	        if ($this->isAdminDirection() || $this->isApiViewDirection()) {
+		        $viewClassName .= ucfirst($this->routeDirection);
+	        }
+	        $viewClassName .= 'View';
 
             /**
              * @var TemplateBuilder $view
@@ -225,7 +229,7 @@ class SectionBuilder
             return $view->render();
         }
 
-        return $this->getContent($this->route . '/' . $this->routeType, self::TYPE_BODY);
+	    return $this->getContent($this->route . DIR_SEP . $this->routeType, self::TYPE_BODY);
     }
 
     private function renderFooter()
