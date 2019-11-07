@@ -103,6 +103,11 @@ class ViewUnit extends View
 			}
 		}
 
+		if (isset($data['secretField'])) {
+			if (!tAccess::isOwner($this->dependModel)) {
+				return '';
+			}
+		}
 
 		$class = 'type-' . $data['type'];
 		if ($data['type'] == TemplateBuilder::VIEW_TYPE_HEADER) {

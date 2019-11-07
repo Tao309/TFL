@@ -12,7 +12,7 @@ class tAccess
 		return \TFL::source()->session->currentUser();
 	}
 
-	private static function isOwner(Unit $model): bool
+	public static function isOwner(Unit $model): bool
 	{
 		if (!$user = self::isAuth()) {
 			return false;
@@ -23,11 +23,11 @@ class tAccess
 		}
 
 		if ($model instanceof User) {
-			if (!self::hasAccessByStatus(User::STATUS_MODERATOR)) {
+			if (!self::hasAccessByStatus(User::STATUS_ADMIN)) {
 				return false;
 			}
 
-			return $user->status > $model->status;
+			return $user->status > $model->status || $user->id == $model->id;
 		}
 
 		return self::hasAccessByStatus(User::STATUS_ADMIN)

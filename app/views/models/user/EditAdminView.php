@@ -39,6 +39,11 @@ class EditAdminView extends TemplateBuilder
                 'limit' => 50,
 	            'required' => true,
             ],
+	        'password' => [
+		        'type' => static::VIEW_TYPE_TEXT,
+		        'limit' => 20,
+		        'secretField' => true,
+	        ],
             'status' => [
                 'type' => static::VIEW_TYPE_SELECT,
                 'values' => User::getStatusList(),

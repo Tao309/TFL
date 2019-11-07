@@ -2,6 +2,8 @@
 
 namespace tfl\observers\models;
 
+use app\models\User;
+use tfl\auth\SessionBuilder;
 use tfl\utils\tCrypt;
 
 trait UserObserver
@@ -14,10 +16,16 @@ trait UserObserver
 
 	protected function beforeSave(): bool
 	{
-		if (!empty($this->password)) {
-			$this->password = tCrypt::createHashPassword($this->password);
+		if (!parent::beforeSave()) {
+			return false;
 		}
 
-		return parent::beforeSave();
+		if (!empty(trim($this->password))) {
+			$this->password = tCrypt::createHashPassword($this->password);
+			//Обновляем сессию
+			SessionBuilder::activateSession($this);
+		}
+
+		return true;
 	}
 }

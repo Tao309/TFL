@@ -169,11 +169,11 @@ trait ControllerBuilderObserver
 
     private function checkAuthOrNotRequire()
     {
-        if ($this->checkNoAuthRequired) {
+	    if (!empty($this->checkNoAuthRequired)) {
             if (!\TFL::source()->session->isGuest()) {
                 tProtocolLoader::closeAccess();
             }
-        } elseif ($this->checkNoAuthRequired) {
+	    } elseif (!empty($this->checkAuthRequired)) {
             if (!\TFL::source()->session->isUser()) {
                 tProtocolLoader::closeAccess();
             }

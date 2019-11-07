@@ -44,6 +44,7 @@ class AddAdminView extends TemplateBuilder
 		        'limit' => 20,
 		        'requiredLevel' => User::STATUS_ADMIN,
 		        'required' => true,
+		        'secretField' => true,
 	        ],
             'status' => [
                 'type' => static::VIEW_TYPE_SELECT,
