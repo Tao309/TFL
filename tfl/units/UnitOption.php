@@ -82,11 +82,10 @@ class UnitOption extends Unit implements UnitInterface, UnitOptionInterface
 
 	public static function getByName(string $name): UnitOption
 	{
-		$className = self::getOptionClassName($name);
 		/**
 		 * @var UnitOption $model
 		 */
-		$model = new $className;
+		$model = Unit::createNullModelByName(self::getOptionClassName($name), true);
 
 		$rowData = $model->prepareRowData(['name' => $name]);
 
@@ -111,7 +110,7 @@ class UnitOption extends Unit implements UnitInterface, UnitOptionInterface
 				/**
 				 * @var UnitOption $model
 				 */
-				$model = new $className;
+				$model = Unit::createNullModelByName($className, true);
 				$models[] = $model->createFinalModel($model, $rowData);
 			}
 		}

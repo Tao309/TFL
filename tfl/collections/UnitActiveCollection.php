@@ -145,7 +145,7 @@ class UnitActiveCollection extends UnitCollection implements UnitCollectionInter
 			/**
 			 * @var UnitActive $model
 			 */
-			$model = new $className;
+			$model = Unit::createNullModelByName($className, true);
 			yield $model->createFinalModel($model, $rowData, true);
 		}
 	}

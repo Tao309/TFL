@@ -225,7 +225,10 @@ trait UnitActiveBuilder
 			return;
 		}
 
-		$owner = new User();
+		/**
+		 * @var User $owner
+		 */
+		$owner = Unit::createNullModelByName(User::class, true);
 		$owner->createFinalModel($owner, $this->rowDataForCreateFinalModel['owner']);
 
 		$model->owner = $owner;

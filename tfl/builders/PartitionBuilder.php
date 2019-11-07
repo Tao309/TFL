@@ -59,6 +59,7 @@ class PartitionBuilder
 			return false;
 		}
 
+
 		return (isset($this->userData[$type][$name]) && $this->userData[$type][$name] > 0) ? true : false;
 	}
 

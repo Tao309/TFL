@@ -12,6 +12,12 @@ use tfl\units\UnitOption;
 use tfl\utils\tFile;
 use tfl\view\View;
 
+/**
+ * Class SectionBuilder
+ * @package tfl\builders
+ *
+ * @property string $content Выводимый html контент
+ */
 class SectionBuilder
 {
     use SectionObserver, ResourceObserver;

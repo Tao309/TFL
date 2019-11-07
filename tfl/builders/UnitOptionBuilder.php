@@ -3,6 +3,7 @@
 namespace tfl\builders;
 
 use tfl\units\Unit;
+use tfl\units\UnitOption;
 use tfl\utils\tString;
 
 trait UnitOptionBuilder

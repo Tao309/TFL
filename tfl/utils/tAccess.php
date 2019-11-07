@@ -2,11 +2,8 @@
 
 namespace tfl\utils;
 
-use app\models\Role;
-use app\models\User;
-use tfl\units\Unit;
-use tfl\units\UnitActive;
-use tfl\units\UnitOption;
+use app\models\{Role, User};
+use tfl\units\{Unit, UnitActive, UnitOption};
 
 class tAccess
 {
