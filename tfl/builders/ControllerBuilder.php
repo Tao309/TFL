@@ -103,6 +103,7 @@ class ControllerBuilder implements ControllerInterface
 	protected function beforeAction(): void
 	{
 		$this->checkJustAjaxRequest();
+		$this->checkCsrfValidating();
 		$this->checkAuthOrNotRequire();
 		$this->checkMethodAuthRequire();
 

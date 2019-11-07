@@ -7,6 +7,9 @@ use tfl\utils\tString;
 
 class RequestBuilder
 {
+	const METHOD_REQUEST = 'request';
+	const METHOD_SERVER = 'server';
+
     const METHOD_POST = 'post';
     const METHOD_FILES = 'files';
     const METHOD_GET = 'get';
@@ -101,7 +104,13 @@ class RequestBuilder
                 break;
             case self::METHOD_FILES:
                 return $_FILES ?? [];
-                break;
+	            break;
+	        case self::METHOD_REQUEST:
+		        return $_REQUEST ?? [];
+		        break;
+	        case self::METHOD_SERVER:
+		        return $_SERVER ?? [];
+		        break;
             default:
                 return [];
         }

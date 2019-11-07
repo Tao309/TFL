@@ -9,6 +9,7 @@ use tfl\builders\RequestBuilder;
 use tfl\units\Unit;
 use tfl\units\UnitActive;
 use tfl\units\UnitOption;
+use tfl\utils\tCrypt;
 use tfl\utils\tDebug;
 use tfl\utils\tProtocolLoader;
 use tfl\view\View;
@@ -158,6 +159,13 @@ trait ControllerBuilderObserver
             tProtocolLoader::closeAccess();
         }
     }
+
+	private function checkCsrfValidating()
+	{
+		if (!tCrypt::checkCsrfRequest()) {
+			tProtocolLoader::closeAccess();
+		}
+	}
 
     private function checkAuthOrNotRequire()
     {

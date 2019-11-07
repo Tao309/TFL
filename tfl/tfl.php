@@ -50,6 +50,11 @@ class TFL
         self::$source->section = new \tfl\builders\InitControllerBuilder();
     }
 
+	public function enableCsrfProtection()
+	{
+		\tfl\utils\tCrypt::enableCsrfToken();
+	}
+
     public function getVersion(): string
     {
         return '1.00.000';
