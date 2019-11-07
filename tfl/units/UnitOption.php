@@ -4,9 +4,11 @@ namespace tfl\units;
 
 use tfl\builders\RequestBuilder;
 use tfl\builders\TemplateBuilder;
+use tfl\builders\UnitOptionBuilder;
 use tfl\builders\UnitOptionSqlBuilder;
 use tfl\interfaces\UnitInterface;
 use tfl\interfaces\UnitOptionInterface;
+use tfl\observers\UnitOptionObserver;
 use tfl\utils\tCaching;
 use tfl\utils\tString;
 
@@ -27,7 +29,7 @@ use tfl\utils\tString;
  */
 class UnitOption extends Unit implements UnitInterface, UnitOptionInterface
 {
-	use UnitOptionSqlBuilder;
+	use UnitOptionSqlBuilder, UnitOptionObserver, UnitOptionBuilder;
 
 	const NAME_CORE_SYSTEM = 'core.system';
 	const NAME_CORE_SEO = 'core.seo';
@@ -42,22 +44,6 @@ class UnitOption extends Unit implements UnitInterface, UnitOptionInterface
 
 		self::NAME_DESIGN_COLORS => 'Design Colors',
 	];
-
-	public function __construct()
-	{
-		parent::__construct();
-
-		$this->setModelUnitData();
-	}
-
-	protected function beforeSave(): bool
-	{
-		$this->name = $this->title;
-		//Свой метод attemptLoadData записывает в $this->>option данные
-		$this->content = $this->getJustOptionsList();
-
-		return parent::beforeSave();
-	}
 
 	/**
 	 * Получаем код-название настроек
@@ -75,14 +61,6 @@ class UnitOption extends Unit implements UnitInterface, UnitOptionInterface
 	protected function getOptionList(): array
 	{
 		return [];
-	}
-
-	protected function afterSave(): bool
-	{
-		//Пересоздать кэш файл настроек
-		tCaching::recreateUnitOptionFiles([$this]);
-
-		return parent::afterSave();
 	}
 
 	public static function getOptionTitles()
@@ -242,24 +220,6 @@ class UnitOption extends Unit implements UnitInterface, UnitOptionInterface
 		return array_map(function ($row) {
 			return tString::encodeValue($row);
 		}, $this->option);
-	}
-
-	public function createFinalModel(Unit $model, array $rowData)
-	{
-		$model->title = $this->getOptionTitle();
-		$this->id = $rowData['id'];
-
-		if (empty(trim($rowData['content']))) {
-			$rowData['content'] = [];
-		} else {
-			$rowData['content'] = tString::unserialize($rowData['content']);
-		}
-
-		$this->option = $this->getOptionData($rowData['content'], true);
-
-		$this->afterFind();
-
-		return $model;
 	}
 
 	public function attemptLoadData(): bool

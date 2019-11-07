@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use tfl\observers\models\RoleObserver;
 use tfl\units\UnitActive;
 
 /**
@@ -14,9 +15,11 @@ use tfl\units\UnitActive;
  */
 class Role extends UnitActive
 {
+	use RoleObserver;
+
 	public function __toString()
 	{
-		return 'Role: ' . $this->title;
+		return '#' . $this->id . ' ' . $this->title;
 	}
 
 	public function unitData(): array
@@ -58,5 +61,14 @@ class Role extends UnitActive
 			'rights' => 'Rights',
 			'users' => 'Users',
 		];
+	}
+
+	/**
+	 * Получаем массив прав по роли
+	 * @return array
+	 */
+	public function getRightsArray()
+	{
+		return $this->rights;
 	}
 }

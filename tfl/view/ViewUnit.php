@@ -7,6 +7,7 @@ use tfl\builders\PartitionBuilder;
 use tfl\builders\RequestBuilder;
 use tfl\builders\TemplateBuilder;
 use tfl\handlers\html\BbTags;
+use tfl\units\Unit;
 use tfl\units\UnitOption;
 use tfl\utils\tAccess;
 use tfl\utils\tHTML;
@@ -47,7 +48,6 @@ class ViewUnit extends View
 		foreach ($this->tplBuilder->viewData() as $attr => $data) {
 			$elements .= $this->viewRow($attr, $data);
 		}
-
 
 		if (in_array($this->tplBuilder->geViewType(), [static::TYPE_VIEW_ADD, static::TYPE_VIEW_EDIT])) {
 			$elements .= $this->viewActionRow();
@@ -90,6 +90,20 @@ class ViewUnit extends View
 
 	protected function viewRow(string $attr, array $data): string
 	{
+		if ($data['type'] == TemplateBuilder::VIEW_TYPE_MODEL) {
+			$nullModel = Unit::createNullModelByName($data['model']);
+			if (in_array($this->tplBuilder->geViewType(), [self::TYPE_VIEW_ADD, self::TYPE_VIEW_EDIT])) {
+				if (!tAccess::canEdit($nullModel)) {
+					return '';
+				}
+			} else {
+				if (!tAccess::canView($nullModel)) {
+					return '';
+				}
+			}
+		}
+
+
 		$class = 'type-' . $data['type'];
 		if ($data['type'] == TemplateBuilder::VIEW_TYPE_HEADER) {
 			$class = 'view-row-' . $data['type'];
@@ -113,7 +127,7 @@ class ViewUnit extends View
 				 */
 				$defaultValue = $this->dependModel->getOptionValue($attr);
 			} else {
-				$defaultValue = $this->dependModel->$attr;
+				$defaultValue = $this->dependModel->$attr ?? null;
 			}
 
 			$t .= tHtmlTags::render('div', $this->dependModel->getLabel($attr), [
@@ -172,7 +186,7 @@ class ViewUnit extends View
 						break;
 					case TemplateBuilder::VIEW_TYPE_SELECT:
 						$values = $data['values'] ?? [];
-						$t .= tHTML::inputSelect($inputName, $values, $defaultValue);
+						$t .= tHTML::inputSelect($inputName, $values, $defaultValue, $options);
 						break;
 					case TemplateBuilder::VIEW_TYPE_MODEL:
 						$t .= $this->viewRelationModelRow($attr);

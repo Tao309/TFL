@@ -221,6 +221,10 @@ class SectionBuilder
 	        }
 	        $viewClassName .= 'View';
 
+	        if (!class_exists($viewClassName)) {
+		        return 'View <b>' . $viewClassName . '</b> is not found!';
+	        }
+
             /**
              * @var TemplateBuilder $view
              */

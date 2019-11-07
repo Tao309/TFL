@@ -4,7 +4,9 @@ namespace tfl\handlers\view;
 
 use app\models\Image;
 use tfl\interfaces\view\ViewHandlerInterface;
+use tfl\units\Unit;
 use tfl\units\UnitActive;
+use tfl\utils\tAccess;
 use tfl\view\View;
 
 /**
@@ -12,6 +14,7 @@ use tfl\view\View;
  * @package tfl\handlers\view
  *
  * @property UnitActive $parentModel Родительская модель
+ * @property UnitActive $dependNullModel Используемая модель, пустая модель
  * @property UnitActive $model Текущая модель, для неё отображаем вид
  * @property UnitActive[] $models Текущие модели, для них отображаем вид
  * @property string $attr Атрибут, по которому дочерняя модель отображается
@@ -21,11 +24,14 @@ use tfl\view\View;
 abstract class ViewHandler
 {
 	protected $parentModel;
+	protected $dependNullModel;
 	protected $model;
 	protected $models = [];
 	protected $attr;
 	protected $viewType;
 	protected $typeLink;
+
+	const VALUE_EMPTY_FIELD = '---';
 
 	public function __construct(UnitActive $parentModel, $attr, $viewType)
 	{
@@ -35,6 +41,7 @@ abstract class ViewHandler
 
 		$relationData = $parentModel->getUnitDataRelationByAttr($this->attr);
 		$this->typeLink = $relationData['link'];
+		$this->dependNullModel = Unit::createNullModelByName($relationData['model']);
 
 		if ($parentModel->hasAttribute($attr)) {
 			if ($this->typeLink == UnitActive::LINK_HAS_ONE_TO_MANY) {

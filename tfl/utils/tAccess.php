@@ -2,6 +2,7 @@
 
 namespace tfl\utils;
 
+use app\models\Role;
 use app\models\User;
 use tfl\units\Unit;
 use tfl\units\UnitActive;
@@ -9,101 +10,109 @@ use tfl\units\UnitOption;
 
 class tAccess
 {
-    private static function isAuth()
-    {
-        return \TFL::source()->session->currentUser();
-    }
+	private static function isAuth()
+	{
+		return \TFL::source()->session->currentUser();
+	}
 
-    private static function isOwner(Unit $model): bool
-    {
-        if (!$user = self::isAuth()) {
-            return false;
-        }
+	private static function isOwner(Unit $model): bool
+	{
+		if (!$user = self::isAuth()) {
+			return false;
+		}
 
-        if (!$model->hasAttribute('owner')) {
-            return false;
-        }
+		if (!$model->isNewModel() && !$model->hasAttribute('owner')) {
+			return false;
+		}
 
-        if ($model instanceof User) {
-            if (!self::hasAccessByStatus(User::STATUS_MODERATOR)) {
-                return false;
-            }
+		if ($model instanceof User) {
+			if (!self::hasAccessByStatus(User::STATUS_MODERATOR)) {
+				return false;
+			}
 
-            return $user->status > $model->status;
-        }
+			return $user->status > $model->status;
+		}
 
-        return self::hasAccessByStatus(User::STATUS_ADMIN) || $user->id == $model->owner->id;
-    }
+		return self::hasAccessByStatus(User::STATUS_ADMIN)
+			|| ($model->hasAttribute('owner') && $user->id == $model->owner->id);
+	}
 
-    private static function hasAccessByStatus($status = User::STATUS_USER): bool
-    {
-        if (!$user = self::isAuth()) {
-            return false;
-        }
-        return $user->status >= $status;
-    }
+	public static function hasAccessByStatus($status = User::STATUS_USER): bool
+	{
+		if (!$user = self::isAuth()) {
+			return false;
+		}
 
-    public static function canAdd(UnitActive $model): bool
-    {
-        if (!$user = self::isAuth()) {
-            return false;
-        }
+		return $user->status >= $status;
+	}
 
-        if ($model instanceof User) {
-            return self::hasAccessByStatus(User::STATUS_ADMIN);
-        }
+	public static function canAdd(UnitActive $model): bool
+	{
+		if (!$user = self::isAuth()) {
+			return false;
+		}
 
-        return self::hasAccessByStatus(User::STATUS_PUBLISHER);
-    }
+		if ($model instanceof User) {
+			return self::hasAccessByStatus(User::STATUS_ADMIN);
+		}
 
-    public static function canView(Unit $model): bool
-    {
-        return true;
-    }
+		return self::hasAccessByStatus(User::STATUS_PUBLISHER);
+	}
 
-    public static function canEdit(Unit $model): bool
-    {
-        if (!$user = self::isAuth()) {
-            return false;
-        }
+	public static function canView(Unit $model, $module = null): bool
+	{
+		if ($model instanceof Role) {
+			if (!self::hasAccessByStatus(User::STATUS_ADMIN)) {
+				return false;
+			}
+		}
 
-        if ($model instanceof User || $model instanceof UnitOption) {
-            return self::hasAccessByStatus(User::STATUS_ADMIN);
-        }
+		return \TFL::source()->partition->hasAccess($model, $module);
+	}
 
-        if (!self::canView($model)) {
-            return false;
-        }
+	public static function canEdit(Unit $model): bool
+	{
+		if (!$user = self::isAuth()) {
+			return false;
+		}
 
-        if (!self::hasAccessByStatus(User::STATUS_PUBLISHER)) {
-            return false;
-        }
+		if ($model instanceof User || $model instanceof UnitOption) {
+			return self::hasAccessByStatus(User::STATUS_ADMIN);
+		}
 
-        if (!self::isOwner($model)) {
-            return false;
-        }
+		if (!self::canView($model)) {
+			return false;
+		}
 
-        return true;
-    }
+		if (!self::hasAccessByStatus(User::STATUS_PUBLISHER)) {
+			return false;
+		}
 
-    public static function canDelete(Unit $model): bool
-    {
-        if (!$user = self::isAuth()) {
-            return false;
-        }
+		if (!self::isOwner($model)) {
+			return false;
+		}
 
-        if ($model instanceof UnitOption) {
-            return false;
-        }
+		return true;
+	}
 
-        if (!self::canEdit($model)) {
-            return false;
-        }
+	public static function canDelete(Unit $model): bool
+	{
+		if (!$user = self::isAuth()) {
+			return false;
+		}
 
-        if ($model instanceof User) {
-            return self::hasAccessByStatus(User::STATUS_SUPERADMIN);
-        }
+		if ($model instanceof UnitOption) {
+			return false;
+		}
 
-        return true;
-    }
+		if (!self::canEdit($model)) {
+			return false;
+		}
+
+		if ($model instanceof User) {
+			return self::hasAccessByStatus(User::STATUS_SUPERADMIN);
+		}
+
+		return true;
+	}
 }

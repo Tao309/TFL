@@ -3,6 +3,7 @@
 namespace app\views\models\User;
 
 use app\models\Image;
+use app\models\Role;
 use app\models\User;
 use tfl\builders\TemplateBuilder;
 
@@ -41,6 +42,10 @@ class DetailsAdminView extends TemplateBuilder
                 'values' => User::getStatusList(),
                 'requiredLevel' => User::STATUS_ADMIN,
             ],
+	        'role' => [
+		        'type' => static::VIEW_TYPE_MODEL,
+		        'model' => Role::class,
+	        ],
         ];
 
         return $data;

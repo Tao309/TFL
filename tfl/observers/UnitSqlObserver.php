@@ -3,6 +3,7 @@
 namespace tfl\observers;
 
 use app\models\User;
+use tfl\units\Unit;
 use tfl\units\UnitActive;
 use tfl\utils\tString;
 
@@ -44,7 +45,7 @@ trait UnitSqlObserver
 
 		foreach ($this->getUnitData()['details'] as $attr) {
 			if (isset($rules[$attr]['secretField'])) {
-				continue;
+//				continue;
 			}
 
 			$attrs[] = $attr = mb_strtolower($attr);
@@ -111,72 +112,101 @@ trait UnitSqlObserver
 		$update = [];
 
 		foreach ($this->getUnitDataRelations() as $attr => $data) {
-			if (!$this->hasAttribute($attr)) {
+			if (!isset($this->$attr)) {
 				continue;
 			}
 
-			if (!isset($update[$data['model']])) {
+			if ($data['model'] === UnitActive::class) {
+				continue;
+			}
+
+			/**
+			 * @var UnitActive $model
+			 */
+			$model = Unit::createNullModelByName($data['model']);
+			if ($model->isDependModel()) {
+				//Пропускаем зависимые модели, f.e Image, они сохраняются при загрузке своей модели сами
+				continue;
+			}
+
+			$updateIndex = $data['model'] . '\\' . $data['link'];
+			if (!isset($update[$updateIndex])) {
 				if ($data['link'] == UnitActive::LINK_HAS_ONE_TO_MANY) {
 					$attrName = $this->getModelNameLower() . '_id';
 				} else {
 					$attrName = $attr . '_id';
 				}
 
-				$update[$data['model']] = [
-					'ids' => [],
+				$update[$updateIndex] = [
 					'attrName' => $attrName,
-					'attr' => $attr,
-					'clearIds' => [],//По этому массиву обнулять модели, что были ранее
+					'link' => $data['link'],
+					'model' => $model,
+					'ids' => [],
+					'oldIds' => [],
 				];
+			}
+			//Добавляем значения изначальные
+			$oldIds = $this->getOldRelationsValues($attr);
+			if (!empty($oldIds)) {
+				if ($data['link'] == UnitActive::LINK_HAS_ONE_TO_MANY) {
+					$update[$updateIndex]['oldIds'] = array_merge($update[$updateIndex]['oldIds'], $oldIds);
+				} else {
+					$update[$updateIndex]['oldIds'][] = $oldIds;
+				}
+
+				$update[$updateIndex]['oldIds'] = array_unique($update[$updateIndex]['oldIds']);
 			}
 
 			if ($data['link'] == UnitActive::LINK_HAS_ONE_TO_MANY) {
 				foreach ($this->$attr as $id) {
-					$update[$data['model']]['ids'][] = $id;
+					$valueId = ($id instanceof UnitActive) ? $id->id : $id;
+					$update[$updateIndex]['ids'][] = $valueId;
 				}
 			} else if ($data['link'] == UnitActive::LINK_HAS_ONE_TO_ONE) {
-				$update[$data['model']]['ids'][] = $this->$attr;
-			}
-
-			//Значения, которые надо обнулить
-			$oldIds = $this->getOldRelationsValues($attr);
-			if (!empty($oldIds)) {
-				$clearIds = array_diff($oldIds, $update[$data['model']]['ids']);
-				if (!empty($clearIds)) {
-					$update[$data['model']]['clearIds'] = array_merge($update[$data['model']]['clearIds'], $clearIds);
-				}
+				$valueId = ($this->$attr instanceof UnitActive) ? $this->$attr->id : $this->$attr;
+				$update[$updateIndex]['ids'][] = $valueId;
 			}
 		}
 
-		if (!$this->isWasNewModel()) {
-			//Сохраняем уже имеющуюся модель, relation модели до нового сохранения открепить
-			//Нужны oldValues или что-то такое
-		}
+		foreach ($update as $updateIndex => $data) {
+			$newIds = array_diff($data['ids'], $data['oldIds']);
+			$oldDeleteIds = array_diff($data['oldIds'], $data['ids']);
 
-		//Обновление только для изображений
-		foreach ($update as $modelName => $data) {
 			/**
-			 * @var UnitActive $model ;
+			 * @var UnitActive $data ['model']
 			 */
-			$model = new $modelName;
+			$model = $data['model'];
 
-			if (!$model->isDependModel()) {
-				//Сбрасываем ранее сохранённые
-				if (!empty($data['clearIds'])) {
+			if ($data['link'] == UnitActive::LINK_HAS_ONE_TO_MANY) {
+				//Обнуляем старые значения
+				if (!empty($oldDeleteIds)) {
 					\TFL::source()->db->update($model->getTableName(), [
 						$data['attrName'] => 0,
 					], [
-						['id', 'IN', $data['clearIds']],
+						['id', 'IN', $oldDeleteIds],
 					]);
 				}
-			}
 
-			//Записываем новые сохранённые
-			\TFL::source()->db->update($model->getTableName(), [
-				$data['attrName'] => $this->id,
-			], [
-				['id', 'IN', $data['ids']]
-			]);
+				//Записываем новые значения
+				if (!empty($newIds)) {
+					\TFL::source()->db->update($model->getTableName(), [
+						$data['attrName'] => $this->id,
+					], [
+						['id', 'IN', $newIds],
+					]);
+				}
+			} else {
+				if (empty($newIds)) {
+					continue;
+				}
+
+				//Записываем новые значения
+				\TFL::source()->db->update($this->getTableName(), [
+					$data['attrName'] => $newIds[0],
+				], [
+					'id' => $this->id,
+				]);
+			}
 		}
 
 		return true;

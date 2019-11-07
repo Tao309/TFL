@@ -87,10 +87,16 @@ class InitControllerBuilder implements InitControllerBuilderInterface
         require_once $file;
 
         /**
-         * $modelController extends ControllerBuilder
+         * @var ControllerBuilder $modelController
          */
         $fullClassName = 'app\\controllers\\' . $className;
-        $modelController = new $fullClassName($this);
+	    if (!class_exists($fullClassName)) {
+		    echo 'Controller not found';
+		    exit;
+	    }
+
+	    $modelController = new $fullClassName($this);
+	    $modelController->afterAction();
 
         echo $modelController->$route(...$this->getInputArgs());
     }

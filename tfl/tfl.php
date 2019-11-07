@@ -9,6 +9,7 @@ if (!defined('INCLUDE')) exit;
  * @property \tfl\builders\RequestBuilder request
  * @property \tfl\builders\InitControllerBuilder section
  * @property \tfl\auth\Session session
+ * @property \tfl\builders\PartitionBuilder partition
  */
 class TFL
 {
@@ -45,6 +46,7 @@ class TFL
         new \tfl\builders\CacheBuilder();
 
         self::$source->session = new \tfl\auth\Session();
+	    self::$source->partition = new \tfl\builders\PartitionBuilder();
         self::$source->section = new \tfl\builders\InitControllerBuilder();
     }
 

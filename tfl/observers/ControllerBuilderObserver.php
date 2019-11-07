@@ -21,9 +21,28 @@ trait ControllerBuilderObserver
      */
     private $seoModelValues = [];
 
-    /**
-     * Проверяем доступ для мартшрутов REST
-     */
+	private function checkPartitionAccess()
+	{
+		//@todo Требуется фиксация. После наполнения большего функционала
+		if (
+			$this->getRouteDirection() == InitControllerBuilder::ROUTE_ADMIN_DIRECTION
+			&& $this->getSectionRoute() != InitControllerBuilder::DEFAULT_ROUTE
+		) {
+			if ($this->getSectionRoute() == 'option') {
+				$name = 'app\models\\' . $this->getSectionRoute() . '\\' . $this->getSectionRouteType();
+			} else {
+				$name = $this->getSectionRoute();
+			}
+			if (!\TFL::source()->partition->hasAccess(Unit::createNullModelByName($name))) {
+				die('Has no access');
+			}
+		}
+	}
+
+	/**
+	 * Проверяем доступ для мартшрутов REST
+	 * @throws \tfl\exceptions\TFLNotFoundModelException
+	 */
     private function checkRequireRequest()
     {
 	    if (!$this->enableREST) {
@@ -41,7 +60,7 @@ trait ControllerBuilderObserver
         /**
          * @var UnitActive $modelName
          */
-        $modelName = 'app\models\\' . ucfirst($this->getSectionRoute());
+	    $modelName = Unit::checkClassExistsByName($this->getSectionRoute());
         $id = (int)\TFL::source()->request->getRequestValue('get', 'id');
         $model = null;
 
@@ -52,7 +71,7 @@ trait ControllerBuilderObserver
 
             switch ($this->getSectionRouteType()) {
                 case 'create':
-                    $model = new $modelName();
+	                $model = Unit::createNullModelByName($modelName);
                     $model->attemptRequestCreateModel();
                     break;
                 case 'save':
@@ -71,12 +90,10 @@ trait ControllerBuilderObserver
                 return;
             }
 
-	        tDebug::startDebug();
-
             //Просмотр вида через метод GET
             switch ($this->getSectionRouteType()) {
                 case 'index'://Список
-                    $model = new $modelName;
+	                $model = Unit::createNullModelByName($modelName);
                     $this->checkAccess(DbBuilder::TYPE_VIEW, $model);
                     $this->appendTypeView(View::TYPE_VIEW_LIST);
                     break;

@@ -7,6 +7,7 @@ use tfl\builders\RequestBuilder;
 use tfl\builders\TemplateBuilder;
 use tfl\builders\UnitBuilder;
 use tfl\builders\UnitSqlBuilder;
+use tfl\exceptions\TFLNotFoundModelException;
 use tfl\observers\UnitObserver;
 use tfl\observers\UnitRulesObserver;
 use tfl\observers\UnitSqlObserver;
@@ -39,6 +40,12 @@ abstract class Unit
 	const RULE_TYPE_DESCRIPTION = 'Description';
 	const RULE_TYPE_INT = 'Integer';
 	const RULE_TYPE_ARRAY = 'Array';
+
+	/**
+	 * Список нулевых моделей, уникальный
+	 * @var array
+	 */
+	private static $nullModels = [];
 
 	/**
 	 * @var $modelName string|null
@@ -84,6 +91,50 @@ abstract class Unit
 	 */
 	protected $loadDataErrors = [];
 
+	/**
+	 * Проверяем наличие названия класса
+	 * @param string $sectionRoute
+	 * @return string
+	 * @throws TFLNotFoundModelException
+	 */
+	public static function checkClassExistsByName(string $sectionRoute, string $moduleName = null)
+	{
+		if (!strstr($sectionRoute, '\\')) {
+			$modelClassName = 'app\models\\';
+			if ($moduleName) {
+				$modelClassName .= mb_strtolower($moduleName) . '\\';
+			}
+			$modelClassName .= ucfirst($sectionRoute);
+		} else {
+			$modelClassName = $sectionRoute;
+		}
+
+		if (!class_exists($modelClassName)) {
+			throw new TFLNotFoundModelException($modelClassName);
+		}
+
+		return $modelClassName;
+	}
+
+	/**
+	 * Создаём нулевую модель из названия sectionRoute
+	 * @param string $name
+	 * @return Unit
+	 */
+	public static function createNullModelByName(string $name, $forceNew = false)
+	{
+		$className = self::checkClassExistsByName($name);
+		if ($forceNew) {
+			return new $className;
+		}
+
+		if (!isset(self::$nullModels[$className])) {
+			self::$nullModels[$className] = new $className;
+		}
+
+		return self::$nullModels[$className];
+	}
+
 	public function __construct()
 	{
 		$this->beforeFind();
@@ -94,7 +145,7 @@ abstract class Unit
 		return $this->getModelName() . ' #' . $this->id;
 	}
 
-	protected function isNewModel()
+	public function isNewModel()
 	{
 		return !isset($this->id) || !$this->id || $this->id <= 0;
 	}
@@ -186,6 +237,11 @@ abstract class Unit
 			'relations' => [],
 		];
 
+		if ($this->isNewModel()) {
+			$this->oldValues = $data;
+			return;
+		}
+
 		foreach ($this->getUnitData()['details'] as $attr) {
 			if (empty($this->$attr)) {
 				continue;
@@ -224,6 +280,7 @@ abstract class Unit
 		if ($attr) {
 			return $this->oldValues['relations'][$attr] ?? null;
 		}
+
 		return $this->oldValues['relations'];
 	}
 

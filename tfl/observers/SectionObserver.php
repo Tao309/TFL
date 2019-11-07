@@ -4,6 +4,7 @@ namespace tfl\observers;
 
 use tfl\builders\MenuBuilder;
 use tfl\builders\RequestBuilder;
+use tfl\units\Unit;
 use tfl\utils\tHTML;
 use tfl\utils\tHtmlForm;
 
@@ -206,15 +207,11 @@ trait SectionObserver
 
             $menuName = ucfirst($match[1]);
 
-            $className = 'app\\models\\menu\\Menu' . $menuName;
-            if (!class_exists($className)) {
-                return '';
-            }
-
+	        $className = 'app\models\menu\Menu' . $menuName;
             /**
              * @var MenuBuilder $model
              */
-            $model = new $className();
+	        $model = Unit::createNullModelByName($className);
 
             return $model->render();
         }, $this->content);

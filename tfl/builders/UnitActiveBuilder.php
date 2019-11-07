@@ -7,7 +7,6 @@ use app\models\Page;
 use app\models\User;
 use tfl\units\Unit;
 use tfl\units\UnitActive;
-use tfl\utils\tDebug;
 use tfl\utils\tString;
 
 trait UnitActiveBuilder
@@ -82,6 +81,14 @@ trait UnitActiveBuilder
 	{
 		foreach ($this->getUnitData()['relations'] as $attr => $data) {
 			if (!isset($request[$attr])) {
+				if (!$this->isNewModel()) {
+					if ($data['link'] == UnitActive::LINK_HAS_ONE_TO_MANY) {
+						$this->$attr = [];
+					} else {
+						$this->$attr = null;
+					}
+				}
+
 				continue;
 			}
 
@@ -251,7 +258,7 @@ trait UnitActiveBuilder
 		/**
 		 * @var UnitActive $relationModel
 		 */
-		$relationModel = new $data['model'];
+		$relationModel = Unit::createNullModelByName($data['model'], true);
 
 		//Добавление зависимых моделей в модели связи
 		if ($relationModel instanceof Image) {

@@ -4,6 +4,7 @@ namespace app\models;
 
 use tfl\observers\models\UserObserver;
 use tfl\units\UnitActive;
+use tfl\utils\tCrypt;
 
 /**
  * Class User
@@ -13,6 +14,8 @@ use tfl\units\UnitActive;
  * @property string $email
  * @property string $status
  * @property Image $avatar
+ * @property Role $role
+ * @property string $password
  */
 class User extends UnitActive
 {
@@ -58,7 +61,7 @@ class User extends UnitActive
         return $statusNames;
     }
 
-    public function __toString()
+	public function __toString()
     {
         if ($this->isNewModel()) {
             return 'Nonamed User';
@@ -131,10 +134,7 @@ class User extends UnitActive
         $labels['password'] = 'Пароль';
         $labels['status'] = 'Статус';
         $labels['avatar'] = 'Аватар';
-
-        $labels['firstName'] = 'Имя';
-        $labels['lastName'] = 'Фамилия';
-        $labels['dateBirth'] = 'Дата рождения';
+	    $labels['role'] = 'Роль';
 
         return $labels;
     }

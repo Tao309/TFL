@@ -167,7 +167,20 @@ class tHTML
 		array $options = []
 	)
 	{
-		$input = '<select name="' . $name . '" class="html-element-select">';
+		if (isset($options['class'])) {
+			if (!is_array($options['class'])) {
+				$options['class'] = [$options['class']];
+			}
+		} else {
+			$options['class'] = [];
+		}
+		$options['class'][] = 'html-element-select';
+
+		$input = tHtmlTags::startTag('select', [
+			'name' => $name,
+			'id' => $name,
+			'class' => $options['class'],
+		]);
 
 		$input .= '<option hidden></option>';
 
@@ -191,7 +204,7 @@ class tHTML
 			}
 		}
 
-		$input .= '</select>';
+		$input .= tHtmlTags::endTag('select');
 
 		return $input;
 	}

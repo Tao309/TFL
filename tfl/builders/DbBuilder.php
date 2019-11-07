@@ -13,6 +13,11 @@ class DbBuilder
 {
     use DbObserver;
 
+	const CONCAT_EQUAL = '=';
+	const CONCAT_NOT_EQUAL = '!=';
+	const CONCAT_IN = 'IN';
+	const CONCAT_NOT_IN = 'NOT IN';
+
     const TYPE_INSERT = 'insert';
     const TYPE_UPDATE = 'update';//Для UnitActive
     const TYPE_VIEW = 'view';//Для UnitActive

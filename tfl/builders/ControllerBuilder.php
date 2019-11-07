@@ -13,18 +13,7 @@ use tfl\utils\tAccess;
 use tfl\utils\tHtmlForm;
 use tfl\utils\tHtmlTags;
 use tfl\utils\tResponse;
-use tfl\utils\tString;
 
-/**
- * 'section/page/'          => sectionList (GET)
- * 'section/page/add/       => sectionAdd (GET)
- * 'section/page/2/         => sectionDetails (GET)
- * 'section/page/2/edit'    => sectionEdit (GET)
- *
- * 'section/page/create/    => sectionCreate (POST)
- * 'section/page/2/save     => sectionSave (PUT)
- * 'section/page/2/delete'  => sectionDelete (DELETE)
- */
 /**
  * Class ControllerBuilder
  * @package tfl\builders
@@ -113,11 +102,17 @@ class ControllerBuilder implements ControllerInterface
 
 	protected function beforeAction(): void
 	{
-		$this->checkRequireRequest();
-
 		$this->checkJustAjaxRequest();
 		$this->checkAuthOrNotRequire();
 		$this->checkMethodAuthRequire();
+
+		$this->checkPartitionAccess();
+		$this->checkRequireRequest();
+	}
+
+	public function afterAction(): void
+	{
+
 	}
 
 	/**
@@ -146,9 +141,9 @@ class ControllerBuilder implements ControllerInterface
 	/**
 	 * Проверяем доступ к моделе
 	 * @param string $type
-	 * @param UnitActive|null $model
+	 * @param Unit|null $model
 	 */
-	protected function checkAccess(string $type, UnitActive $model = null): void
+	protected function checkAccess(string $type, Unit $model = null): void
 	{
 		$this->checkModelOrRedirect($model);
 
@@ -203,19 +198,18 @@ class ControllerBuilder implements ControllerInterface
 		//Показ списка моделей для выбора
 		//@todo оптимизировать
 
-		/**
-		 * @var UnitActive $modelName
-		 */
-		$modelName = 'app\models\\' . ucfirst($this->getSectionRoute());
-
-		$collection = new UnitActiveCollection(new $modelName);
+		$collection = new UnitActiveCollection(Unit::createNullModelByName($this->getSectionRoute()));
 		$collection->setOffset(0);
 		$collection->setPerPage(10);
+//		$requestData = \TFL::source()->request->getRequestData(RequestBuilder::METHOD_POST);
+//		$collection->setExcludeValues($requestData);
+
+		$typeLink = \TFL::source()->request->getRequestValue(RequestBuilder::METHOD_POST, 'typeLink');
+		$elementName = \TFL::source()->request->getRequestValue(RequestBuilder::METHOD_POST, 'elementName');
 
 		$item = [];
 
 		foreach ($collection->getModels() as $model) {
-
 			/**
 			 * @var UnitActive $model
 			 */
@@ -228,7 +222,8 @@ class ControllerBuilder implements ControllerInterface
 			$htmlData .= tHtmlForm::generateDataParams([
 				'id' => $model->id,
 				'name' => (string)$model,
-				'chooseType' => UnitActive::LINK_HAS_ONE_TO_MANY,
+				'typeLink' => $typeLink,
+				'elementName' => $elementName,
 			]);
 
 			$t = tHtmlTags::render('span', (string)$model, [
@@ -239,16 +234,13 @@ class ControllerBuilder implements ControllerInterface
 		}
 
 		tResponse::modalWindow('Users List', implode(PAGE_EOL, $item), ['model-list']);
-
-//	    tResponse::resultSuccess([tString::RESPONSE_OK, DbBuilder::TYPE_DELETE], true, true, $this);
-//		tResponse::resultError($this->getDeleteErrors(), true, true, $this);
 	}
 
 	/**
 	 * Если модель не существует, перенаправляем
-	 * @param UnitActive|null $model
+	 * @param Unit|null $model
 	 */
-	private function checkModelOrRedirect(UnitActive $model = null)
+	private function checkModelOrRedirect(Unit $model = null)
 	{
 		if (!$model) {
 			$this->redirect();

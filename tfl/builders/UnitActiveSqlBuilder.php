@@ -4,6 +4,7 @@ namespace tfl\builders;
 
 use app\models\Image;
 use app\models\User;
+use tfl\units\Unit;
 use tfl\units\UnitActive;
 use tfl\utils\tDebug;
 use tfl\utils\tString;
@@ -32,6 +33,7 @@ trait UnitActiveSqlBuilder
 			return null;
 		}
 
+		//@todo Сделать красиво ниже. Добавить значения по умолчанию
 		$many = $option['many'] ?? false;
 		$skipOwner = $option['skipOwner'] ?? false;
 		$skipRelations = $option['skipRelations'] ?? false;
@@ -40,6 +42,7 @@ trait UnitActiveSqlBuilder
 		$perPage = isset($option['perPage']) ? tString::encodeNum($option['perPage']) : 30;
 		$order = isset($option['order']) ? tString::encodeString($option['order']) : null;
 		$orderType = isset($option['orderType']) ? tString::encodeString($option['orderType']) : null;
+		$where = isset($option['where']) && is_array($option['where']) ? $option['where'] : [];
 
 		if (in_array(['id', 'password', 'name', 'unitcollection', 'nullmodel'], array_keys($queryData))) {
 			return null;
@@ -74,6 +77,10 @@ trait UnitActiveSqlBuilder
 			$this->addRelationsQuery($command);
 		}
 
+		if (!empty($where)) {
+			$command->andWhere($where);
+		}
+
 		if ($many) {
 			if ($order) {
 				$command->order($order, $orderType);
@@ -103,13 +110,13 @@ trait UnitActiveSqlBuilder
 			if (empty($row)) {
 				return null;
 			}
+//			tDebug::printDebug($row);
 
 			$this->assignRowData($row);
 			if (!$skipRelations) {
 				$this->assignRelationsData($row);
 			}
 
-//            tDebug::printDebug($row);
 
 			return $row;
 		}
@@ -182,7 +189,6 @@ trait UnitActiveSqlBuilder
 	{
 		foreach ($this->getUnitData()['relations'] as $relationKey => $relationData) {
 
-			$modelClass = $relationData['model'];
 			$aliasTable = 'relations.' . $relationKey;
 			$aliasTableEncase = "`" . $aliasTable . "`";
 
@@ -191,7 +197,7 @@ trait UnitActiveSqlBuilder
 				/**
 				 * @var $relationModel UnitActive
 				 */
-				$relationModel = new $modelClass;
+				$relationModel = Unit::createNullModelByName($relationData['model']);
 
 				$relationModel->setNewLinkType($relationData['link']);
 

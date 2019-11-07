@@ -9,23 +9,63 @@ use app\models\{Role,
 	option\OptionCoreSeo,
 	option\OptionCoreSystem,
 	option\OptionDesignColors};
+use tfl\units\Unit;
+use tfl\units\UnitOption;
+use tfl\utils\tAccess;
+use tfl\utils\tDebug;
 
-abstract class PartitionBuilder
+/**
+ * Class PartitionBuilder
+ * @package tfl\builders
+ *
+ * @property array $userData
+ */
+class PartitionBuilder
 {
-	abstract protected function getTitle();
+	/**
+	 * Пользовательский массив прав
+	 * @var array
+	 */
+	private $userData = [];
 
-	abstract protected function getClass();
-
-	protected function getLink()
+	public function __construct()
 	{
-		return 'admin/section/';
+		if ($user = \TFL::source()->session->currentUser()) {
+			if ($user->hasAttribute('role')) {
+				$this->userData = $user->role->getRightsArray();
+			}
+		}
+	}
+
+	/**
+	 * @param Unit $model Модель, может быть нулевая
+	 * @param null $module Искать в модулях
+	 * @return bool
+	 */
+	public function hasAccess(Unit $model, $module = null): bool
+	{
+		if (tAccess::hasAccessByStatus(User::STATUS_ADMIN)) {
+			return true;
+		}
+
+		$type = ($model instanceof UnitOption) ? 'options' : 'models';
+		$name = $model->getClassName();
+
+		if ($module) {
+			if (isset($this->userData['modules'][$module][$type][$name])) {
+				return $this->userData['modules'][$module][$type][$name] > 0 ? true : false;
+			}
+
+			return false;
+		}
+
+		return (isset($this->userData[$type][$name]) && $this->userData[$type][$name] > 0) ? true : false;
 	}
 
 	public static function getPartitionList()
 	{
 		/*
 		 * 1. Построение дерева разделов.
-		 * 2. Распределение доступов.
 		 * 3. Создание групп с нужными доступами? Роли.
 		 */
 		return [
