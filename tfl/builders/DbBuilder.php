@@ -19,7 +19,6 @@ class DbBuilder
 	const CONCAT_NOT_IN = 'NOT IN';
 
     const TYPE_INSERT = 'insert';
-    const TYPE_UPDATE = 'update';//Для UnitActive
     const TYPE_DELETE = 'delete';
     const TYPE_SAVE = 'save';
     const TYPE_ERROR = 'error';
@@ -157,7 +156,7 @@ class DbBuilder
 
     protected function updateRow($sql = null)
     {
-        $this->type = self::TYPE_UPDATE;
+	    $this->type = self::TYPE_SAVE;
         $exec = $this->execute($sql);
 
         return $this;

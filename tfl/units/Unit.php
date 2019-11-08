@@ -385,7 +385,7 @@ abstract class Unit
 			$action = DbBuilder::TYPE_INSERT;
 		} else {
 			$method = RequestBuilder::METHOD_PUT;
-			$action = ($this instanceof UnitActive) ? DbBuilder::TYPE_SAVE : DbBuilder::TYPE_UPDATE;
+			$action = DbBuilder::TYPE_SAVE;
 		}
 
 		if (\TFL::source()->request->isAjaxRequest()) {
