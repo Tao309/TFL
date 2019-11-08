@@ -66,7 +66,6 @@ class Page extends UnitActive
         ];
     }
 
-
     public function translatedLabels(): array
     {
         return [

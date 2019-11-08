@@ -11,6 +11,7 @@ use tfl\units\UnitActive;
 use tfl\utils\tHTML;
 use tfl\utils\tHtmlForm;
 use tfl\utils\tHtmlTags;
+use tfl\utils\tRoute;
 use tfl\view\View;
 
 /**
@@ -84,7 +85,7 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
             'class' => ['http-request-upload']
         ]);
 
-        $htmlData .= tHtmlForm::generateDataParams($this->model->getHiddenActionData(DbBuilder::TYPE_INSERT));
+	    $htmlData .= tHtmlForm::generateDataParams($this->model->getHiddenActionData(tRoute::SECTION_ROUTE_ADD));
 
         $inputFile = tHtmlTags::renderClosedTag('input', [
             'type' => 'file',
@@ -142,10 +143,10 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
     private function renderDeleteButton(Image $model, string $route): string
     {
         $htmlData = tHtmlForm::generateElementData([
-	        'admin/section', $route, DbBuilder::TYPE_DELETE,
+	        'admin/section', $route, tRoute::SECTION_ROUTE_DELETE,
         ], RequestBuilder::METHOD_POST);
 
-        $hiddenData = $model->getHiddenActionData(DbBuilder::TYPE_DELETE);
+	    $hiddenData = $model->getHiddenActionData(tRoute::SECTION_ROUTE_DELETE);
 
         return tHTML::inputActionButton('delete', 'x', $htmlData, [
             'class' => ['html-icon-button', 'icon-image-delete'],

@@ -9,7 +9,7 @@ use tfl\view\View;
 
 class PageController extends ControllerBuilder
 {
-	public function sectionDetails($id)
+	public function sectionView($id)
 	{
 		$model = Page::getById($id);
 

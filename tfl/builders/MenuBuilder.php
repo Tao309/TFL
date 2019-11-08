@@ -131,10 +131,10 @@ abstract class MenuBuilder extends Unit
             //Проверку текущая ли ссылка открыта
             if (
                 $data['link'] != 'admin/'
-                && $data['link'] != ''
+                && !empty(trim($data['link']))
                 && (
-                    $this->currentUrl == $data['link']
-                    || preg_match('!^' . $data['link'] . '!si', $this->currentUrl)
+	                preg_match('!^' . $data['link'] . '!si', $this->currentUrl)
+	                || preg_match('!^' . rtrim($data['link'], WEB_SEP) . '!si', $this->currentUrl)
                 )
             ) {
                 $class[] = 'current-link';

@@ -29,6 +29,8 @@ class TFL
 
     private function launchSource(): void
     {
+	    \tfl\utils\tRoute::init();
+
         $this->db = new \tfl\builders\DbBuilder();
         $this->path = new \tfl\builders\PathBuilder();
         $this->request = new \tfl\builders\RequestBuilder();

@@ -178,4 +178,14 @@ class tString
 
         return $arr;
     }
+
+	public static function urlencode(string $value)
+	{
+		return urlencode($value);
+	}
+
+	public static function urldecode(string $value)
+	{
+		return urldecode($value);
+	}
 }

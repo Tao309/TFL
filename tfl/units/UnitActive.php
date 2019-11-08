@@ -9,6 +9,7 @@ use tfl\builders\{DbBuilder, RequestBuilder, UnitActiveBuilder, UnitActiveSqlBui
 use tfl\utils\tDebug;
 use tfl\utils\tHtmlForm;
 use tfl\utils\tResponse;
+use tfl\utils\tRoute;
 
 /**
  * Class UnitActive
@@ -172,18 +173,17 @@ abstract class UnitActive extends Unit implements UnitInterface
 		}
 
 		switch ($type) {
-			case DbBuilder::TYPE_INSERT:
+			case tRoute::SECTION_ROUTE_ADD:
 				$data[tHtmlForm::NAME_METHOD] = RequestBuilder::METHOD_POST;
 				break;
-			case DbBuilder::TYPE_UPDATE:
-			case DbBuilder::TYPE_SAVE:
+			case tRoute::SECTION_ROUTE_UPDATE:
 				$data[tHtmlForm::NAME_METHOD] = RequestBuilder::METHOD_PUT;
 				break;
-			case DbBuilder::TYPE_DELETE:
+			case tRoute::SECTION_ROUTE_DELETE:
 				$data[$modelName . '[id]'] = $this->id;
 				$data[tHtmlForm::NAME_METHOD] = RequestBuilder::METHOD_DELETE;
 				break;
-			case DbBuilder::TYPE_VIEW:
+			case tRoute::SECTION_ROUTE_VIEW:
 				$data[tHtmlForm::NAME_METHOD] = RequestBuilder::METHOD_GET;
 				break;
 		}

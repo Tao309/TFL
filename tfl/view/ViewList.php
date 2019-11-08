@@ -13,6 +13,7 @@ use tfl\utils\tAccess;
 use tfl\utils\tHTML;
 use tfl\utils\tHtmlForm;
 use tfl\utils\tHtmlTags;
+use tfl\utils\tRoute;
 use tfl\utils\tString;
 
 /**
@@ -211,7 +212,7 @@ class ViewList extends View
             $htmlData = tHtmlForm::generateElementData([
                 $this->tplBuilder->getRouteDirectionLink(),
 	            $model->getModelName() . DIR_SEP . $model->id,
-                DbBuilder::TYPE_DELETE,
+	            tRoute::SECTION_ROUTE_DELETE,
             ], RequestBuilder::METHOD_POST);
 
             $t .= tHTML::inputActionButton('Delete', '', $htmlData, [
@@ -221,7 +222,7 @@ class ViewList extends View
                     'font-icon-tfl',
                 ],
                 'title' => 'Delete',
-                'data-params' => tHtmlForm::generateDataParams($model->getHiddenActionData(DbBuilder::TYPE_DELETE), true),
+	            'data-params' => tHtmlForm::generateDataParams($model->getHiddenActionData(tRoute::SECTION_ROUTE_DELETE), true),
             ]);
         }
 

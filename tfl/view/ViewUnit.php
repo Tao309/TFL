@@ -13,6 +13,7 @@ use tfl\utils\tAccess;
 use tfl\utils\tHTML;
 use tfl\utils\tHtmlForm;
 use tfl\utils\tHtmlTags;
+use tfl\utils\tRoute;
 use tfl\utils\tString;
 
 class ViewUnit extends View
@@ -65,14 +66,14 @@ class ViewUnit extends View
 					$data = [
 						$this->tplBuilder->getRouteDirectionLink(),
 						$this->dependModel->getModelNameLower(),
-						static::TYPE_VIEW_CREATE
+						tRoute::SECTION_ROUTE_ADD
 					];
 					$method = RequestBuilder::METHOD_POST;
 				} else {
 					$data = [
 						$this->tplBuilder->getRouteDirectionLink(),
 						$this->dependModel->getModelNameLower() . DIR_SEP . $this->dependModel->id,
-						static::TYPE_VIEW_SAVE
+						tRoute::SECTION_ROUTE_UPDATE
 					];
 				}
 			}
@@ -264,7 +265,7 @@ class ViewUnit extends View
 					$htmlData = tHtmlForm::generateElementData([
 						$this->tplBuilder->getRouteDirectionLink(),
 						$this->dependModel->getModelName() . DIR_SEP . $this->dependModel->id,
-						DbBuilder::TYPE_DELETE,
+						tRoute::SECTION_ROUTE_DELETE,
 					], RequestBuilder::METHOD_POST);
 
 					$t .= tHTML::inputActionButton('Delete', 'Delete', $htmlData, [
@@ -275,7 +276,7 @@ class ViewUnit extends View
 							'size-large',
 						],
 						'title' => 'Delete',
-						'data-params' => tHtmlForm::generateDataParams($this->dependModel->getHiddenActionData(DbBuilder::TYPE_DELETE), true),
+						'data-params' => tHtmlForm::generateDataParams($this->dependModel->getHiddenActionData(tRoute::SECTION_ROUTE_DELETE), true),
 					]);
 				}
 			}

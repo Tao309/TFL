@@ -6,6 +6,7 @@ use tfl\collections\UnitActiveCollection;
 use tfl\interfaces\ControllerInterface;
 use tfl\interfaces\InitControllerBuilderInterface;
 use tfl\observers\ControllerBuilderObserver;
+use tfl\observers\ControllerBuilderRestObserver;
 use tfl\units\Unit;
 use tfl\units\UnitActive;
 use tfl\units\UnitOption;
@@ -13,6 +14,7 @@ use tfl\utils\tAccess;
 use tfl\utils\tHtmlForm;
 use tfl\utils\tHtmlTags;
 use tfl\utils\tResponse;
+use tfl\utils\tRoute;
 
 /**
  * Class ControllerBuilder
@@ -25,21 +27,29 @@ use tfl\utils\tResponse;
  *
  * @property UnitActive $model;
  * @property bool $enableREST;
+ * @property bool $restErrorExists;
  */
 class ControllerBuilder implements ControllerInterface
 {
-	use ControllerBuilderObserver;
+	use ControllerBuilderObserver, ControllerBuilderRestObserver;
 
 	private $section;
 
 	private $sectionRoute;
 	private $sectionRouteType;
 	private $routeDirection;
+
 	/**
-	 * Включение доступа ControllerBuilderObserver->checkRequireRequest()
+	 * Включение доступа ControllerRestBuilderObserver->checkRestRequest()
 	 * @var bool
 	 */
 	protected $enableREST = false;
+
+	/*
+	 * Есть ли ошибка при запросе по REST
+	 * @var bool $restObserverError
+	 */
+	private $restErrorExists = true;
 
 	/**
 	 * Получаемая модель при запросе edit, view
@@ -108,7 +118,7 @@ class ControllerBuilder implements ControllerInterface
 		$this->checkMethodAuthRequire();
 
 		$this->checkPartitionAccess();
-		$this->checkRequireRequest();
+		$this->checkRestRequest();
 	}
 
 	public function afterAction(): void
@@ -150,17 +160,16 @@ class ControllerBuilder implements ControllerInterface
 
 		$hasAccess = true;
 		switch ($type) {
-			case DbBuilder::TYPE_INSERT:
+			case tRoute::SECTION_ROUTE_ADD:
 				$hasAccess = tAccess::canAdd($model);
 				break;
-			case DbBuilder::TYPE_UPDATE:
-			case DbBuilder::TYPE_SAVE:
+			case tRoute::SECTION_ROUTE_EDIT:
 				$hasAccess = tAccess::canEdit($model);
 				break;
-			case DbBuilder::TYPE_DELETE:
+			case tRoute::SECTION_ROUTE_DELETE:
 				$hasAccess = tAccess::canDelete($model);
 				break;
-			case DbBuilder::TYPE_VIEW:
+			case tRoute::SECTION_ROUTE_VIEW:
 				$hasAccess = tAccess::canView($model);
 				break;
 		}

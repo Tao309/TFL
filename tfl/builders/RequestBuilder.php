@@ -5,114 +5,128 @@ namespace tfl\builders;
 use tfl\utils\tHtmlForm;
 use tfl\utils\tString;
 
+/**
+ * Class RequestBuilder
+ * @package tfl\builders
+ *
+ * @property string $method
+ */
 class RequestBuilder
 {
 	const METHOD_REQUEST = 'request';
 	const METHOD_SERVER = 'server';
 
-    const METHOD_POST = 'post';
-    const METHOD_FILES = 'files';
-    const METHOD_GET = 'get';
-    const METHOD_PUT = 'put';
-    const METHOD_DELETE = 'delete';
+	const METHOD_POST = 'post';
+	const METHOD_FILES = 'files';
+	const METHOD_GET = 'get';
+	const METHOD_PUT = 'put';
+	const METHOD_PATCH = 'patch';
+	const METHOD_DELETE = 'delete';
 
-    /**
-     * @var $method string|null
-     */
-    private $method;
+	/**
+	 * @var $method string|null
+	 */
+	private $method;
 
-    public function __construct()
-    {
-        $this->setRequestMethod();
-    }
+	public function __construct()
+	{
+		$this->setRequestMethod();
+	}
 
-    private function setRequestMethod(): void
-    {
-        $this->method = strtolower($_SERVER['REQUEST_METHOD']) ?? self::METHOD_GET;
-    }
+	private function setRequestMethod(): void
+	{
+		$this->method = strtolower($_SERVER['REQUEST_METHOD']) ?? self::METHOD_GET;
+	}
 
-    public function isPostRequest(): bool
-    {
-        return $this->method === self::METHOD_POST;
-    }
+	public function getRequestMethod(): string
+	{
+		$requestMethod = $this->method == self::METHOD_POST ? self::METHOD_POST : self::METHOD_GET;
 
-    public function isGetRequest(): bool
-    {
-        return $this->method === self::METHOD_GET;
-    }
+		return \TFL::source()->request->getRequestValue($requestMethod, tHtmlForm::NAME_METHOD) ?? self::METHOD_GET;
+	}
 
-    /**
-     * @param string|null $forceMethod
-     * @return bool
-     */
-    public function isAjaxRequest($forceMethod = null): bool
-    {
-        $isAjax = $this->hasTflNmHeader();
+	public function isPostRequest(): bool
+	{
+		return $this->method === self::METHOD_POST;
+	}
 
-        $methodAccept = true;
+	public function isGetRequest(): bool
+	{
+		return $this->method === self::METHOD_GET;
+	}
 
-        if ($forceMethod) {
-            $methodAccept = $this->checkForceMethod($forceMethod);
-        }
+	/**
+	 * @param string|null $forceMethod
+	 * @return bool
+	 */
+	public function isAjaxRequest($forceMethod = null): bool
+	{
+		$isAjax = $this->hasTflNmHeader();
 
-        return $isAjax && $methodAccept;
-    }
+		$methodAccept = true;
 
-    public function checkForceMethod($forceMethod)
-    {
-        $requestMethod = self::METHOD_GET;
+		if ($forceMethod) {
+			$methodAccept = $this->checkForceMethod($forceMethod);
+		}
 
-        switch ($forceMethod) {
-            case self::METHOD_DELETE:
-            case self::METHOD_POST:
-            case self::METHOD_PUT:
-                $requestMethod = self::METHOD_POST;
-                break;
-        }
+		return $isAjax && $methodAccept;
+	}
 
-        $value = \TFL::source()->request->getRequestValue($requestMethod, tHtmlForm::NAME_METHOD);
-        return ($this->method == $requestMethod) && ($value == $forceMethod);
-    }
+	public function checkForceMethod($forceMethod)
+	{
+		$requestMethod = self::METHOD_GET;
 
-    private function hasTflNmHeader()
-    {
-        $attr = \TFL::source()->config('web')['HTTP_REQUEST'] ?? null;
-        $value = \TFL::source()->config('web')[$attr] ?? null;
+		switch ($forceMethod) {
+			case self::METHOD_DELETE:
+			case self::METHOD_POST:
+			case self::METHOD_PUT:
+				$requestMethod = self::METHOD_POST;
+				break;
+		}
 
-        return isset($_SERVER[$attr]) && $_SERVER[$attr] == $value;
-    }
+		$value = \TFL::source()->request->getRequestValue($requestMethod, tHtmlForm::NAME_METHOD);
+		return ($this->method == $requestMethod) && ($value == $forceMethod);
+	}
 
-    public function getRequestValue(string $method, string $nameValue)
-    {
-        $data = $this->getRequestData(mb_strtolower($method));
+	private function hasTflNmHeader()
+	{
+		$attr = \TFL::source()->config('web')['HTTP_REQUEST'] ?? null;
+		$value = \TFL::source()->config('web')[$attr] ?? null;
 
-        if (isset($data[$nameValue])) {
-            return tString::encodeString($data[$nameValue]);
-        }
+		return isset($_SERVER[$attr]) && $_SERVER[$attr] == $value;
+	}
 
-        return null;
-    }
+	public function getRequestValue(string $method, string $nameValue)
+	{
+		$data = $this->getRequestData(mb_strtolower($method));
 
-    public function getRequestData(string $method): array
-    {
-        switch ($method) {
-            case self::METHOD_POST:
-                return $_POST ?? [];
-                break;
-            case self::METHOD_GET:
-                return $_GET ?? [];
-                break;
-            case self::METHOD_FILES:
-                return $_FILES ?? [];
-	            break;
-	        case self::METHOD_REQUEST:
-		        return $_REQUEST ?? [];
-		        break;
-	        case self::METHOD_SERVER:
-		        return $_SERVER ?? [];
-		        break;
-            default:
-                return [];
-        }
-    }
+		if (isset($data[$nameValue])) {
+			return tString::encodeString($data[$nameValue]);
+		}
+
+		return null;
+	}
+
+	public function getRequestData(string $method): array
+	{
+		switch ($method) {
+			case self::METHOD_POST:
+				return $_POST ?? [];
+				break;
+			case self::METHOD_GET:
+				return $_GET ?? [];
+				break;
+			case self::METHOD_FILES:
+				return $_FILES ?? [];
+				break;
+			case self::METHOD_REQUEST:
+				return $_REQUEST ?? [];
+				break;
+			case self::METHOD_SERVER:
+				return $_SERVER ?? [];
+				break;
+			default:
+				return [];
+		}
+	}
 }

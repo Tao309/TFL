@@ -20,7 +20,7 @@ class PageAdminController extends ControllerBuilder
 		return $this->render();
 	}
 
-	public function sectionDetails($id)
+	public function sectionView($id)
 	{
 		return $this->render();
 	}
