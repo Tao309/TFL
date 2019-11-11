@@ -45,6 +45,7 @@ class TFL
 
     public function launchAfterInit()
     {
+	    \tfl\utils\tRoute::initModelRestRoute();
         new \tfl\builders\CacheBuilder();
 
         self::$source->session = new \tfl\auth\Session();

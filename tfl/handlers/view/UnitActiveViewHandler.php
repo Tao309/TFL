@@ -51,9 +51,7 @@ class UnitActiveViewHandler extends ViewHandler implements ViewHandlerInterface
 	{
 		$htmlData = tHtmlForm::generateElementData([
 			'admin/section', $this->dependNullModel->getModelNameLower(), 'modalList',
-		], RequestBuilder::METHOD_PUT, [
-			'class' => ['http-request-button', 'html-button', 'size-large']
-		]);
+		], RequestBuilder::METHOD_PUT);
 
 		$htmlData .= tHtmlForm::generateDataParams([
 			$this->parentModel->getModelNameLower() => $this->parentModel->id,
@@ -61,7 +59,10 @@ class UnitActiveViewHandler extends ViewHandler implements ViewHandlerInterface
 			'elementName' => $this->getSingleEditElementName(),
 		]);
 
-		$button = tHTML::inputActionButton('', '', $htmlData, ['title' => 'Choose/Add Element']);
+		$button = tHTML::inputActionButton('', '', $htmlData, [
+			'title' => 'Choose/Add Element',
+			'class' => ['http-request-button', 'html-button', 'size-large'],
+		]);
 
 		$t = tHtmlTags::startTag('div', ['class' => 'html-model-list']);
 		$t .= tHtmlTags::render('div', $button, ['class' => 'action']);

@@ -136,38 +136,38 @@ trait SectionObserver
 
             $htmlData = tHtmlForm::generateElementData([
 	            'section', 'auth', 'exit',
-            ], RequestBuilder::METHOD_POST, [
-                'class' => ['http-request-button', 'html-button', 'html-button-auth', 'html-button-exit']
-            ]);
+            ], RequestBuilder::METHOD_POST);
+
             $buttonExit = tHTML::inputLink(ROOT . 'exit/', 'Выход', [
                 'html' => $htmlData,
+	            'class' => ['http-request-button', 'html-button', 'html-button-auth', 'html-button-exit']
             ]);
         } else {
             $htmlData = tHtmlForm::generateElementData([
 	            'section', 'window', 'login',
-            ], RequestBuilder::METHOD_GET, [
-                'class' => ['http-request-button', 'html-button', 'html-button-auth', 'html-button-login']
-            ]);
+            ], RequestBuilder::METHOD_GET);
+
             $buttonLogin = tHTML::inputLink(ROOT . 'login/', 'Вход', [
                 'html' => $htmlData,
+	            'class' => ['http-request-button', 'html-button', 'html-button-auth', 'html-button-login'],
             ]);
 
             $htmlData = tHtmlForm::generateElementData([
 	            'section', 'window', 'register',
-            ], RequestBuilder::METHOD_GET, [
-                'class' => ['http-request-button', 'html-button', 'html-button-auth', 'html-button-register']
-            ]);
+            ], RequestBuilder::METHOD_GET);
+
             $buttonRegister = tHTML::inputLink(ROOT . 'register/', 'Регистрация', [
                 'html' => $htmlData,
+	            'class' => ['http-request-button', 'html-button', 'html-button-auth', 'html-button-register']
             ]);
 
             $htmlData = tHtmlForm::generateElementData([
 	            'section', 'window', 'requestpassword',
-            ], RequestBuilder::METHOD_GET, [
-                'class' => ['http-request-button', 'html-button', 'html-button-auth', 'html-button-requestpassword']
-            ]);
+            ], RequestBuilder::METHOD_GET);
+
             $buttonRequestPassword = tHTML::inputLink(ROOT . 'requestpassword/', 'Вернуть пароль', [
                 'html' => $htmlData,
+	            'class' => ['http-request-button', 'html-button', 'html-button-auth', 'html-button-requestpassword'],
             ]);
         }
         $vars['button'] = [

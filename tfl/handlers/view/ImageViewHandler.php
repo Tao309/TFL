@@ -79,17 +79,13 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
             ]
         ]);
 
-        $htmlData = tHtmlForm::generateElementData([
-	        'admin/section', 'image', 'create',
-        ], RequestBuilder::METHOD_POST, [
-            'class' => ['http-request-upload']
-        ]);
-
+	    $htmlData = tHtmlForm::generateRestButtonData(tRoute::SECTION_ROUTE_CREATE, $this->dependNullModel);
 	    $htmlData .= tHtmlForm::generateDataParams($this->model->getHiddenActionData(tRoute::SECTION_ROUTE_ADD));
 
         $inputFile = tHtmlTags::renderClosedTag('input', [
             'type' => 'file',
             'name' => 'Image[filename]',
+	        'class' => ['http-request-upload'],
         ], $htmlData);
 
         $t .= tHtmlTags::render('label', $inputFile, [
@@ -140,12 +136,10 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
             'data-value' => $model->getImageUrl(Image::NAME_SIZE_FULL, true),
         ]);
     }
-    private function renderDeleteButton(Image $model, string $route): string
-    {
-        $htmlData = tHtmlForm::generateElementData([
-	        'admin/section', $route, tRoute::SECTION_ROUTE_DELETE,
-        ], RequestBuilder::METHOD_POST);
 
+	private function renderDeleteButton(Image $model): string
+    {
+	    $htmlData = tHtmlForm::generateRestButtonData(tRoute::SECTION_ROUTE_DELETE, $model);
 	    $hiddenData = $model->getHiddenActionData(tRoute::SECTION_ROUTE_DELETE);
 
         return tHTML::inputActionButton('delete', 'x', $htmlData, [
@@ -222,19 +216,13 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
                 'class' => 'action',
             ]);
 
-            $route = 'image';
-
-            if ($this->viewType == View::TYPE_VIEW_EDIT || $this->viewType == View::TYPE_VIEW_ADD) {
-	            $route .= WEB_SEP . $model->id;
-            }
-
             $t .= $this->renderOpenButton($model);
 
             if ($this->typeLink == UnitActive::LINK_HAS_ONE_TO_MANY) {
                 $t .= $this->renderInsertButton($model);
             }
 
-            $t .= $this->renderDeleteButton($model, $route);
+	        $t .= $this->renderDeleteButton($model);
 
             $t .= tHtmlTags::endTag();
         }

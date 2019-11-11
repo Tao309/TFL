@@ -225,15 +225,14 @@ class ControllerBuilder implements ControllerInterface
 			 */
 			$htmlData = tHtmlForm::generateElementData([
 				'admin/section', 'modal', 'choose',
-			], RequestBuilder::METHOD_GET, [
-				'class' => ['html-button', 'html-list-element']
-			]);
+			], RequestBuilder::METHOD_GET);
 
 			$htmlData .= tHtmlForm::generateDataParams([
 				'id' => $model->id,
 				'name' => (string)$model,
 				'typeLink' => $typeLink,
 				'elementName' => $elementName,
+				'class' => ['html-button', 'html-list-element']
 			]);
 
 			$t = tHtmlTags::render('span', (string)$model, [

@@ -3,6 +3,8 @@
 namespace tfl\utils;
 
 use tfl\builders\RequestBuilder;
+use tfl\units\UnitActive;
+use tfl\units\UnitOption;
 
 class tHtmlForm
 {
@@ -38,7 +40,7 @@ class tHtmlForm
             ],
         ];
 
-        return self::simpleForm($data, $elements, [], RequestBuilder::METHOD_POST);
+	    return self::simpleForm(tRoute::SECTION_ROUTE_CREATE, $data, $elements);
     }
 
     public static function registerForm()
@@ -75,7 +77,7 @@ class tHtmlForm
             ],
         ];
 
-        return self::simpleForm($data, $elements, [], RequestBuilder::METHOD_POST);
+	    return self::simpleForm(tRoute::SECTION_ROUTE_CREATE, $data, $elements);
     }
 
     public static function requestForm()
@@ -97,23 +99,25 @@ class tHtmlForm
             ],
         ];
 
-        return self::simpleForm($data, $elements, [], RequestBuilder::METHOD_POST);
+	    return self::simpleForm(tRoute::SECTION_ROUTE_CREATE, $data, $elements);
     }
 
-    public static function simpleForm($data = [], $elements = null, $options = [], $method = null)
+	public static function simpleForm($type, $data = [], $elements = null)
     {
         $classNames = [];
         $classNames[] = 'http-request-form';
         $classNames[] = 'html-element';
         $classNames[] = 'html-element-form';
 
+	    $formId = implode('-', $data);
+	    $formId = str_replace('/', '-', $formId);
+
         $form = '<form method="' . RequestBuilder::METHOD_POST . '" enctype="multipart/form-data" ';
         $form .= 'class="' . implode(' ', $classNames) . '" ';
-        $form .= 'id="' . implode('-', $data) . '" ';
-        $form .= self::generateElementData($data, $method);
+	    $form .= 'id="' . $formId . '" ';
+	    $form .= self::generateElementData($data, self::getMethodByType($type, true));
         $form .= '>';
-
-        $form .= tHTML::inputHidden(self::NAME_METHOD, $method);
+	    $form .= tHTML::inputHidden(self::NAME_METHOD, self::getMethodByType($type, true));
 
         if (is_array($elements)) {
             $form .= '<ul class="html-element-ul">';
@@ -128,31 +132,100 @@ class tHtmlForm
         return $form;
     }
 
-    public static function generateElementData($data = [], $type = null, $options = [])
+	/**
+	 * Получаем метод запросы (POST, DELETE, GET) по типу запроса (UPDATE, CREATE, DELETE)
+	 * @param string $type
+	 * @param bool $forceDirectMethod Получить метод напрямую, без замены
+	 * @return string
+	 */
+	public static function getMethodByType(string $type, $forceDirectMethod = false): string
+	{
+		switch ($type) {
+			case tRoute::SECTION_ROUTE_ADD:
+				return RequestBuilder::METHOD_POST;
+				break;
+			case tRoute::SECTION_ROUTE_UPDATE:
+				if ($forceDirectMethod) {
+					return RequestBuilder::METHOD_PUT;
+				}
+
+				return RequestBuilder::METHOD_POST;
+				break;
+			case tRoute::SECTION_ROUTE_DELETE:
+				if ($forceDirectMethod) {
+					return RequestBuilder::METHOD_DELETE;
+				}
+
+				return RequestBuilder::METHOD_POST;
+				break;
+			default:
+				return RequestBuilder::METHOD_GET;
+		}
+	}
+
+	/**
+	 * Создание основных данных запроса
+	 * @param string $type
+	 * @param UnitActive $model
+	 * @return array
+	 */
+	public static function generateRestData(string $type, UnitActive $model): array
+	{
+		$t = [];
+		$t[] = \TFL::source()->section->getRouteDirection();
+
+		if ($model instanceof UnitOption) {
+			$t[] = 'option';
+			$t[] = lcfirst($model->getModelName());
+		} else {
+			$t[] = $model->getModelNameLower();
+
+			if ($type == tRoute::SECTION_ROUTE_ADD) {
+				$t[] = tRoute::SECTION_ROUTE_ADD;
+			} else if (!$model->isNewModel()) {
+				$t[] = $model->id;
+			}
+		}
+
+		return $t;
+	}
+
+	/**
+	 * Создание данных для кнопок под REST запросы
+	 * @param string $type
+	 * @param UnitActive $model
+	 * @return string
+	 */
+	public static function generateRestButtonData(string $type, UnitActive $model): string
+	{
+		$data = self::generateRestData($type, $model);
+
+		return self::generateElementData($data, self::getMethodByType($type));
+	}
+
+	/**
+	 * Простая генерация данных на вывод для элемента
+	 * @param array $data
+	 * @param null $method
+	 * @return string
+	 */
+	public static function generateElementData(array $data, $method = null): string
     {
-        $input = [];
+	    $t = [];
 
-        if (isset($data[0])) {
-            $input[] = 'data-' . self::INDEX_TYPE . '="' . $data[0] . '"';
-            if (isset($data[1])) {
-                $input[] = 'data-' . self::INDEX_PAGE . '="' . mb_strtolower($data[1]) . '"';
-                if (isset($data[2])) {
-                    $input[] = 'data-' . self::INDEX_PAGE_SECTION . '="' . $data[2] . '"';
-                }
-            }
+	    $t[] = 'data-' . self::INDEX_TYPE . '="' . $data[0] . '"';
+	    $t[] = 'data-' . self::INDEX_PAGE . '="' . mb_strtolower($data[1]) . '"';
+	    if (isset($data[2])) {
+		    $t[] = 'data-' . self::INDEX_PAGE_SECTION . '="' . $data[2] . '"';
         }
 
-        if ($type) {
-            $type = (in_array(mb_strtolower($type), [RequestBuilder::METHOD_POST, RequestBuilder::METHOD_PUT]))
+	    if (!empty($method)) {
+		    $method = (in_array(mb_strtolower($method), [RequestBuilder::METHOD_POST, RequestBuilder::METHOD_PUT]))
                 ? RequestBuilder::METHOD_POST : RequestBuilder::METHOD_GET;
-            $input[] = 'data-method="' . $type . '"';
+		    $t[] = 'data-method="' . $method . '"';
         }
 
-        if (!empty($options)) {
-            $input[] = tHTML::decodeOptions($options);
-        }
-
-        return ' ' . implode(' ', $input);
+	    return ' ' . implode(' ', $t);
     }
 
     public static function generateDataParams($data = [], $view = false)

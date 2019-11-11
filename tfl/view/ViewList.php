@@ -209,11 +209,8 @@ class ViewList extends View
             ]);
         }
         if (tAccess::canDelete($model)) {
-            $htmlData = tHtmlForm::generateElementData([
-                $this->tplBuilder->getRouteDirectionLink(),
-	            $model->getModelName() . DIR_SEP . $model->id,
-	            tRoute::SECTION_ROUTE_DELETE,
-            ], RequestBuilder::METHOD_POST);
+	        $htmlData = tHtmlForm::generateRestButtonData(tRoute::SECTION_ROUTE_DELETE, $model);
+	        $hiddenData = $model->getHiddenActionData(tRoute::SECTION_ROUTE_DELETE);
 
             $t .= tHTML::inputActionButton('Delete', '', $htmlData, [
                 'class' => [
@@ -222,7 +219,7 @@ class ViewList extends View
                     'font-icon-tfl',
                 ],
                 'title' => 'Delete',
-	            'data-params' => tHtmlForm::generateDataParams($model->getHiddenActionData(tRoute::SECTION_ROUTE_DELETE), true),
+	            'data-params' => tHtmlForm::generateDataParams($hiddenData, true),
             ]);
         }
 

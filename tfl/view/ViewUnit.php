@@ -54,31 +54,15 @@ class ViewUnit extends View
 			$elements .= $this->viewActionRow();
 			$elements .= tHtmlTags::endTag('div');
 
-			$method = RequestBuilder::METHOD_PUT;
-			if ($this->dependModel instanceof UnitOption) {
-				$data = [
-					$this->tplBuilder->getRouteDirectionLink(),
-					'option',
-					lcfirst($this->dependModel->getModelName())
-				];
+			if ($this->tplBuilder->geViewType() == static::TYPE_VIEW_ADD) {
+				$data = tHtmlForm::generateRestData(tRoute::SECTION_ROUTE_ADD, $this->dependModel);
+				$type = tRoute::SECTION_ROUTE_CREATE;
 			} else {
-				if ($this->tplBuilder->geViewType() == static::TYPE_VIEW_ADD) {
-					$data = [
-						$this->tplBuilder->getRouteDirectionLink(),
-						$this->dependModel->getModelNameLower(),
-						tRoute::SECTION_ROUTE_ADD
-					];
-					$method = RequestBuilder::METHOD_POST;
-				} else {
-					$data = [
-						$this->tplBuilder->getRouteDirectionLink(),
-						$this->dependModel->getModelNameLower() . DIR_SEP . $this->dependModel->id,
-						tRoute::SECTION_ROUTE_UPDATE
-					];
-				}
+				$data = tHtmlForm::generateRestData(tRoute::SECTION_ROUTE_UPDATE, $this->dependModel);
+				$type = tRoute::SECTION_ROUTE_UPDATE;
 			}
 
-			$t .= tHtmlForm::simpleForm($data, $elements, [], $method);
+			$t .= tHtmlForm::simpleForm($type, $data, $elements);
 		} else {
 			$elements .= tHtmlTags::endTag('div');
 			$t .= $elements;
@@ -262,12 +246,9 @@ class ViewUnit extends View
 				}
 
 				if (tAccess::canDelete($this->dependModel)) {
-					$htmlData = tHtmlForm::generateElementData([
-						$this->tplBuilder->getRouteDirectionLink(),
-						$this->dependModel->getModelName() . DIR_SEP . $this->dependModel->id,
-						tRoute::SECTION_ROUTE_DELETE,
-					], RequestBuilder::METHOD_POST);
+					$htmlData = tHtmlForm::generateRestButtonData(tRoute::SECTION_ROUTE_DELETE, $this->dependModel);
 
+					$hiddenParams = $this->dependModel->getHiddenActionData(tRoute::SECTION_ROUTE_DELETE);
 					$t .= tHTML::inputActionButton('Delete', 'Delete', $htmlData, [
 						'class' => [
 							'html-element',
@@ -276,7 +257,7 @@ class ViewUnit extends View
 							'size-large',
 						],
 						'title' => 'Delete',
-						'data-params' => tHtmlForm::generateDataParams($this->dependModel->getHiddenActionData(tRoute::SECTION_ROUTE_DELETE), true),
+						'data-params' => tHtmlForm::generateDataParams($hiddenParams, true),
 					]);
 				}
 			}
