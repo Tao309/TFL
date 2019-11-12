@@ -2,9 +2,7 @@
 
 namespace tfl\observers;
 
-use tfl\builders\DbBuilder;
 use tfl\builders\InitControllerBuilder;
-use tfl\builders\RequestBuilder;
 use tfl\units\Unit;
 use tfl\units\UnitActive;
 use tfl\utils\tRoute;

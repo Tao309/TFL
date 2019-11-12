@@ -198,9 +198,7 @@ class tHtmlForm
 	 */
 	public static function generateRestButtonData(string $type, UnitActive $model): string
 	{
-		$data = self::generateRestData($type, $model);
-
-		return self::generateElementData($data, self::getMethodByType($type));
+		return self::generateElementData(self::generateRestData($type, $model), self::getMethodByType($type));
 	}
 
 	/**

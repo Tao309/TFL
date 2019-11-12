@@ -35,9 +35,8 @@ class tFile
         $dir = preg_replace("/^\/*|\/*$/", '', $dir);
 	    $values = explode(DIR_SEP, $dir);
 
-        //@todo Exception
         if (!count($values)) {
-            die('Not values for path: ' . $dir);
+	        return false;
         }
 
         $dir = zROOT;

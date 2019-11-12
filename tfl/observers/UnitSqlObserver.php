@@ -11,7 +11,6 @@ trait UnitSqlObserver
 {
 	private function saveModelAttrs(): bool
 	{
-		//@todo Добавить проверку атрибутов
 		list($attrs, $values) = $this->getAttrAndValuesForSave();
 
 		if (empty($attrs)) {

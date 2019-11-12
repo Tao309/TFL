@@ -98,7 +98,7 @@ abstract class TemplateBuilder
 		if ($this->getRouteDirection() == InitControllerBuilder::ROUTE_ADMIN_DIRECTION) {
 			$t .= 'admin/';
 		}
-		$t .= 'section';
+		$t .= InitControllerBuilder::PREFIX_SECTION;
 
 		return $t;
 	}

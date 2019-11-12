@@ -98,7 +98,7 @@ class UnitOption extends Unit implements UnitInterface, UnitOptionInterface
 		 * @var UnitOption $model
 		 */
 		$modelName = self::getCurrentModel();
-		$model = new $modelName;
+		$model = Unit::createNullModelByName($modelName);
 
 		$rowDatas = $model->prepareRowData(['name' => $names], ['many' => true]);
 

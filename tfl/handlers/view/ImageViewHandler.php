@@ -7,6 +7,7 @@ use app\models\User;
 use tfl\builders\DbBuilder;
 use tfl\builders\RequestBuilder;
 use tfl\interfaces\view\ViewHandlerInterface;
+use tfl\units\Unit;
 use tfl\units\UnitActive;
 use tfl\utils\tHTML;
 use tfl\utils\tHtmlForm;
@@ -154,7 +155,7 @@ class ImageViewHandler extends ViewHandler implements ViewHandlerInterface
      */
     private function initNullImageModel()
     {
-        $this->model = new Image();
+	    $this->model = Unit::createNullModelByName(Image::class, true);
         $this->model->model_name = $this->parentModel->getModelNameLower();
         $this->model->model_id = $this->parentModel->id;
         $this->model->model_attr = $this->attr;

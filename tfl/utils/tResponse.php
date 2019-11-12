@@ -7,40 +7,42 @@ use tfl\units\Unit;
 
 class tResponse
 {
-    public static function resultSuccess($input = [], $echo = false, $json = true, Unit $model = null)
+	const RESPONSE_OK = 'Ok';
+	const RESPONSE_RESULT_SUCCESS = 1;
+	const RESPONSE_RESULT_ERROR = 0;
+
+	public static function resultSuccess(string $action, $echo = false, $json = true, Unit $model = null)
+	{
+		$data = [
+			'result' => self::RESPONSE_RESULT_SUCCESS,
+			'message' => self::RESPONSE_OK,
+			'action' => $action,
+		];
+
+		if ($model && $addResponse = $model->getResponse($data['action'])) {
+			$data['model'] = $addResponse;
+		}
+
+		if ($action == DbBuilder::TYPE_INSERT) {
+			$data['event'] = 'clickButton';
+		}
+
+		if ($json) {
+			$data = json_encode($data);
+		}
+
+		if ($echo) {
+			echo $data;
+			exit;
+		} else {
+			return $data;
+		}
+	}
+
+	public static function resultError(string $message, $echo = false, $json = true, Unit $model = null)
     {
-        list($message, $action) = $input;
-
         $data = [
-            'result' => tString::RESPONSE_RESULT_SUCCESS,
-            'message' => $message ?? tString::RESPONSE_RESULT_SUCCESS,
-            'action' => $action ?? DbBuilder::TYPE_ERROR,
-        ];
-
-        if ($model && $addResponse = $model->getResponse($data['action'])) {
-            $data['model'] = $addResponse;
-        }
-
-        if ($action == DbBuilder::TYPE_INSERT) {
-            $data['event'] = 'clickButton';
-        }
-
-        if ($json) {
-            $data = json_encode($data);
-        }
-
-        if ($echo) {
-            echo $data;
-            exit;
-        } else {
-            return $data;
-        }
-    }
-
-    public static function resultError($message, $echo = false, $json = true, Unit $model = null)
-    {
-        $data = [
-            'result' => tString::RESPONSE_RESULT_ERROR,
+	        'result' => tResponse::RESPONSE_RESULT_ERROR,
             'message' => $message,
             'action' => DbBuilder::TYPE_ERROR,
         ];
@@ -77,7 +79,7 @@ class tResponse
             'content' => $content,
             'className' => implode(' ', $classNames),
 
-            'result' => tString::RESPONSE_RESULT_SUCCESS,
+	        'result' => tResponse::RESPONSE_RESULT_SUCCESS,
             'action' => DbBuilder::TYPE_SHOW_MODAL_WINDOW,
         ];
 

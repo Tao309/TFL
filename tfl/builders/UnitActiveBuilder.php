@@ -5,6 +5,7 @@ namespace tfl\builders;
 use app\models\Image;
 use app\models\Page;
 use app\models\User;
+use tfl\exceptions\TFLNotFoundModelException;
 use tfl\units\Unit;
 use tfl\units\UnitActive;
 use tfl\utils\tString;
@@ -150,8 +151,19 @@ trait UnitActiveBuilder
 		}
 	}
 
+	/**
+	 * @param Unit $model
+	 * @param array $rowData
+	 * @param bool $isPrimaryModel
+	 * @param bool $skipRelation
+	 * @return Unit|UnitActive
+	 */
 	public function createFinalModel(Unit $model, array $rowData, $isPrimaryModel = false, $skipRelation = false)
 	{
+		if (empty($rowData)) {
+			throw new TFLNotFoundModelException("Model {$model->getModelName()} is not found");
+		}
+
 		$this->rowDataForCreateFinalModel = $rowData;
 		/**
 		 * @var $model UnitActive

@@ -77,10 +77,6 @@ class InitControllerBuilder implements InitControllerBuilderInterface
         $route = self::PREFIX_SECTION . ucfirst($this->sectionRouteType);
 
         if (!file_exists($file)) {
-//            @todo Добавить exception
-//            $message = 'Not found Controller ' . $this->sectionRoute . '::' . $className;
-//            throw new \tfl\exceptions\TFLNotFoundControllerException($message);
-
             list($file, $className, $route) = $this->getDefaultControllerData();
         }
 

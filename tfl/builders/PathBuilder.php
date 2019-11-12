@@ -6,7 +6,6 @@ class PathBuilder
 {
     public function __construct()
     {
-        // @todo Сделать один раз вывод
         $config = require_once zROOT . 'config/web.php';
 
         if (isset($_SERVER['SERVER_NAME']) && !empty($_SERVER['SERVER_NAME'])) {

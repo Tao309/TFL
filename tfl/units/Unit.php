@@ -125,7 +125,7 @@ abstract class Unit
 	{
 		$className = self::checkClassExistsByName($name);
 		if ($forceNew) {
-			return new $className;
+			return Unit::createNullModelByName($className);
 		}
 
 		if (!isset(self::$nullModels[$className])) {
@@ -392,7 +392,7 @@ abstract class Unit
 			if (\TFL::source()->request->checkForceMethod($method)) {
 				if ($this->attemptLoadData()) {
 					if ($this->save()) {
-						tResponse::resultSuccess([tString::RESPONSE_OK, $action], true, true, $this);
+						tResponse::resultSuccess($action, true, true, $this);
 					} else {
 						tResponse::resultError($this->getSaveErrors(), true, true, $this);
 					}
@@ -413,7 +413,7 @@ abstract class Unit
 		if (\TFL::source()->request->isAjaxRequest()) {
 			if (\TFL::source()->request->checkForceMethod(RequestBuilder::METHOD_DELETE)) {
 				if ($this->delete()) {
-					tResponse::resultSuccess([tString::RESPONSE_OK, DbBuilder::TYPE_DELETE], true, true, $this);
+					tResponse::resultSuccess(DbBuilder::TYPE_DELETE, true, true, $this);
 				} else {
 					tResponse::resultError($this->getDeleteErrors(), true, true, $this);
 				}

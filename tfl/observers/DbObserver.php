@@ -6,12 +6,9 @@ use tfl\utils\tString;
 
 trait DbObserver
 {
-	// @todo Сделать адекватное построение
 	private $_select;
 	private $_from;
 	private $_leftJoin;
-	private $_rightJoin;
-	private $_innerJoin;
 	private $_where;
 	private $_group;
 	private $_order;
@@ -24,8 +21,6 @@ trait DbObserver
 		'select',
 		'from',
 		'leftJoin',
-		'rightJoin',
-		'innerJoin',
 		'where',
 		'group',
 		'order',
@@ -39,23 +34,21 @@ trait DbObserver
 		self::CONCAT_NOT_IN,
 	];
 
-	private function setInit()
+	private function setInit(): void
 	{
 		$this->init = true;
 	}
 
-	private function restoreInit()
+	private function restoreInit(): void
 	{
 		$this->init = false;
 
 		foreach (self::$sort as $index => $value) {
-			$attr = '_' . $value;
-			$this->$attr = null;
+			$this->{'_' . $value} = null;
 		}
-
 	}
 
-	public function getInit()
+	public function getInit(): bool
 	{
 		return $this->init;
 	}
@@ -71,13 +64,8 @@ trait DbObserver
 		return $this;
 	}
 
-	public function addSelect($input)
+	public function addSelect(string $input)
 	{
-		if (empty($this->_select)) {
-			//@todo Улучшить
-			die('Select fields required for query');
-		}
-
 		$this->_select .= ',' . PAGE_EOL;
 		$this->_select .= $input;
 
@@ -87,6 +75,7 @@ trait DbObserver
 	public function from($input)
 	{
 		$this->_from = 'FROM ' . $input;
+
 		return $this;
 	}
 
@@ -105,13 +94,6 @@ trait DbObserver
 		return $t;
 	}
 
-	public function innerJoin($input, $cond)
-	{
-		$this->_innerJoin .= $this->join('inner', $input, $cond);
-
-		return $this;
-	}
-
 	public function leftJoin($input, array $cond)
 	{
 		$this->_leftJoin .= $this->join('left', $input, $cond);
@@ -119,16 +101,10 @@ trait DbObserver
 		return $this;
 	}
 
-	public function rightJoin($input, $cond)
-	{
-		$this->_rightJoin .= $this->join('right', $input, $cond);
-
-		return $this;
-	}
-
 	private function getDefaultConcatEqual(string $value)
 	{
 		$value = mb_strtoupper($value);
+
 		return in_array($value, self::$availableConcatEquals) ? $value : self::CONCAT_EQUAL;
 	}
 
@@ -360,21 +336,19 @@ trait DbObserver
 			if (count($options) > 1) {
 				$valueName = $valueName[0];
 			}
-
 		}
 	}
 
 	public function getCount()
 	{
 		$this->select('COUNT(*) as count');
+
 		return $this->find()['count'];
 	}
 
-	//@todo Добавить защиту
 	protected function getSqlRow()
 	{
 		$text = $this->getText();
-
 		$this->restoreInit();
 
 		return $text;

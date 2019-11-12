@@ -4,11 +4,6 @@ namespace tfl\utils;
 
 class tString
 {
-    const RESPONSE_OK = 'Ok';
-    const RESPONSE_ERROR = 'Error';
-    const RESPONSE_RESULT_SUCCESS = 1;
-    const RESPONSE_RESULT_ERROR = 0;
-
     public static function serialize($value = null)
     {
         return base64_encode(serialize($value));
@@ -32,17 +27,12 @@ class tString
         return self::encodeString($value);
     }
 
-    public static function encodeString($value, $sql = false)
+	public static function encodeString(string $value, $sql = false)
     {
-        //@todo Добавить защитцу
-        if (is_array($value)) {
-            return $value;
-        }
-
         return htmlentities(trim($value), ENT_QUOTES);
     }
 
-    public static function encodeNum($value, $sql = false)
+	public static function encodeNum($value)
     {
         return (int)$value;
     }

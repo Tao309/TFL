@@ -17,7 +17,7 @@ trait UnitActiveSqlBuilder
 	 */
 	public function getCount()
 	{
-		//@todo В будщем внести исправления при работе с WHERE в разделах при фильтрации
+		//@todo В будущем внести исправления при работе с WHERE в разделах при фильтрации
 		return \TFL::source()->db->from($this->getTableName())->getCount();
 	}
 
@@ -26,11 +26,10 @@ trait UnitActiveSqlBuilder
 	 * @param array $option Настройки для запроса
 	 * @return array
 	 */
-	public function prepareRowData(array $queryData = [], $option = [])
+	public function prepareRowData(array $queryData = [], $option = []): array
 	{
-		//@todo Add Exception
 		if (empty($queryData)) {
-			return null;
+			return [];
 		}
 
 		//@todo Сделать красиво ниже. Добавить значения по умолчанию
@@ -172,7 +171,7 @@ trait UnitActiveSqlBuilder
 		$aliasTableEncase = "`" . $aliasTable . "`";
 
 		//@todo исправить, добавить в переменную
-		$model = new User();
+		$model = Unit::createNullModelByName(User::class);
 		$model->setNewLinkType($this->linkType);
 
 		$attrs = $model->getModelColumnAttrs($aliasTable, true);
