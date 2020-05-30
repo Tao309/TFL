@@ -1,0 +1,162 @@
+#body {
+    max-width: 100%;
+}
+
+#admin-page-header {
+    background: #d7d7d3;
+    height: 48px;
+}
+
+#menu-adminTopPanel {}
+#menu-adminTopPanel li.home>a {
+    width: 48px;
+    text-align: center;
+}
+#menu-adminTopPanel li {
+    float:left;
+    height: 48px;
+    display: inline-block;
+}
+#menu-adminTopPanel li>a {
+    display: table-cell;
+    background: #ecece8;
+    width: 100%;
+    max-width: 120px;
+    height: 48px;
+    padding: 4px 12px;
+    color: #423c44;
+    border: 1px solid #B2ACB4;
+    border-left: 0;
+    vertical-align: middle;
+
+    box-sizing: border-box;
+}
+#menu-adminTopPanel li>a:hover {
+    background: #d7d7d3;
+}
+#menu-adminTopPanel li.current-link>a {
+    background: #1c94c4;
+    border-color: #1c7ead;
+    color: #fff;
+}
+
+
+#menu-adminLeftPanel {
+    width: 200px;
+}
+#menu-adminLeftPanel a {
+    padding: 8px;
+    background: #1ca3d4;
+    color: #fff;
+    font-size: 1.2em;
+}
+#menu-adminLeftPanel li {
+    margin: 0 0 1px 0;
+}
+#menu-adminLeftPanel .html-element-menu-li:hover > a,
+#menu-adminLeftPanel li.current-link a {
+    background: #1c7ead;
+}
+#menu-adminLeftPanel .html-element-menu-li {
+    position: relative;
+}
+#menu-adminLeftPanel .html-element-menu-li:hover > .html-element-menu-child  {
+    display: block;
+}
+#menu-adminLeftPanel .html-element-menu-child {
+    background: #fff;
+    display: none;
+    position: absolute;
+    left: 100%;
+    top: 0;
+    z-index: 1;
+    width: 100%;
+    max-width: 180px;
+    padding-left: 1px;
+}
+
+
+
+#admin-page-body {
+    padding: 10px 10px;
+}
+#admin-page-body>.admin-page-panel {
+    display: table-cell;
+    vertical-align: top;
+}
+
+#admin-page-middle-panel {
+    width: 100%;
+    padding-left: 10px;
+}
+
+
+#admin-page-body .section-header {
+    padding: 10px 14px;
+    margin: 0;
+    background: #1c94c4;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #fff;
+}
+#admin-page-body .section-option-buttons {
+    margin: 6px 0px;
+}
+#admin-page-body .section-option-buttons .html-button {
+    display: inline-block;
+    vertical-align: middle;
+}
+#admin-page-body .section-list {
+    margin: 6px 0;
+}
+#admin-page-body .section-list > .empty-list {
+    text-align: center;
+    margin: 20px;
+}
+#admin-page-body .section-list .view-list-table {
+    width: 100%;
+}
+#admin-page-body .section-list .view-list-table .view-row-header .attr-id {
+    width: 80px;
+}
+#admin-page-body .section-list .view-list-table .view-row-header .attr-createddatetime,
+#admin-page-body .section-list .view-list-table .view-row-header .attr-lastchangedatetime {
+    width: 120px;
+}
+#admin-page-body .section-list .view-list-table .view-row-header .attr-owner {
+    width: 140px;
+}
+#admin-page-body .section-list .view-list-table .view-row-header .attr-actions {
+    width: 100px;
+}
+#admin-page-body .section-list .view-list-table .attr-actions .html-icon-button {
+    margin: 0 2px;
+}
+
+#admin-page-body .section-pages {
+    margin: 24px 0 12px 0;
+    text-align: center;
+}
+#admin-page-body .section-pages .one-page {
+    margin: 2px;
+    padding: 6px 8px;
+    border: 1px solid #3189ff;
+    background: #fff;
+
+    border-radius: 2px;
+}
+#admin-page-body .section-pages .one-page:hover {
+    background: #3189ff;
+    color: #fff;
+}
+#admin-page-body .section-pages .one-page.current-page {
+    background: #3189ff;
+    color: #fff;
+    cursor: default;
+}
+
+
+#admin-page-footer {
+    padding: 10px;
+    text-align: center;
+}

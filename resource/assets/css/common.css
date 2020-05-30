@@ -1,0 +1,156 @@
+/**
+	Основные базовые стили для страницы
+*/
+*:focus {outline: none;}
+
+html,body,button,input {
+	font-family: Verdana, Sans-Serif, Arial;
+}
+html,body,h1,h2,h3,h4,h5,h6,p {
+	font-size: 12px;
+}
+html,body{
+	height:100%;
+	margin:0;
+	padding:0;
+}
+
+button {
+	border: 0;
+}
+button>* {
+	pointer-events: none;
+}
+button>font {
+	display: block;
+}
+
+/*Настройки для мобильной среды - НАЧАЛО*/
+* {
+	/*цвет подсветки ссылки или любого кликабельного JavaScript элемента при касании*/
+	tap-highlight-color: rgba(0,0,0,0);
+}
+body {outline: none;width:100%;height:100%;
+	/*Отображение стандартной подсказки, возникающей при продолжительном нажатии на элементе*/
+	touch-callout: none;
+	/*Корректировка размеров текстового содержания*/
+	text-size-adjust:none;
+	/*Возможность пользователю выделить содержание элемента*/
+	user-select:none;
+	focus-ring-color: rgba(0,0,0,0);
+}
+input[type=text], textarea {resize: none;_user-select: text;}
+
+a {
+	color: #1c94c4;
+	text-decoration: none;
+}
+a:hover {
+	color: #1c7ead;
+}
+
+ul {
+	display:block;
+	margin:0;
+	padding:0;
+	list-style: none;
+}
+
+#body-view {
+	cursor: default;
+}
+
+#page-header {}
+#page-body {
+	margin: 10px 0;
+}
+#page-footer {
+	text-align:center;
+	padding: 20px;
+}
+
+/**
+	Глобальные стили
+ */
+.element-display-block {
+	display: block;
+}
+
+
+#section-user-register {
+
+}
+
+#body {
+	flex: 1 0 auto;
+	margin: 0 auto;
+	width: 100%;
+	max-width: 990px;
+	/*
+	max-width: 1240px;
+	 */
+	position: relative;
+}
+
+/**
+	Стили для #page-body BEGIN
+ */
+#page-body .section-header {
+	background: #1c94c4;
+	padding: 1.2em;
+	font-size: 1.2em;
+	color: #fff;
+
+	border-radius: 0.1em;
+}
+#page-body .section-header .header {
+	font-size: 1.2em;
+	padding: 0;
+	margin: 0;
+}
+#page-body .section-description {
+	padding: 1.2em 0.2em;
+	font-size: 1.1em;
+}
+#page-body .section-description p {
+	padding: 0;
+	margin: 0;
+}
+/**
+	Стили для #page-body END
+ */
+
+#errorHandler {
+	padding:14px 30px;
+	background-color:#ecf0f1;
+	cursor:default;
+	font-size:14px;
+	color:#34495e;
+}
+#errorHandler {
+	border-bottom:2px solid #7f8c8d;
+}
+#errorHandler>div {
+	margin:2px 0;
+}
+#errorHandler font {
+	display:inline-block;
+	vertical-align:middle;
+}
+#errorHandler .title {
+	width:70px;
+	margin-right:6px;
+}
+#errorHandler .line {
+	margin-left: 4px;
+}
+
+
+
+
+
+
+
+
+
+

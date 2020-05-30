@@ -1,0 +1,154 @@
+#tImage {
+    display: none;
+    border: 2px solid #fff;
+    z-index: 500;
+    background: #fff;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+
+    border-radius: 2px;
+    box-sizing: border-box;
+    box-shadow: 0 0 18px 2px rgba(0, 0, 0, .9);
+    transition: margin 120ms;
+}
+
+#tImage div.full {
+    display: none;
+    position: absolute;
+    margin: 10px;
+    z-index: 1;
+}
+
+#tImage div.full > a {
+    display: block;
+    font-family: 'tfl-nm';
+    background: #fff;
+    color: #212121;
+    padding: 4px;
+    border-radius: 2px;
+}
+#tImage div.full > a:hover {
+    cursor: pointer;
+}
+
+#tImage div.full > a::before {
+    content: '\A038';
+    font-size: 20px;
+}
+
+#tImage #mainimage {
+    visibility: hidden;
+    opacity: 0;
+    transition: visible 260ms, opacity 260ms;
+}
+
+#tImage > a.img.show #mainimage {
+    visibility: visible;
+    opacity: 1;
+}
+
+#tImage > a.img {
+    cursor: default;
+    display: block;
+    transition: width 120ms, height 120ms;
+}
+
+#tImage > a.img::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#tImage > a.img.notransition {
+    transition: none !important;
+}
+
+#tImage > a.img > img {
+    vertical-align: top;
+    border-radius: 2px;
+}
+
+#tImage a.img:hover {
+    cursor: move;
+}
+
+#tImage a.close {
+    position: absolute;
+    z-index: 1;
+    right: -14px;
+    top: -14px;
+    width: 22px;
+    height: 22px;
+    line-height: 22px;
+    background: #212121;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    text-align: center;
+    font-family: 'tfl-nm';
+    border-radius: 100%;
+    box-shadow: 0 0 18px 2px rgba(0, 0, 0, .4);
+}
+
+#tImage a.close::before {
+    content: '\E011';
+    font-size: 8px;
+    font-weight: bold;
+    color: #fff;
+    vertical-align: top;
+}
+
+#tImage a.close:hover {
+    cursor: pointer;
+}
+
+#tImage a.nav {
+    position: fixed;
+    top: 50%;
+    margin-top: -60px;
+    text-align: center;
+    display: block; /*width:80px;height:80px;*/
+    color: #ecf0f1;
+    _opacity: .8;
+    font-family: 'tfl-nm';
+    font-size: 60px;
+}
+
+#tImage a.nav:hover {
+    opacity: 1;
+}
+
+#tImage a.nav_left {
+    left: 50px;
+}
+
+#tImage a.nav_left:before {
+    content: '\A014';
+}
+
+#tImage a.nav_right {
+    right: 50px;
+}
+
+#tImage a.nav_right:before {
+    content: '\A012';
+}
+
+#tImage > div.title {
+    position: absolute;
+    left: 0;
+    bottom: 0px;
+    right: 0;
+    padding: 6px 10px;
+    text-align: left;
+    background: #fff;
+    background-color: rgba(255, 255, 255, .8);
+    color: #000;
+    font-size: 1.2rem;
+    display: block;
+    cursor: default;
+
+    border-radius: 0 2px 0 0;
+}

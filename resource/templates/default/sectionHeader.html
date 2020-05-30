@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang='{header:lang}'>
+<head>
+{header:metatags}
+{DOM:CSS}{DOM:JS}
+</head>
+<body>
+<!-- START #body-view -->
+<div id='body-view'>
+
+    <div id='page-header'>
+        <div class="header-content">
+            <div class="logo floatLeft"><a href="/">T</a></div>
+            <div class="panel floatRight">
+
+            {{
+                if({user:isUser})
+                {
+                $link = '<a href="{ROOT}profile/" class="html-button html-button-auth html-button-avatar"><img src="{user:avatar}"/></a>';
+                $link .= '<a href="{ROOT}profile/" class="html-button html-button-auth html-button-userLogin">{user:model}</a>';
+
+                if({user:userStatus} >= 30)
+                {
+                    $link .= '{button:toAdmin}';
+                }
+
+                    return $link.'{button:exit}';
+                }
+                else
+                {
+                    return '{button:login}{button:register}';
+                }
+            }}
+
+
+            </div>
+        </div>
+    </div>
+
+
+<!-- START #body -->
+<div id='body'>
+
+
+<!-- START #page-body -->
+<div id='page-body'>

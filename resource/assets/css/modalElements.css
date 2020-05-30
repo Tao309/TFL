@@ -1,0 +1,300 @@
+/*
+    Элемент показа (внизу): insert, update, delete BEGIN
+ */
+#modal-window-action {
+    width: 160px;
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    margin-left: -80px;
+    z-index: 100;
+}
+
+#modal-window-action .message {
+    text-align: center;
+    padding: 12px;
+    color: #fff;
+    font-size: 1.2em;
+
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+#modal-window-action.insert .message {
+    background: #5acc38;
+    border: 2px solid #59c537;
+}
+
+#modal-window-action.update .message {
+    background: #1c94c4;
+    border: 2px solid #1c88b8;
+}
+
+#modal-window-action.delete .message {
+    background: #df3737;
+    border: 2px solid #d63737;
+}
+
+#modal-window-action.error {
+    width: 100%;
+    max-width: 400px;
+    margin-left: -200px;
+}
+
+#modal-window-action.error .message {
+    background: #d43737;
+    border: 2px solid #c93737;
+}
+
+#modal-window-action.loading .message {
+    background: #dce3eb;
+    border: 2px solid #ced5dd;
+    color: #51565c;
+}
+
+/*
+    Элемент показа (внизу): insert, update, delete END
+ */
+
+/**
+    Теневое поле для окон BEGIN
+ */
+#shadowField {
+    z-index: 400;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0);
+    visibility: hidden;
+    transition: all .3s ease-out;
+}
+
+#shadowField.show {
+    background: rgba(0, 0, 0, .7);
+    visibility: visible;
+}
+
+/**
+    Теневое поле для окон END
+ */
+
+/**
+    Поле пред загрузки BEGIN
+ */
+#preloadField {
+    z-index: 510;
+    position: fixed;
+    padding: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: auto;
+}
+
+#preloadField {
+    width: 48px;
+    height: 48px;
+    border: 2px solid rgba(255, 255, 255, .3);
+    display: block;
+
+    border-radius: 100%;
+    animation: taogalRotation .8s infinite linear;
+}
+
+#preloadField::before {
+    content: "";
+    height: 100%;
+    width: 100%;
+    display: block;
+    position: absolute;
+    left: -2px;
+    top: -2px;
+    border-top: 2px solid rgba(255, 255, 255, 1);
+    border-left: 2px solid transparent;
+    border-bottom: 2px solid transparent;
+    border-right: 2px solid transparent;
+
+    border-radius: 100%;
+}
+
+/**
+    Поле пред загрузки END
+ */
+
+/*
+    Модальное окно BEGIN
+ */
+#tModalWindow {
+    padding: 0;
+    background: #fff;
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    width: 500px;
+    margin-left: -250px;
+    z-index: 500;
+    font-size: 12px;
+    overflow: hidden;
+
+    opacity: 1.0;
+    transition: transform .4s ease-out;
+    box-shadow: 0 2px 6px 1px rgba(0, 0, 0, 0.6);
+    border-radius: 2px;
+}
+
+#tModalWindow.hide {
+    z-index: -9999;
+    opacity: 0;
+}
+
+#tModalWindow > div.header {
+    border: 0;
+    color: #fff;
+    padding: 10px 32px 10px 16px;
+    background: #1ca3d4;
+    font-weight: bold;
+    font-size: 1.1rem;
+    position: relative;
+
+    border-radius: 2px 2px 0 0;
+}
+
+#tModalWindow.draggable > div.header {
+    cursor: move;
+}
+
+#tModalWindow > div.header > .close {
+    font-size: 16px;
+    font-family: 'tfl-nm';
+    color: #fff;
+    position: absolute;
+    right: 9px;
+    top: 50%;
+    margin-top: -8px;
+    text-shadow: none;
+}
+
+#tModalWindow > div.header > .close::before {
+    content: '\E002';
+}
+
+#tModalWindow > div.header > .close:hover {
+    cursor: pointer !important;
+}
+
+#tModalWindow > div.body {
+    background: #fff;
+    padding: 6px;
+    font-size: 1.1rem;
+    cursor: default;
+    max-height: 450px;
+    overflow: hidden;
+    vertical-align: top;
+
+    border-radius: 0 0 2px 2px;
+}
+
+#tModalWindow > div.body > .content {
+    margin: 5px;
+}
+
+/*
+    Модальное окно END
+ */
+
+/*
+    Модальное окно со списком моделей BEGIN
+*/
+#tModalWindow.model-list {}
+#tModalWindow > .body > .content {}
+#tModalWindow > .body > .content > .html-list-element {
+    margin: 4px;
+}
+/*
+    Модальное окно со списком моделей END
+*/
+
+/*
+    Модальное окно с выбором кнопок BEGIN
+*/
+#tModalWindow.popup {
+    width: 100%;
+    max-width: 440px;
+    left: 50%;
+    margin-left: -220px;
+    top: 40%;
+    text-align: center;
+    background: #fff;
+
+    border-radius: 5px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, .7);
+}
+#tModalWindow.popup > div.body > .content {
+    margin: 12px 5px;
+}
+
+#tModalWindow.popup > .body .title {
+    margin: 0 0 12px 0;
+    text-align: center;
+}
+#tModalWindow.popup > .body .buttons {
+    text-align: center;
+}
+#tModalWindow.popup > .body .buttons button {
+    margin: 4px 6px;
+}
+/*
+    Модальное окно с выбором кнопок END
+*/
+/*
+    Модальное окно входа, регистрации и т.д. BEGIN
+*/
+#tModalWindow.window-auth {
+    width: 100%;
+    max-width: 400px;
+    left: 50%;
+    margin-left: -200px;
+    top: 30%;
+}
+#tModalWindow.window-auth > div.body {
+    padding: 0;
+}
+#tModalWindow.window-auth > div.body > .content {
+    text-align: center;
+}
+#tModalWindow.window-auth > div.body > .content > .http-request-form {
+    text-align: left;
+}
+/*
+    Модальное окно входа, регистрации и т.д. END
+*/
+
+/*
+    Модальное окно редактирования элемента категории BEGIN
+*/
+#tModalWindow.edit-catsitem {
+    width: 100%;
+    max-width: 400px;
+    left: 50%;
+    margin-left: -200px;
+    top: 20%;
+}
+#tModalWindow.edit-catsitem .html-element-form {
+    width: 94%;
+}
+#tModalWindow.edit-catsitem .html-element-form .html-element-label {
+    float: none;
+    width: 100%;
+    display: block;
+}
+#tModalWindow.edit-catsitem .html-element-form .type-submit {
+    margin-top: 30px;
+}
+/*
+    Модальное окно редактирования элемента категории END
+*/

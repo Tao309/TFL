@@ -7,4 +7,3 @@ Excluded:
 - auth system
 - crypt system
 - route system
-- js and css files.
